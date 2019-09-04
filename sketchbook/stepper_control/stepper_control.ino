@@ -546,7 +546,7 @@ int getLimit(int axis, int limit) {
 
 // **********************************************
 void setup() {
-  Serial.begin(57600);        // serial port    
+  Serial.begin(115200);        // serial port    
 
   // Hard limits
   pinMode(azLimitCW, INPUT_PULLUP);

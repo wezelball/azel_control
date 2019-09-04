@@ -26,7 +26,7 @@ elResolverArray = []
 # connect to /dev/ttyACM0 from Arduino IDE, and to
 # /dev/ttyDUMMY from this program
 
-port = serial.Serial('/dev/ttyACM0', 57600, timeout = 5)
+port = serial.Serial('/dev/ttyACM0', 115200, timeout = 5)
 #port = serial.Serial('/dev/ttyDUMMY', 57600, timeout = 5)
 
 # ********************************************* FUNCTIONS *********************************************
@@ -41,7 +41,7 @@ def sendMessage(priority, message):
         # higher numbers are lower priority
         next_message = messageQ.pop()
         port.write(next_message[1].encode())
-        time.sleep(0.5)
+        time.sleep(0.1)
         response = ghettoReadline()
 
         return response
@@ -387,10 +387,14 @@ class Stepper():
         result = sendMessage(1, command)
         print("lim result: %s" % result)
 
-        if int(result[:-2]) == 1:
+        # This can fail of bad data comes from serial port
+        try:
+            if int(result[:-2]) == 1:
+                return False
+            elif int(result[:-2]) == 0:
+                return True
+        except ValueError as error:
             return False
-        elif int(result[:-2]) == 0:
-            return True
 
 # The application starts here
 # *******************************************************************************************************
