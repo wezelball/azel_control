@@ -18,6 +18,10 @@ messageQ = []
 azResolverArray = []
 elResolverArray = []
 
+# Calibrating the scope position
+azCalibration = 0.0
+elCalibration = 0.0
+
 # need serial port autodetection
 # to monitor serial port, run the follwoing command
 # sudo interceptty -s 'ispeed 57600 ospeed 57600' 
@@ -107,7 +111,26 @@ def getMovingMedian(r_list):
     except statistics.StatisticsError as error:
         return 0
 
-
+# Convert a string value of angle to decimal degrees
+# Accepts the following formats:
+# 1. A decimal degree value, like 39.50
+# 2. A space separate value, like dd mm ss.ss or dd mm.m
+# 3. A colon separated value, like dd:mm:ss.s
+# Returns
+# Decimal value of angle in degrees
+def dms2dec(str_angle):
+    try:
+        value = float(str_angle)
+    except ValueError as error:
+        if len(str_angle.split(' ')) == 3:
+            vlist =  str_angle.split(' ')
+            value = float(vlist[0]) + (float(vlist[1])/60.0) + (float(vlist[1])/3600.0)
+        elif len(str_angle.split(':')) == 3:
+            print("Colon separated value")
+            vlist =  str_angle.split(':')
+            value = float(vlist[0]) + (float(vlist[1])/60.0) + (float(vlist[1])/3600.0)
+    finally:
+        return value
 
 # ********************************************* CLASSES *********************************************
 
@@ -431,6 +454,10 @@ operation_layout =  [
                     [sg.Button('AZ_CCW'),sg.Button('AZ_CW')],
                     [sg.Text('Elevation Move Relative')],
                     [sg.Button('EL_DOWN'),sg.Button('EL_UP')],
+                    [sg.Text('Calibration')],
+                    [],
+                    [sg.Text('Current Az: '), sg.Text('', size=(18,1), key = 'calAzimuth'), sg.Text('Current El: '), sg.Text('', size=(18,1), key = 'calElevation')],
+                    [sg.Button('Calibrate'),sg.InputText('', size=(10,1),key='calibAz'),sg.InputText('', size=(10,1),key='calibEl')],
                     #[sg.Text('Homed', size=(10,1)), sg.Button('Az', button_color=('white', 'red'),enable_events=True, key='butAzHome'), sg.Button('El', button_color=('white', 'red'),enable_events=True, key='butElHome')],
                     ]
 
@@ -484,7 +511,7 @@ commThread.start()
 while True:        # Event Loop
 
     event, values = window.Read(1000) # Please try and use as high of a timeout value as you can
-    
+
     if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
         shutdown()
     if event == 'AZ_CW':
@@ -495,12 +522,17 @@ while True:        # Event Loop
         stepperEl.moveRelative(3000)
     if event == 'EL_DOWN':
         stepperEl.moveRelative(-3000)
+    if event == 'Calibrate':    # get the calibration values from text boxes
+        azCalibration = dms2dec(window.Element('calibAz').Get())
+        elCalibration = dms2dec(window.Element('calibEl').Get())
 
     # Updates the information in the window
     # These values can be updated only on change 
     window.Element('elevation').Update(gumSpring.elevation)     # make more generic - sitename variable
     window.Element('latitude').Update(str(gumSpring.lat))
     window.Element('longitude').Update(str(gumSpring.lon))
+    window.Element('calAzimuth').Update(str(azCalibration))
+    window.Element('calElevation').Update(str(elCalibration))
     
     # These values should be updated quickly
     window.Element('localTime').Update(getCurrentTime())
