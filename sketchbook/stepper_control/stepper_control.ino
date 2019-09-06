@@ -283,8 +283,9 @@ int getLimitCommand() {
 */
 bool DoMyCommand(char * commandLine) {
   //  print2("\nCommand: ", commandLine);
-  int result;
+  int   result;       // return proper data type
   float floatResult;
+  long  longResult;     
 
   char * ptrToCommandName = strtok(commandLine, delimiters);
   //  print2("commandName= ", ptrToCommandName);
@@ -308,8 +309,8 @@ bool DoMyCommand(char * commandLine) {
     result = accelCommand();
     Serial.println(result);
   } else if (strcmp(ptrToCommandName, getCurPosCommandToken) == 0) {
-    result = getCurPosCommand();
-    Serial.println(result);
+    longResult = getCurPosCommand();
+    Serial.println(longResult);
   } else if (strcmp(ptrToCommandName, setCurPosCommandToken) == 0) {    
     result = setCurPosCommand();
     Serial.println(result);                                             

@@ -15,12 +15,9 @@ import PySimpleGUI as sg
 messageQ = []
 
 # Create lists for az and el resolvers
+# This will be removed if encoders are installed
 azResolverArray = []
 elResolverArray = []
-
-# Calibrating the scope position
-azCalibration = 0.0
-elCalibration = 0.0
 
 # need serial port autodetection
 # to monitor serial port, run the follwoing command
@@ -31,7 +28,7 @@ elCalibration = 0.0
 # /dev/ttyDUMMY from this program
 
 port = serial.Serial('/dev/ttyACM0', 115200, timeout = 5)
-#port = serial.Serial('/dev/ttyDUMMY', 57600, timeout = 5)
+#port = serial.Serial('/dev/ttyDUMMY', 115200, timeout = 5)
 
 # ********************************************* FUNCTIONS *********************************************
 
@@ -217,9 +214,13 @@ class Stepper():
         # The actual position of the stepper
         self.stepperPosition = self.getCurrentStepperPosition()   # not axis-specific
         
+        # The calibration value of the stepper, which is the measured angle
+        # of each axis of the mount
+        self.calibrationValue = 0.0
+        
         # Axis hasn't been homed yet
-        azAxisHomed = False
-        elAxisHomed = False
+        #azAxisHomed = False
+        #elAxisHomed = False
 
     # Relative move
     def moveRelative(self, steps):
@@ -299,7 +300,7 @@ class Stepper():
         return (result)         # FIXME
     
     # This is "private"
-    def __setCurrentStepperPosition(self, position):
+    def setCurrentStepperPosition(self, position):
         if self.axis == 'a':
             command = "scp " + "0 " + str(position) + '\n'
         elif self.axis == 'e':
@@ -362,10 +363,12 @@ class Stepper():
     # Negative values are allowed
     def degreesToPulses(self, degrees):
         if self.axis == 'a':
-            degrees = degrees * 321.0
+            pulses = degrees * 321.0
         elif self.axis == 'e':
-            degrees = degrees * 615.3
+            pulses = degrees * 615.3
     
+        return int(pulses)
+
     def getImuPosition(self):
         if self.axis == 'a':
             command = "gim 0\n"
@@ -522,23 +525,27 @@ while True:        # Event Loop
         stepperEl.moveRelative(3000)
     if event == 'EL_DOWN':
         stepperEl.moveRelative(-3000)
-    if event == 'Calibrate':    # get the calibration values from text boxes
-        azCalibration = dms2dec(window.Element('calibAz').Get())
-        elCalibration = dms2dec(window.Element('calibEl').Get())
+    if event == 'Calibrate':    
+        # get the calibration values from text boxes
+        stepperAz.calibrationValue = dms2dec(window.Element('calibAz').Get()) 
+        stepperEl.calibrationValue = dms2dec(window.Element('calibEl').Get())
+        # update the stepper position based on the current calibration
+        stepperAz.setCurrentStepperPosition(stepperAz.degreesToPulses(stepperAz.calibrationValue))
+        stepperEl.setCurrentStepperPosition(stepperEl.degreesToPulses(stepperEl.calibrationValue))
 
     # Updates the information in the window
     # These values can be updated only on change 
     window.Element('elevation').Update(gumSpring.elevation)     # make more generic - sitename variable
     window.Element('latitude').Update(str(gumSpring.lat))
     window.Element('longitude').Update(str(gumSpring.lon))
-    window.Element('calAzimuth').Update(str(azCalibration))
-    window.Element('calElevation').Update(str(elCalibration))
+    window.Element('calAzimuth').Update(str(stepperAz.calibrationValue))    # display the current cal values
+    window.Element('calElevation').Update(str(stepperEl.calibrationValue))
     
     # These values should be updated quickly
     window.Element('localTime').Update(getCurrentTime())
     window.Element('localSiderealTime').Update(str(getCurrentLST()))
-    window.Element('azimuth').Update(str(stepperAz.getImuPosition()))
-    window.Element('altitude').Update(str(stepperEl.getImuPosition()))
+    #window.Element('azimuth').Update(str(stepperAz.getImuPosition()))
+    #window.Element('altitude').Update(str(stepperEl.getImuPosition()))
     window.Element('stepsAz').Update(str(stepperAz.getCurrentStepperPosition()))
     window.Element('stepsAlt').Update(str(stepperEl.getCurrentStepperPosition()))
     window.Element('azResolver').Update(getMovingMedian(azResolverArray))
