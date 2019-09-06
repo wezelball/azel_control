@@ -214,6 +214,9 @@ class Stepper():
         # The actual position of the stepper
         self.stepperPosition = self.getCurrentStepperPosition()   # not axis-specific
         
+        # The calculated angular position of the axis
+        # This is always derived from the stepper position
+        self.calculatedAngle = 0.0
         # The calibration value of the stepper, which is the measured angle
         # of each axis of the mount
         self.calibrationValue = 0.0
@@ -352,9 +355,9 @@ class Stepper():
         # multiplied by 13/18 for chain reduction
         # multiplied by 40 for # teeth in worm wheel (guess)
         if self.axis == 'a':
-            degrees = pulses/321.0
+            degrees = float(pulses)/321.0
         elif self.axis == 'e':
-            degrees = pulses/615.3
+            degrees = float(pulses)/615.3
             
         return degrees
         
@@ -459,7 +462,7 @@ operation_layout =  [
                     [sg.Button('EL_DOWN'),sg.Button('EL_UP')],
                     [sg.Text('Calibration')],
                     [],
-                    [sg.Text('Current Az: '), sg.Text('', size=(18,1), key = 'calAzimuth'), sg.Text('Current El: '), sg.Text('', size=(18,1), key = 'calElevation')],
+                    [sg.Text('Calib Az:   '), sg.Text('', size=(8,1), key = 'calAzimuth'), sg.Text('Calib El: '), sg.Text('', size=(8,1), key = 'calElevation')],
                     [sg.Button('Calibrate'),sg.InputText('', size=(10,1),key='calibAz'),sg.InputText('', size=(10,1),key='calibEl')],
                     #[sg.Text('Homed', size=(10,1)), sg.Button('Az', button_color=('white', 'red'),enable_events=True, key='butAzHome'), sg.Button('El', button_color=('white', 'red'),enable_events=True, key='butElHome')],
                     ]
@@ -522,9 +525,9 @@ while True:        # Event Loop
     if event == 'AZ_CCW':
         stepperAz.moveRelative(-3000)
     if event == 'EL_UP':
-        stepperEl.moveRelative(3000)
+        stepperEl.moveRelative(1000)
     if event == 'EL_DOWN':
-        stepperEl.moveRelative(-3000)
+        stepperEl.moveRelative(-1000)
     if event == 'Calibrate':    
         # get the calibration values from text boxes
         stepperAz.calibrationValue = dms2dec(window.Element('calibAz').Get()) 
@@ -532,6 +535,9 @@ while True:        # Event Loop
         # update the stepper position based on the current calibration
         stepperAz.setCurrentStepperPosition(stepperAz.degreesToPulses(stepperAz.calibrationValue))
         stepperEl.setCurrentStepperPosition(stepperEl.degreesToPulses(stepperEl.calibrationValue))
+        # update the calculated angle position
+        stepperAz.calculatedAngle = stepperAz.calibrationValue
+        stepperEl.calculatedAngle = stepperEl.calibrationValue
 
     # Updates the information in the window
     # These values can be updated only on change 
@@ -544,8 +550,8 @@ while True:        # Event Loop
     # These values should be updated quickly
     window.Element('localTime').Update(getCurrentTime())
     window.Element('localSiderealTime').Update(str(getCurrentLST()))
-    #window.Element('azimuth').Update(str(stepperAz.getImuPosition()))
-    #window.Element('altitude').Update(str(stepperEl.getImuPosition()))
+    window.Element('azimuth').Update(str(stepperAz.calculatedAngle))
+    window.Element('altitude').Update(str(stepperEl.calculatedAngle))
     window.Element('stepsAz').Update(str(stepperAz.getCurrentStepperPosition()))
     window.Element('stepsAlt').Update(str(stepperEl.getCurrentStepperPosition()))
     window.Element('azResolver').Update(getMovingMedian(azResolverArray))
@@ -574,6 +580,9 @@ while True:        # Event Loop
     elif stepperEl.isLimitReached(1) == False:
         window.FindElement('butElDown').Update(button_color=('white', 'green'))
 
+    # Update the calculated angles
+    stepperAz.calculatedAngle = stepperAz.pulsesToDegrees(float(stepperAz.getCurrentStepperPosition()))
+    stepperEl.calculatedAngle = stepperEl.pulsesToDegrees(float(stepperEl.getCurrentStepperPosition()))
 
     # Update the logfile
     log.write(time.strftime('%H:%M:%S') + ',' +  stepperAz.getResolver() + ',' + 
