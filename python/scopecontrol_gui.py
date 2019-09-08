@@ -189,7 +189,7 @@ class RadioObject():
             "Cygnus A|3C 405,f|J,19 57 44.0,+40 35 46.0,1.0,2000,0",
             "Cassiopeia A|3C 461,f|J,23 21 7.0,+58 32 47.0,1.0,2000,0",
             "Taurus A|3C 144,f|J,5 31 30.0,+21 59 0.0,1.0,2000,0"
-            ]
+        ]
         
     def getObject(self, searchstr):
         for item in self.objects:
@@ -433,18 +433,18 @@ location_layout =   [
                     [sg.Text('Site', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'siteName')],
                     [sg.Text('Latitude', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'latitude')],
                     [sg.Text('Longitude', size=(10,1)), sg.Text('', size=(18,1),background_color = 'lightblue', key = 'longitude')],
-                    [sg.Text('Elevation', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'elevation')],
+                    [sg.Text('Height ASL', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'heightASL')],
                     [sg.Text('Local time', size=(10,1)), sg.Text('', size=(18,1),background_color = 'lightblue', key = 'localTime')],
                     [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')]
                     ]   
 
 position_layout =   [
                     [sg.Text('Azimuth', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azimuth')],
-                    [sg.Text('Altitude', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'altitude')],
+                    [sg.Text('Elevation', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elevation')],
                     [sg.Text('Az Resolver', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azResolver')],
                     [sg.Text('El Resolver', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elResolver')],
                     [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
-                    [sg.Text('StepsAlt', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAlt')],
+                    [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
                     [sg.Text('Az Limit', size=(10,1)), sg.Button('AzCW', button_color=('white', 'green'),enable_events=True, key='butAzCW', 
                         size = (10,1)), sg.Button('AzCCW', button_color=('green', 'red'),enable_events=True, key='butAzCCW', size = (10,1)),],
                     [sg.Text('El Limit', size=(10,1)), sg.Button('ElDown', button_color=('white', 'green'),enable_events=True, key='butElDown',
@@ -488,7 +488,7 @@ log.write("Time,AzResolver,ElResolver,avgAzResolver,avgElResolver" + '\n')
 gumSpring = ephem.Observer()
 gumSpring.lon = '-77:57'
 gumSpring.lat = '37:47'
-gumSpring.elevation = 116
+gumSpring.elevation = 116   # i'm calling this heightASL from now on
 
 # Instantiate a stepper instance
 stepperAz = Stepper(axis = "az")
@@ -541,7 +541,7 @@ while True:        # Event Loop
 
     # Updates the information in the window
     # These values can be updated only on change 
-    window.Element('elevation').Update(gumSpring.elevation)     # make more generic - sitename variable
+    window.Element('heightASL').Update(gumSpring.elevation)     # make more generic - sitename variable
     window.Element('latitude').Update(str(gumSpring.lat))
     window.Element('longitude').Update(str(gumSpring.lon))
     window.Element('calAzimuth').Update(str(stepperAz.calibrationValue))    # display the current cal values
@@ -551,9 +551,9 @@ while True:        # Event Loop
     window.Element('localTime').Update(getCurrentTime())
     window.Element('localSiderealTime').Update(str(getCurrentLST()))
     window.Element('azimuth').Update(str(stepperAz.calculatedAngle))
-    window.Element('altitude').Update(str(stepperEl.calculatedAngle))
+    window.Element('elevation').Update(str(stepperEl.calculatedAngle))
     window.Element('stepsAz').Update(str(stepperAz.getCurrentStepperPosition()))
-    window.Element('stepsAlt').Update(str(stepperEl.getCurrentStepperPosition()))
+    window.Element('stepsEl').Update(str(stepperEl.getCurrentStepperPosition()))
     window.Element('azResolver').Update(getMovingMedian(azResolverArray))
     window.Element('elResolver').Update(getMovingMedian(elResolverArray))
 
