@@ -145,17 +145,22 @@ class periodicThread (threading.Thread):
       
    def run(self):
        while(self.running):
-           time.sleep(self.delay)
-           #self.message = 'png\n'
-           self.message = "gap 0\n"
-           self.response = sendMessage(5, self.message) # very low queue priority
-           addResolverValue(azResolverArray, 20, int(self.response[:-2]))
-           time.sleep(0.5)
-           self.message = "gap 1\n"
-           self.response = sendMessage(5, self.message) # very low queue priority
-           addResolverValue(elResolverArray, 20, int(self.response[:-2]))
+            time.sleep(self.delay)
+            #self.message = 'png\n'
+            self.message = "gap 0\n"
+            self.response = sendMessage(5, self.message) # very low queue priority
+            try:
+               addResolverValue(azResolverArray, 20, int(self.response[:-2]))
+            except ValueError as error:
+                pass
 
-
+            time.sleep(0.5)
+            self.message = "gap 1\n"
+            self.response = sendMessage(5, self.message) # very low queue priority
+            try:
+                addResolverValue(elResolverArray, 20, int(self.response[:-2]))
+            except ValueError as error:
+                pass
 
    def print_time(self,threadName):
        print ("%s: %s") % (threadName, time.ctime(time.time()))
@@ -185,6 +190,8 @@ class RadioObject():
         Field 5     =   Magnitude
         Field 6     =   Epoch (default 2000)
         """
+        # In the future, I might use configparser library ans 
+        # store these in an ini file
         self.objects = [
             "Cygnus A|3C 405,f|J,19 57 44.0,+40 35 46.0,1.0,2000,0",
             "Cassiopeia A|3C 461,f|J,23 21 7.0,+58 32 47.0,1.0,2000,0",
@@ -456,14 +463,17 @@ position_layout =   [
                     ]
 
 operation_layout =  [
-                    [sg.Text('Azimuth Move Relative')],
-                    [sg.Button('AZ_CCW'),sg.Button('AZ_CW')],
+                    [sg.Text('Azimuth Move Relative')],             # assign a key to this and use it
+                    [sg.Button('AZ_CCW'),sg.Button('AZ_CW')],       # assign a key to this and use it
                     [sg.Text('Elevation Move Relative')],
-                    [sg.Button('EL_DOWN'),sg.Button('EL_UP')],
-                    [sg.Text('Calibration')],
-                    [],
-                    [sg.Text('Calib Az:   '), sg.Text('', size=(8,1), key = 'calAzimuth'), sg.Text('Calib El: '), sg.Text('', size=(8,1), key = 'calElevation')],
-                    [sg.Button('Calibrate'),sg.InputText('', size=(10,1),key='calibAz'),sg.InputText('', size=(10,1),key='calibEl')],
+                    [sg.Button('EL_DOWN'),sg.Button('EL_UP')],      # assign a key to this and use it
+                    [sg.Text('Calibration')],                       # assign a key to this and use it
+                    [sg.Text('Az: '), sg.Text('', size=(8,1),background_color = 'lightblue', key = 'calAzimuth'), sg.Text('El:'), sg.Text('', size=(8,1),background_color = 'lightblue', key = 'calElevation')],
+                    [sg.InputText('', size=(10,1),key='calibAz'),sg.InputText('', size=(10,1),key='calibEl')],
+                    [sg.Button('Calibrate')],                       # assign a key to this and use it
+                    [sg.Text('GoTo Horizontal Coordinate')],
+                    [sg.Text('Az:'),sg.InputText('',size=(10,1),key='goToAz'),sg.Text('El:'),sg.InputText('', size=(10,1),key='goToEl')],
+                    [sg.Button('Go')],                              # assign a key to this and use it
                     #[sg.Text('Homed', size=(10,1)), sg.Button('Az', button_color=('white', 'red'),enable_events=True, key='butAzHome'), sg.Button('El', button_color=('white', 'red'),enable_events=True, key='butElHome')],
                     ]
 
@@ -484,6 +494,9 @@ log = open(logfile, 'w')
 log.write("Time,AzResolver,ElResolver,avgAzResolver,avgElResolver" + '\n')
 
 # Define the observer
+# In the future, I might use configparser library and
+# store these in an ini file
+
 # Don't include a date, ephem will assume "now"
 gumSpring = ephem.Observer()
 gumSpring.lon = '-77:57'
@@ -518,6 +531,7 @@ while True:        # Event Loop
 
     event, values = window.Read(1000) # Please try and use as high of a timeout value as you can
 
+    # EVENTS
     if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
         shutdown()
     if event == 'AZ_CW':
@@ -538,6 +552,10 @@ while True:        # Event Loop
         # update the calculated angle position
         stepperAz.calculatedAngle = stepperAz.calibrationValue
         stepperEl.calculatedAngle = stepperEl.calibrationValue
+    if event == "Go":   # The GoTo button has bee pressed
+        pass
+
+    # UPDATES
 
     # Updates the information in the window
     # These values can be updated only on change 
@@ -556,6 +574,8 @@ while True:        # Event Loop
     window.Element('stepsEl').Update(str(stepperEl.getCurrentStepperPosition()))
     window.Element('azResolver').Update(getMovingMedian(azResolverArray))
     window.Element('elResolver').Update(getMovingMedian(elResolverArray))
+
+    # EXTERNAL EVENTS
 
     # Check for limit switch values
     # Azimuth
@@ -580,6 +600,8 @@ while True:        # Event Loop
     elif stepperEl.isLimitReached(1) == False:
         window.FindElement('butElDown').Update(button_color=('white', 'green'))
 
+    # EXTERNAL UPDATES
+    
     # Update the calculated angles
     stepperAz.calculatedAngle = stepperAz.pulsesToDegrees(float(stepperAz.getCurrentStepperPosition()))
     stepperEl.calculatedAngle = stepperEl.pulsesToDegrees(float(stepperEl.getCurrentStepperPosition()))
