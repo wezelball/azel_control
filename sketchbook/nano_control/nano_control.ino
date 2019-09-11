@@ -10,14 +10,14 @@
 // Define Slave answer size
 #define ANSWERSIZE 8
 
+// Instantiate the encoders
 Encoder azEnc(2,4);
+Encoder elEnc(3,5);
 
-long position;
-char str[8];
-String answer;
- 
-// Define string with response to Master
-//String answer = "Hello";
+long position;    // encoder position
+char str[8];      // string value of position
+String answer;    // reply to master
+int command;      // command from master
  
 void setup() {
  
@@ -32,7 +32,6 @@ void setup() {
   
   // Setup Serial Monitor 
   Serial.begin(9600);
-  Serial.println("I2C Slave Demonstration");
 }
  
 void receiveEvent() {
@@ -40,10 +39,9 @@ void receiveEvent() {
   // Read while data received
   while (0 < Wire.available()) {
     byte x = Wire.read();
+    command = int(x);
   }
   
-  // Print to Serial Monitor
-  Serial.println("Receive event");
 }
  
 void requestEvent() {
@@ -59,17 +57,22 @@ void requestEvent() {
   // Send response back to Master
   Wire.write(response,sizeof(response));
   
-  // Print to Serial Monitor
-  Serial.println("Request event");
 }
  
 void loop() {
 
- position = azEnc.read();
- Serial.println(position);
- ltoa(position,str,10);
- answer = str;
- Serial.println(str);
+  // What command did master send?
+  if(command == 0) 
+    position = azEnc.read();
+  else if (command == 1)
+    position = elEnc.read();
+  
+  Serial.println(position);
+  ltoa(position,str,10);
+  answer = str;
+  Serial.println(str);
+  
   // Time delay in loop
+  // Take out later
   delay(50);
 }
