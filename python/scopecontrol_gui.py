@@ -499,8 +499,8 @@ log.write("Time,AzResolver,ElResolver,avgAzResolver,avgElResolver" + '\n')
 
 # Don't include a date, ephem will assume "now"
 gumSpring = ephem.Observer()
-gumSpring.lon = '-77:57'
-gumSpring.lat = '37:47'
+gumSpring.lon = '-77:55:27'
+gumSpring.lat = '37:47:26'
 gumSpring.elevation = 116   # i'm calling this heightASL from now on
 
 # Instantiate a stepper instance
