@@ -66,8 +66,10 @@ void requestEvent() {
 void loop() {
 
  position = azEnc.read();
- ltoa(position,str,8);
+ Serial.println(position);
+ ltoa(position,str,10);
  answer = str;
+ Serial.println(str);
   // Time delay in loop
   delay(50);
 }
