@@ -8,7 +8,9 @@
 // Define Slave answer size
 #define ANSWERSIZE 8
 
-
+// Make current time global
+// Fucking C/C++ !!!
+int currentUTCTime[3];
 
 // encoder = 0    azimuth
 // encoder = 1    elavation
@@ -33,7 +35,8 @@ long getEncoderPosition(int encoder) {
   return response.toInt();
 }
 
-void getTime()  {
+void updateTime()  {
+  
   // send request to receive data starting at register 0
   Wire.beginTransmission(0x68); // 0x68 is DS3231 device address
   Wire.write((byte)0); // start at register 0
@@ -49,8 +52,10 @@ void getTime()  {
     seconds = (((seconds & 0b11110000)>>4)*10 + (seconds & 0b00001111)); // convert BCD to decimal
     minutes = (((minutes & 0b11110000)>>4)*10 + (minutes & 0b00001111)); // convert BCD to decimal
     hours = (((hours & 0b00100000)>>5)*20 + ((hours & 0b00010000)>>4)*10 + (hours & 0b00001111)); // convert BCD to decimal (assume 24 hour mode)
- 
-    Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.println(seconds);
+
+    currentUTCTime[2] = hours;
+    currentUTCTime[1] = minutes;
+    currentUTCTime[0] = seconds;    
   }
 }
 
@@ -81,6 +86,8 @@ void loop() {
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
   delay(1000);
+  updateTime();   // update the current UTC time
   Serial.print("Time:\t");
-  getTime();
+  Serial.print(currentUTCTime[2]); Serial.print(":"); Serial.print(currentUTCTime[1]); Serial.print(":"); Serial.println(currentUTCTime[0]);
+  
 }
