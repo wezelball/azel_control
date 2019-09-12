@@ -62,17 +62,23 @@ void requestEvent() {
 void loop() {
 
   // What command did master send?
-  if(command == 0) 
+  if(command == 0) {
     position = azEnc.read();
-  else if (command == 1)
+    ltoa(position,str,10);
+    answer = str;
+  }
+  else if (command == 1) {
     position = elEnc.read();
+    ltoa(position,str,10);
+    answer = str;
+  }
   
-  Serial.println(position);
-  ltoa(position,str,10);
-  answer = str;
-  Serial.println(str);
+  //Serial.println(position);
+  //ltoa(position,str,10);
+  //answer = str;
+  //Serial.println(str);
   
   // Time delay in loop
   // Take out later
-  delay(50);
+  //delay(50);
 }
