@@ -56,7 +56,6 @@ void requestEvent() {
   
   // Send response back to Master
   Wire.write(response,sizeof(response));
-  
 }
  
 void loop() {
@@ -71,14 +70,10 @@ void loop() {
     position = elEnc.read();
     ltoa(position,str,10);
     answer = str;
+  } else {
+    answer = "999999";
   }
-  
-  //Serial.println(position);
-  //ltoa(position,str,10);
-  //answer = str;
-  //Serial.println(str);
-  
-  // Time delay in loop
-  // Take out later
-  //delay(50);
+
+  delay(100);
+  //Serial.println(answer);
 }
