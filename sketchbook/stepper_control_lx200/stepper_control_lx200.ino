@@ -99,12 +99,8 @@ void loop() {
   // Print to Serial Monitor
   Serial.print("Azimuth:\t");
   Serial.println(getEncoderPosition(0));
-  delay(1000);
+  delay(250);
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
   
-  //updateTime();   // update the current UTC time
-  //Serial.print("Time:\t");
-  //Serial.print(currentUTCTime[2]); Serial.print(":"); Serial.print(currentUTCTime[1]); Serial.print(":"); Serial.println(currentUTCTime[0]);
-
 }
