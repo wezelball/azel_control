@@ -1,9 +1,11 @@
 
+
 // Include Arduino Wire library for I2C
 #include <Wire.h>
-
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include "RTClib.h"
+// #include <SoftwareSerial.h>
+#include "AccelStepper.h" 
  
 // Define Slave I2C Address
 #define SLAVE_ADDR 9
@@ -11,21 +13,30 @@
 // Define Slave answer size
 #define ANSWERSIZE 8
 
+// SoftwareSerial mySerial(12, 13); // RX, TX - debug
+
+// Instantiate RTC
 RTC_DS3231 rtc;
 
-const int ledPin =  13;      // the number of the LED pin
-// This motor should not have a delay lower then 6000ms!
-const int RA_motor_pin_1 =  4; // These are the pins for the stepper originally hooked up
-const int RA_motor_pin_2 =  2; // to the GS-280 hand controller on an EQ3 mount for RA
-const int RA_motor_pin_3 =  5; // Essentially randmly chosen, but contiguous.
-const int RA_motor_pin_4 =  3; //  
-// This motor should not have a delay lower then 6000ms!
-const int DEC_motor_pin_1 =  8; // These are the pins for the homebrew DEC motor
-const int DEC_motor_pin_2 =  9; // 
-const int DEC_motor_pin_3 =  10; // 
-const int DEC_motor_pin_4 =  11; //  
-// Variables will change:
-int ledState = LOW;             // ledState used to set the LED
+// AccelStepper Instances
+AccelStepper stepperX(1, 5, 6);   // X is the azimuth axis
+                                  // 1 = Easy Driver interface
+                                  // UNO Pin 5 connected to STEP pin of Easy Driver
+                                  // UNO Pin 6 connected to DIR pin of Easy Driver
+
+AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
+                                  // 1 = Easy Driver interface
+                                  // UNO Pin a connected to STEP pin of Easy Driver
+                                  // UNO Pin b connected to DIR pin of Easy Driver
+
+// ******************************BEGIN GLOBALS ***************************************
+
+// Hard limits
+int azLimitCW = 2;
+int azLimitCCW = 4;
+int elLimitUp = 3;
+int elLimitDown = 10;
+
 int numcount = 0;
 String val = "0";      // This will be used for ascii to integer conversion
 unsigned long RA_step_number = 107374182 ; // max long divided by two, for tracking steps.
@@ -39,8 +50,12 @@ boolean stringComplete = false;  // whether the string is complete
 boolean RA_tracking_Enabled = true; // Always track - Currently unused
 boolean RA_steppingEnabled = true; // Non-default RA movement if we are doing something other than tracking
 boolean DEC_steppingEnabled = false; // DEC movement is always optional
+
+
 // the follow variables are a long because the time, measured in RA_Microseconds,
 // will quickly become a bigger number than can be stored in an int.
+
+// ************************************* DEPRECATED ******************************************
 
 // Init RA timer variables
 long previousStepRA_Micros = 0;        // will store last time Stepper was moved
@@ -65,10 +80,16 @@ long SerialOutputInterval = 100000;
 int SerialInputInterval = 10000;
 long previousSerialIn_Micros = 0;  // last time serial buffer was polled
 long previousSerialOut_Micros = 0;  // Last time serial data was sent via timer
+
+// ************************************* DEPRECATED ******************************************
+
 char cmdSwitch;
 char newTime;
 String newDelay;
 char numberArray[5];
+
+// ****************************** END GLOBALS ***************************************
+
 
 // encoder = 0    azimuth
 // encoder = 1    elavation
@@ -205,6 +226,9 @@ void setup() {
   // Setup serial monitor
   Serial.begin(9600);
 
+  //mySerial.begin(4800);
+  //mySerial.println("Hello, world?");
+
   delay(3000); // wait for console opening
 
   if (! rtc.begin()) {
@@ -220,24 +244,13 @@ void setup() {
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
   }
-  
-  // clear /EOSC bit
-  // Sometimes necessary to ensure that the clock
-  // keeps running on just battery power. Once set,
-  // it shouldn't need to be reset but it's a good
-  // idea to make sure.
-  Wire.beginTransmission(0x68); // address DS3231
-  Wire.write(0x0E); // select register
-  Wire.write(0b00011100); // write register bitmap, bit 7 is /EOSC
-  Wire.endTransmission();
+
 }
  
 void loop() {
 
   DateTime now = rtc.now();
 
-
-  /*
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
@@ -256,7 +269,7 @@ void loop() {
   Serial.print(rtc.getTemperature());
   Serial.println(" C");
   Serial.println("");
-    
+
   delay(1000); 
   // Print to Serial Monitor
   Serial.print("Azimuth:\t");
@@ -264,7 +277,6 @@ void loop() {
   delay(250);
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
-  */
   
 }
 
