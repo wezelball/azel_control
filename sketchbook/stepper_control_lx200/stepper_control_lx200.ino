@@ -37,6 +37,18 @@ int azLimitCCW = 4;
 int elLimitUp = 3;
 int elLimitDown = 10;
 
+// The difference between UTC and local time
+// The real-time clock is set in local time
+int UTC_OFFSET = 4;
+
+double M,Y,D,MN,H,S;
+double A,B;
+double longitude =-77.924;  //your longtitude.
+double lattitude =37.791;   //your latitude.
+double LST_degrees;         //variable to store local side real time(LST) in degrees.
+double LST_hours;           //variable to store local side real time(LST) in decimal hours.
+
+
 int numcount = 0;
 String val = "0";      // This will be used for ascii to integer conversion
 unsigned long RA_step_number = 107374182 ; // max long divided by two, for tracking steps.
@@ -218,66 +230,26 @@ void parseLX200(String thisCommand)
     } // Ending Init Character Loop
 } // Ending Function
 
-void setup() {
- 
-  // Initialize I2C communications as Master
-  Wire.begin();
-  
-  // Setup serial monitor
-  Serial.begin(9600);
 
-  //mySerial.begin(4800);
-  //mySerial.println("Hello, world?");
-
-  delay(3000); // wait for console opening
-
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-
-  if (rtc.lostPower()) {
-    Serial.println("RTC lost power, lets set the time!");
-    // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  }
-
-}
- 
-void loop() {
-
-  DateTime now = rtc.now();
-
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" (");
-  Serial.print(") ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println();
-
-  Serial.print("Temperature: ");
-  Serial.print(rtc.getTemperature());
-  Serial.println(" C");
-  Serial.println("");
-
-  delay(1000); 
-  // Print to Serial Monitor
-  Serial.print("Azimuth:\t");
-  Serial.println(getEncoderPosition(0));
-  delay(250);
-  Serial.print("Elevation:\t");
-  Serial.println(getEncoderPosition(1));
-  
+void LST_time(){
+    //Calculates local sidereal time based on this calculation,
+    //http://www.stargazing.net/kepler/altaz.html 
+    
+    DateTime now = rtc.now();
+    
+    M = (double) now.month();
+    Y = (double) now.year();
+    D = (double) now.day();
+    MN = (double) now.minute();
+    H = (double) now.hour() + UTC_OFFSET;
+    S = (double) now.second();
+    A = (double)(Y-2000)*365.242199;
+    B = (double)(M-1)*30.4368499;
+    double JDN2000=A+B+(D-1) + H/24;
+    double decimal_time = H+(MN/60)+(S/3600) ;
+    double LST = 100.46 + 0.985647 * JDN2000 + longitude + 15*decimal_time;
+    LST_degrees = (LST-(floor(LST/360)*360));
+    LST_hours = LST_degrees/15;
 }
 
 
@@ -318,4 +290,73 @@ void serialEvent() {
     } 
    }
 
+}
+
+void setup() {
+ 
+  // Initialize I2C communications as Master
+  Wire.begin();
+  
+  // Setup serial monitor
+  Serial.begin(9600);
+
+  //mySerial.begin(4800);
+  //mySerial.println("Hello, world?");
+
+  delay(3000); // wait for console opening
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1);
+  }
+
+  if (rtc.lostPower()) {
+    Serial.println("RTC lost power, lets set the time!");
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // January 21, 2014 at 3am you would call:
+    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  }
+
+}
+ 
+void loop() {
+
+  // Update the RTC
+  DateTime now = rtc.now();
+
+  // Update LST
+  LST_time();
+
+  Serial.print(now.year(), DEC);
+  Serial.print('/');
+  Serial.print(now.month(), DEC);
+  Serial.print('/');
+  Serial.print(now.day(), DEC);
+  Serial.print(" (");
+  Serial.print(") ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  Serial.println();
+
+  Serial.print("LST:\t");
+  Serial.println(LST_hours);
+  
+  Serial.print("Temperature: ");
+  Serial.print(rtc.getTemperature());
+  Serial.println(" C");
+  Serial.println("");
+
+  delay(1000); 
+  // Print to Serial Monitor
+  Serial.print("Azimuth:\t");
+  Serial.println(getEncoderPosition(0));
+  delay(250);
+  Serial.print("Elevation:\t");
+  Serial.println(getEncoderPosition(1));
+  
 }
