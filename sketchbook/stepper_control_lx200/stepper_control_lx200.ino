@@ -4,7 +4,7 @@
 #include <Wire.h>
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
 #include "RTClib.h"
-// #include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
 #include "AccelStepper.h" 
  
 // Define Slave I2C Address
@@ -13,7 +13,7 @@
 // Define Slave answer size
 #define ANSWERSIZE 8
 
-// SoftwareSerial mySerial(12, 13); // RX, TX - debug
+SoftwareSerial mySerial(11, 12); // RX, TX - debug
 
 // Instantiate RTC
 RTC_DS3231 rtc;
@@ -128,8 +128,8 @@ long getEncoderPosition(int encoder) {
 
 void parseLX200(String thisCommand)
 {
- //mySerial.println(thisCommand);
- //mySerial.println(inputString);
+ mySerial.println(thisCommand);
+ mySerial.println(inputString);
  switch (inputString.charAt(0)) { // If this isnt 58 (:), something is wrong!
      case ':':
       switch (inputString.charAt(1)) {
@@ -137,7 +137,7 @@ void parseLX200(String thisCommand)
           switch (inputString.charAt(2)) {
               case 'w': // Slew rate
                 Serial.println(1);
-                //mySerial.println("set max slew");
+                mySerial.println("set max slew");
               break;
           }// end :Sw
           break; //Case S Char2
@@ -208,19 +208,19 @@ void parseLX200(String thisCommand)
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
             Serial.println("123*56#"); // Bogus placeholder FIXME
-            //mySerial.println("sent azimuth");
+            mySerial.println("sent azimuth");
           case 'D': // Declination
             Serial.println("+23*56#"); // Bogus placeholder FIXME
-            //mySerial.println("sent declination");
+            mySerial.println("sent declination");
           case 'S': // Sidereal Time 
             Serial.println("12:34:56#"); // Bogus placeholder FIXME
-            //mySerial.println("sent sidereal");
+            mySerial.println("sent sidereal");
           break;
           case 'V':
             switch (inputString.charAt(3)) {
               case 'F':
                 Serial.println("HomebrewStar"); // Bogus placeholder FIXME
-                //mySerial.println("HomebrewStar"); 
+                mySerial.println("HomebrewStar"); 
            break; 
             } // CaseGV Char3       
           break; // CaseG
@@ -257,20 +257,20 @@ void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    //mySerial.print("rcv: ");
-    //mySerial.println(inChar);
+    mySerial.print("rcv: ");
+    mySerial.println(inChar);
     // Is it the Ack character?
    if (inChar == 6) 
   { 
-    //mySerial.println("GotAck - SendingP");
+    mySerial.println("GotAck - SendingP");
     Serial.println("P"); // Polar Mode
     inputString = ""; //
     return;
   } 
     // add it to the inputString:
     inputString += inChar;
-    //mySerial.println("Something");
-    //mySerial.println(inChar);
+    mySerial.println("Something");
+    mySerial.println(inChar);
     if (inputString.startsWith(":"))   
     {
       if (inputString.endsWith("#"))   
@@ -300,8 +300,8 @@ void setup() {
   // Setup serial monitor
   Serial.begin(9600);
 
-  //mySerial.begin(4800);
-  //mySerial.println("Hello, world?");
+  mySerial.begin(9600);
+  mySerial.println("Hello, world?");
 
   delay(3000); // wait for console opening
 
@@ -334,8 +334,7 @@ void loop() {
   Serial.print(now.month(), DEC);
   Serial.print('/');
   Serial.print(now.day(), DEC);
-  Serial.print(" (");
-  Serial.print(") ");
+  Serial.print("\t");
   Serial.print(now.hour(), DEC);
   Serial.print(':');
   Serial.print(now.minute(), DEC);
@@ -344,7 +343,7 @@ void loop() {
   Serial.println();
 
   Serial.print("LST:\t");
-  Serial.println(LST_hours);
+  Serial.println(LST_hours, 4);
   
   Serial.print("Temperature: ");
   Serial.print(rtc.getTemperature());
@@ -358,5 +357,5 @@ void loop() {
   delay(250);
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
-  
+  mySerial.println("Test..");
 }

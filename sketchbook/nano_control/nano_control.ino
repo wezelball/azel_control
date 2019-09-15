@@ -1,5 +1,6 @@
 
 #include <Encoder.h>
+#include <SoftwareSerial.h>
  
 // Include Arduino Wire library for I2C
 #include <Wire.h>
@@ -9,6 +10,9 @@
  
 // Define Slave answer size
 #define ANSWERSIZE 8
+
+// Set up temporary software serial
+SoftwareSerial mySerial(11, 12); // RX, TX - debug
 
 // Instantiate the encoders
 Encoder azEnc(2,4);
@@ -32,6 +36,9 @@ void setup() {
   
   // Setup Serial Monitor 
   Serial.begin(9600);
+
+  // Software serial
+  mySerial.begin(9600);
 }
  
 void receiveEvent() {
@@ -75,5 +82,10 @@ void loop() {
   }
 
   delay(100);
-  //Serial.println(answer);
+
+  // Print what was reveived from Uno to hardware port
+  while (mySerial.available()>0) {
+    Serial.println(mySerial.readString());
+  }
+
 }
