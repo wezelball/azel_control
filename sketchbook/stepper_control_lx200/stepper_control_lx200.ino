@@ -213,8 +213,8 @@ void parseLX200(String thisCommand)
             mySerial.println("sent dec");
             break;
           case 'S': // Sidereal Time 
-            Serial.print("12:34:56#"); // Bogus placeholder FIXME
-            mySerial.println("sent LST");
+            Serial.print(getLST_time(LST_hours));
+            mySerial.println(getLST_time(LST_hours));
             break;
           case 'A': // Elevation
             Serial.print("+30*25\'40#");
@@ -262,6 +262,33 @@ void LST_time(){
     LST_hours = LST_degrees/15;
 }
 
+String getLST_time(double h_dec)  {
+  int h;
+  int m;
+  float s;
+  char h_c[3];
+  char m_c[3];
+  char s_c[3]; 
+  String h_s;
+  String m_s;
+  String s_s;
+  String result;
+  
+  h = int(h_dec);                 // hours (int)
+  m = int((float)(h_dec - h) * 60.0);      // minutes
+  s = (float(h_dec) - float(h) - float(m)/60.0) * 3600.0;  // seconds
+
+  sprintf(h_c, "%02d", h);
+  sprintf(m_c, "%02d", m);
+  sprintf(s_c, "%02d", int(s));
+
+  h_s = h_c;
+  m_s = m_c;
+  s_s = s_c;
+
+  result = h_s + ':' + m_s + ':' + s_s + '#';
+  return result;
+}
 
 void serialEvent() {
   while (Serial.available()) {
