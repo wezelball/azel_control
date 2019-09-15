@@ -37,9 +37,7 @@ int azLimitCCW = 4;
 int elLimitUp = 3;
 int elLimitDown = 10;
 
-// The difference between UTC and local time
-// The real-time clock is set in local time
-int UTC_OFFSET = 4;
+float UTCOffset = -4.0;    // Your timezone relative to UTC
 
 double M,Y,D,MN,H,S;
 double A,B;
@@ -128,7 +126,7 @@ long getEncoderPosition(int encoder) {
 
 void parseLX200(String thisCommand)
 {
- mySerial.println(thisCommand);
+ //mySerial.println(thisCommand);
  mySerial.println(inputString);
  switch (inputString.charAt(0)) { // If this isnt 58 (:), something is wrong!
      case ':':
@@ -146,22 +144,22 @@ void parseLX200(String thisCommand)
           case 'C':
             RA_StepInterval = (initialRA_StepInterval *2);
             DEC_StepInterval = (initialDEC_StepInterval *2);
-            Serial.println(" Set interval to half default");
+            mySerial.println(" Set interval to half default");
           break;
           case 'G':
            RA_StepInterval = initialRA_StepInterval;
            DEC_StepInterval = initialDEC_StepInterval;
-           Serial.println(" Set interval to default");
+           mySerial.println(" Set interval to default");
           break;      
           case 'M':
            RA_StepInterval = initialRA_StepInterval/2;
            DEC_StepInterval = initialDEC_StepInterval/2;
-           Serial.println(" Set interval to DOUBLE SPEED");
+           mySerial.println(" Set interval to DOUBLE SPEED");
           break;
           case 'S':
            RA_StepInterval = minimumRA_StepInterval;
            DEC_StepInterval = minimumDEC_StepInterval;
-           Serial.println(" Set interval to FASTEST");
+           mySerial.println(" Set interval to FASTEST");
           break;
       } // CaseR Char2
         break; // End Rate Control
@@ -172,24 +170,24 @@ void parseLX200(String thisCommand)
             RA_steppingEnabled = true;
             // We really just need to speed things up
             RA_StepInterval = (initialRA_StepInterval /4);
-            Serial.println("Move RA forwards (west)");
+            mySerial.println("Move RA forwards (west)");
           break;
           case 'e':
             RA_step_direction = 1;
             RA_steppingEnabled = true;
             // We really just need to slow things down
             RA_StepInterval = (initialRA_StepInterval *4);
-            Serial.println("Move RA backwards (east) ");
+            mySerial.println("Move RA backwards (east) ");
           break;
           case 'n':
             DEC_step_direction = 0;
             DEC_steppingEnabled = true;
-            Serial.println("Move DEC forwards (north)");
+            mySerial.println("Move DEC forwards (north)");
           break;
           case 's':
             DEC_step_direction = 1;
             DEC_steppingEnabled = true;
-            Serial.println("Move DEC backwards (south)");
+            mySerial.println("Move DEC backwards (south)");
           break;
           } // CaseM Char2
         break; // End movemont control
@@ -197,25 +195,37 @@ void parseLX200(String thisCommand)
         RA_steppingEnabled = 1; // We still move RA 
         RA_StepInterval = initialRA_StepInterval; // We just set the speed so that stars should be "stationary" relative to everything else
         DEC_steppingEnabled = 0;
-        Serial.println ("Stepping halted");
+        mySerial.println ("Stepping halted");
         break;
       case 'X': // Stop TOTALLY
   RA_steppingEnabled = 0; // Stop moving, for bench testing
   DEC_steppingEnabled = 0;
-  Serial.println ("Stepping totally halted");
+  mySerial.println ("Stepping totally halted");
   break;
       case 'G': // Get Data
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
-            Serial.println("123*56#"); // Bogus placeholder FIXME
-            mySerial.println("sent azimuth");
+            Serial.print("123*56\'57#"); // Bogus placeholder FIXME
+            mySerial.println("sent az");
+            break;
           case 'D': // Declination
-            Serial.println("+23*56#"); // Bogus placeholder FIXME
-            mySerial.println("sent declination");
+            Serial.print("+68*58\'17#"); // Bogus placeholder FIXME
+            mySerial.println("sent dec");
+            break;
           case 'S': // Sidereal Time 
-            Serial.println("12:34:56#"); // Bogus placeholder FIXME
-            mySerial.println("sent sidereal");
-          break;
+            Serial.print("12:34:56#"); // Bogus placeholder FIXME
+            mySerial.println("sent LST");
+            break;
+          case 'A': // Elevation
+            Serial.print("+30*25\'40#");
+            mySerial.println("+30*25\'40#");
+            //mySerial.println("sent el");
+            break;
+          case 'R': // right ascension
+            Serial.print("09:57:04#");
+            mySerial.println("sent RA");
+            break;
+          //break;
           case 'V':
             switch (inputString.charAt(3)) {
               case 'F':
@@ -241,7 +251,7 @@ void LST_time(){
     Y = (double) now.year();
     D = (double) now.day();
     MN = (double) now.minute();
-    H = (double) now.hour() + UTC_OFFSET;
+    H = (double) now.hour();
     S = (double) now.second();
     A = (double)(Y-2000)*365.242199;
     B = (double)(M-1)*30.4368499;
@@ -257,20 +267,20 @@ void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    mySerial.print("rcv: ");
-    mySerial.println(inChar);
+    //mySerial.print("rcv: ");
+    //mySerial.println(inChar);
     // Is it the Ack character?
    if (inChar == 6) 
   { 
-    mySerial.println("GotAck - SendingP");
-    Serial.println("P"); // Polar Mode
+    mySerial.println("GotAck - SendingA");
+    Serial.println("A"); // Altaz Mode
     inputString = ""; //
     return;
   } 
     // add it to the inputString:
     inputString += inChar;
-    mySerial.println("Something");
-    mySerial.println(inChar);
+    //mySerial.println("Something");
+    //mySerial.println(inChar);
     if (inputString.startsWith(":"))   
     {
       if (inputString.endsWith("#"))   
@@ -310,6 +320,7 @@ void setup() {
     while (1);
   }
 
+  /*
   if (rtc.lostPower()) {
     Serial.println("RTC lost power, lets set the time!");
     // following line sets the RTC to the date & time this sketch was compiled
@@ -318,6 +329,13 @@ void setup() {
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
   }
+  */
+
+  rtc.adjust(DateTime(__DATE__, __TIME__));  // sets the clock to the time when this sketch is compiled
+  delay(1000);
+  DateTime now = rtc.now();
+  DateTime UTCTime(now.unixtime() - 3600 * UTCOffset);   // Adjust the time from local to UTC
+  rtc.adjust(UTCTime);
 
 }
  
@@ -329,6 +347,9 @@ void loop() {
   // Update LST
   LST_time();
 
+  
+  /* 
+  // Fun test code
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
@@ -358,4 +379,7 @@ void loop() {
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
   mySerial.println("Test..");
+  // Fun test code
+  */
+  
 }
