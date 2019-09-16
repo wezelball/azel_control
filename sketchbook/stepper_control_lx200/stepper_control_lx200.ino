@@ -37,20 +37,17 @@ int azLimitCCW = 4;
 int elLimitUp = 3;
 int elLimitDown = 10;
 
-float UTCOffset = -4.0;    // Your timezone relative to UTC
+float UTCOffset = -4.0;     // your timezone relative to UTC
 
 double M,Y,D,MN,H,S;
 double A,B;
-double longitude =-77.924;  //your longtitude.
-double lattitude =37.791;   //your latitude.
-double LST_degrees;         //variable to store local side real time(LST) in degrees.
-double LST_hours;           //variable to store local side real time(LST) in decimal hours.
+double longitude =-77.924;  // your longtitude.
+double lattitude =37.791;   // your latitude.
+double LST_degrees;         // variable to store local side real time(LST) in degrees.
+double LST_hours;           // variable to store local side real time(LST) in decimal hours.
+double azimuth = 180.0;     // current azimuth - use same reference as CdC
+double elevation = 45.0;    // current elevation - use same reference as CdC
 
-
-int numcount = 0;
-String val = "0";      // This will be used for ascii to integer conversion
-unsigned long RA_step_number = 107374182 ; // max long divided by two, for tracking steps.
-unsigned long DEC_step_number = 107374182 ; // max long divided by two, for tracking steps.
 int RA_step_direction = 1;
 int DEC_step_direction = 1;
 char cmdEnd;
@@ -61,42 +58,11 @@ boolean RA_tracking_Enabled = true; // Always track - Currently unused
 boolean RA_steppingEnabled = true; // Non-default RA movement if we are doing something other than tracking
 boolean DEC_steppingEnabled = false; // DEC movement is always optional
 
-
-// the follow variables are a long because the time, measured in RA_Microseconds,
-// will quickly become a bigger number than can be stored in an int.
-
-// ************************************* DEPRECATED ******************************************
-
-// Init RA timer variables
-long previousStepRA_Micros = 0;        // will store last time Stepper was moved
-// 10416 gives 1rp60s, 
-// 17186 gives 1rev per 100 seconds
-// 34372 - 1 rev per 195 seconds?
-int minimumRA_StepInterval = 6000; // Stepping delays lower than this generally fail
-long initialRA_StepInterval = 34783; // Delay between steps, timed with stopwatch so accuracy may be lacking
-int maximumRA_StepInterval = ((initialRA_StepInterval - minimumRA_StepInterval) + initialRA_StepInterval);
-unsigned long RA_StepInterval = initialRA_StepInterval;
-// Init DEC timer intervals
-long previousStepDEC_Micros = 0;        // will store last time Stepper was moved
-// 10416 gives 1rp60s, 
-// 17186 gives 1rev per 100 seconds
-// 34372 - 1 rev per 195 seconds?
-int minimumDEC_StepInterval = 6000; // Stepping delays lower than this generally fail
-long initialDEC_StepInterval = 12000; // Delay between steps, its a number that works
-int maximumDEC_StepInterval = ((initialDEC_StepInterval - minimumDEC_StepInterval) + initialDEC_StepInterval);
-unsigned long DEC_StepInterval = initialDEC_StepInterval;
-//long autoDrifttimerStart = 0;
-long SerialOutputInterval = 100000;
-int SerialInputInterval = 10000;
-long previousSerialIn_Micros = 0;  // last time serial buffer was polled
-long previousSerialOut_Micros = 0;  // Last time serial data was sent via timer
-
-// ************************************* DEPRECATED ******************************************
-
-char cmdSwitch;
-char newTime;
-String newDelay;
-char numberArray[5];
+// Make sure these are used
+//char cmdSwitch;
+//char newTime;
+//String newDelay;
+//char numberArray[5];
 
 // ****************************** END GLOBALS ***************************************
 
@@ -142,23 +108,23 @@ void parseLX200(String thisCommand)
         case 'R':// Rate Control - R
           switch (inputString.charAt(2)) {
           case 'C':
-            RA_StepInterval = (initialRA_StepInterval *2);
-            DEC_StepInterval = (initialDEC_StepInterval *2);
+            //RA_StepInterval = (initialRA_StepInterval *2);
+            //DEC_StepInterval = (initialDEC_StepInterval *2);
             mySerial.println(" Set interval to half default");
           break;
           case 'G':
-           RA_StepInterval = initialRA_StepInterval;
-           DEC_StepInterval = initialDEC_StepInterval;
+           //RA_StepInterval = initialRA_StepInterval;
+           //DEC_StepInterval = initialDEC_StepInterval;
            mySerial.println(" Set interval to default");
           break;      
           case 'M':
-           RA_StepInterval = initialRA_StepInterval/2;
-           DEC_StepInterval = initialDEC_StepInterval/2;
+           //RA_StepInterval = initialRA_StepInterval/2;
+           //DEC_StepInterval = initialDEC_StepInterval/2;
            mySerial.println(" Set interval to DOUBLE SPEED");
           break;
           case 'S':
-           RA_StepInterval = minimumRA_StepInterval;
-           DEC_StepInterval = minimumDEC_StepInterval;
+           //RA_StepInterval = minimumRA_StepInterval;
+           //DEC_StepInterval = minimumDEC_StepInterval;
            mySerial.println(" Set interval to FASTEST");
           break;
       } // CaseR Char2
@@ -169,14 +135,14 @@ void parseLX200(String thisCommand)
             RA_step_direction = 1;
             RA_steppingEnabled = true;
             // We really just need to speed things up
-            RA_StepInterval = (initialRA_StepInterval /4);
+            //RA_StepInterval = (initialRA_StepInterval /4);
             mySerial.println("Move RA forwards (west)");
           break;
           case 'e':
             RA_step_direction = 1;
             RA_steppingEnabled = true;
             // We really just need to slow things down
-            RA_StepInterval = (initialRA_StepInterval *4);
+            //RA_StepInterval = (initialRA_StepInterval *4);
             mySerial.println("Move RA backwards (east) ");
           break;
           case 'n':
@@ -193,7 +159,7 @@ void parseLX200(String thisCommand)
         break; // End movemont control
       case 'Q': // Stop Moving - Q
         RA_steppingEnabled = 1; // We still move RA 
-        RA_StepInterval = initialRA_StepInterval; // We just set the speed so that stars should be "stationary" relative to everything else
+        //RA_StepInterval = initialRA_StepInterval; // We just set the speed so that stars should be "stationary" relative to everything else
         DEC_steppingEnabled = 0;
         mySerial.println ("Stepping halted");
         break;
@@ -289,6 +255,26 @@ String getLST_time(double h_dec)  {
   result = h_s + ':' + m_s + ':' + s_s + '#';
   return result;
 }
+
+// Takes an integer value, and pads leading zeros
+// to the number of places
+String pad_int(int value, int places) {
+  char data[places];
+  String result;
+  String format;
+
+  if (places == 2) {
+    sprintf(data, "%02d", value);
+  }
+  else if (places == 3) {
+    sprintf(data, "%03d", value);
+  }
+    
+  result = data;
+  return result;
+    
+}
+
 
 void serialEvent() {
   while (Serial.available()) {
