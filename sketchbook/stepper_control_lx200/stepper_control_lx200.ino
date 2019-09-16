@@ -50,8 +50,8 @@ double elevation;           // current elevation - use same reference as CdC
 double initialAz = 180.0;   // initial azimuth - use same reference as CdC
 double initialEl = 45.0;    // initial elevation - use same reference as CdC
 
-//long azEncoderCount;        // the current azimuth encoder count
-//long elEncoderCount;        // the current elevation encoder count
+long azEncoderCount;      // the current azimuth encoder count
+long elEncoderCount;      // the current elevation encoder count
 double azEncRes = 1.667e-5; // azimuth encoder resolution in degrees per pulse
 double elEncRes = 1.667e-5; // elevation encoder resolution in degrees per pulse
 
@@ -262,12 +262,19 @@ String pad_int(int value, int places) {
 }
 
 void updateAzimuth() {
-  azimuth = initialAz + azEncRes * getEncoderPosition(0);
+  azimuth = initialAz + azEncRes * azEncoderCount;
 }
 
 void updateElevation() {
-  elevation = initialEl + elEncRes * getEncoderPosition(1);
+  elevation = initialEl + elEncRes * elEncoderCount;
 }
+
+void updateEncoders() {
+  azEncoderCount = getEncoderPosition(0);
+  delay(100);
+  elEncoderCount = getEncoderPosition(1);
+}
+
 
 void serialEvent() {
   while (Serial.available()) {
@@ -352,6 +359,7 @@ void loop() {
 
   // Update LST
   LST_time();
+  updateEncoders();
   updateAzimuth();
   updateElevation();
   //updateRA();
@@ -361,16 +369,16 @@ void loop() {
   Serial.println(getHMS(LST_hours));
   delay(500);
   Serial.print("Az:\t");
-  Serial.println(azimuth);
+  Serial.println(azimuth, 4);
   delay(500);
   Serial.print("El:\t");
-  Serial.println(elevation);
+  Serial.println(elevation, 4);
   delay(500);
   Serial.print("AzEnc:\t");
-  Serial.println(getEncoderPosition(0));
+  Serial.println(azEncoderCount);
   delay(500);
   Serial.print("ElEnc:\t");
-  Serial.println(getEncoderPosition(1));
+  Serial.println(elEncoderCount);
   delay(500);
   Serial.println("");
   /* 
