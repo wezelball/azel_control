@@ -45,24 +45,23 @@ double longitude =-77.924;  // your longtitude.
 double lattitude =37.791;   // your latitude.
 double LST_degrees;         // variable to store local side real time(LST) in degrees.
 double LST_hours;           // variable to store local side real time(LST) in decimal hours.
-double azimuth = 180.0;     // current azimuth - use same reference as CdC
-double elevation = 45.0;    // current elevation - use same reference as CdC
+double azimuth;             // current azimuth - use same reference as CdC
+double elevation;           // current elevation - use same reference as CdC
+double initialAz = 180.0;   // initial azimuth - use same reference as CdC
+double initialEl = 45.0;    // initial elevation - use same reference as CdC
+
+//long azEncoderCount;        // the current azimuth encoder count
+//long elEncoderCount;        // the current elevation encoder count
+double azEncRes = 1.667e-5; // azimuth encoder resolution in degrees per pulse
+double elEncRes = 1.667e-5; // elevation encoder resolution in degrees per pulse
 
 int RA_step_direction = 1;
 int DEC_step_direction = 1;
-char cmdEnd;
-char cmdBuffer;
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 boolean RA_tracking_Enabled = true; // Always track - Currently unused
 boolean RA_steppingEnabled = true; // Non-default RA movement if we are doing something other than tracking
 boolean DEC_steppingEnabled = false; // DEC movement is always optional
-
-// Make sure these are used
-//char cmdSwitch;
-//char newTime;
-//String newDelay;
-//char numberArray[5];
 
 // ****************************** END GLOBALS ***************************************
 
@@ -262,6 +261,13 @@ String pad_int(int value, int places) {
     
 }
 
+void updateAzimuth() {
+  azimuth = initialAz + azEncRes * getEncoderPosition(0);
+}
+
+void updateElevation() {
+  elevation = initialEl + elEncRes * getEncoderPosition(1);
+}
 
 void serialEvent() {
   while (Serial.available()) {
@@ -346,8 +352,27 @@ void loop() {
 
   // Update LST
   LST_time();
+  updateAzimuth();
+  updateElevation();
+  //updateRA();
+  //updateDec();
 
-  
+  Serial.print("LST:\t");
+  Serial.println(getHMS(LST_hours));
+  delay(500);
+  Serial.print("Az:\t");
+  Serial.println(azimuth);
+  delay(500);
+  Serial.print("El:\t");
+  Serial.println(elevation);
+  delay(500);
+  Serial.print("AzEnc:\t");
+  Serial.println(getEncoderPosition(0));
+  delay(500);
+  Serial.print("ElEnc:\t");
+  Serial.println(getEncoderPosition(1));
+  delay(500);
+  Serial.println("");
   /* 
   // Fun test code
   Serial.print(now.year(), DEC);
