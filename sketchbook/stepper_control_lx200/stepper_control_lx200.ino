@@ -39,19 +39,21 @@ int elLimitDown = 10;
 
 float UTCOffset = -4.0;     // your timezone relative to UTC
 
-double M,Y,D,MN,H,S;
+double M,Y,D,MN,H,S;        // current UTC time
 double A,B;
 double longitude =-77.924;  // your longtitude.
-double lattitude =37.791;   // your latitude.
+double latitude =37.791;    // your latitude.
 double LST_degrees;         // variable to store local side real time(LST) in degrees.
 double LST_hours;           // variable to store local side real time(LST) in decimal hours.
 double azimuth;             // current azimuth - use same reference as CdC
 double elevation;           // current elevation - use same reference as CdC
 double initialAz = 180.0;   // initial azimuth - use same reference as CdC
 double initialEl = 45.0;    // initial elevation - use same reference as CdC
+double RA;					        // current right ascension;
+double declination;			    // current declination
 
-long azEncoderCount;      // the current azimuth encoder count
-long elEncoderCount;      // the current elevation encoder count
+long azEncoderCount;        // the current azimuth encoder count
+long elEncoderCount;        // the current elevation encoder count
 double azEncRes = 1.667e-5; // azimuth encoder resolution in degrees per pulse
 double elEncRes = 1.667e-5; // elevation encoder resolution in degrees per pulse
 
@@ -275,6 +277,112 @@ void updateEncoders() {
   elEncoderCount = getEncoderPosition(1);
 }
 
+// Given current azimuth/elevation,
+// update RA and Dec
+// These are all global variables 
+// From "Practical Astronomy With Your Calculator", Peter-Duffet Smith, pg. 38
+//
+// DEFINITELY SIMPLIFY THIS AFTER GETTING IT TO WORK, LOTS OF DOUBLES
+void updateEqu()  {
+  double decR;    	// declination angle, in radians
+  double latR;    	// latitude in radians
+  double azR;     	// azimuth angle, in radians
+  double altR;    	// elevation angle, in radians 
+  double sinDec;  	// sin(declination)
+  double cosHA;   	// cosine of the hour angle
+  double haRPrime;	// hour angle, in radians  
+  double sinA;		  // sin(azimuth)
+  //double haR;		  // hour angle, in radians
+  double haD;		    // hour angle,  in degrees
+  double haH;       // hour angle, hours
+  double decD;		  // declination angle, in degrees
+  double raD;		    // right ascension, degrees
+
+  // Test variables for debugging
+  /*
+  double latitude_test = 52.0;
+  double elevation_test = 19.334444;
+  double azimuth_test = 283.271111;
+  double LST_hours_test = 0.401389;
+  */
+  
+
+  // convert all angles in radians before using trig functions
+  //latR = deg2rad(latitude_test);
+  latR = deg2rad(latitude);
+  //azR = deg2rad(azimuth_test);
+  azR = deg2rad(azimuth);
+  //altR = deg2rad(elevation_test);
+  altR = deg2rad(elevation);
+
+  // solve sin(dec) = sin(alt) * sin(lat) + cos(alt) * cos(lat) * cos(az)
+  sinDec = sin(altR) * sin(latR) + cos(altR) * cos(latR) * cos(azR);
+  //mySerial.print("sinDec:\t");
+  //mySerial.println(sinDec, 4);
+  
+  // Declination, in radians
+  decR = asin(sinDec);
+  // Convert dec to degrees
+  decD = rad2deg(decR);
+  //mySerial.print("Dec:\t");
+  //mySerial.println(decD, 4);
+
+  // solve cos(hourAngle) = (sin(alt) - sin(lat)*sin(dec) )/(cos(lat) * cos(dec) )
+  cosHA = (sin(altR) - sin(latR) * sinDec)/( cos(latR) * cos(decR) );
+  //mySerial.print("cosHA:\t");
+  //mySerial.println(cosHA, 4);
+  
+  // hour angle, unadjusted
+  haRPrime = acos(cosHA);
+  // find sin(azimuth) 
+  sinA = sin(azR);
+  //mySerial.print("sinA:\t");
+  //mySerial.println(sinA, 4);
+  
+  
+  // If sin(A) is negative, true hour angle is H'
+  // if positive, true hour angle is 360 - H'
+  if (sinA < 0)	{
+	//haR = haRPrime;
+	haD = rad2deg(haRPrime);
+  } else if (sinA > 0)	{
+	haD = 360.0 - rad2deg(haRPrime);
+  }
+
+  //mySerial.print("haD:\t");
+  //mySerial.println(haD, 4);
+
+  // convert H into hours by dividing by 15 (15 degrees per hour)
+  haH = haD/15.0;
+
+  //mySerial.print("haH:\t");
+  //mySerial.println(haH, 4);
+  
+  // Now find the right ascension
+  // LST - H
+  //raD = LST_hours_test - haH;
+  raD = LST_hours - haH;
+  // If the result is negative, add 24 (hours)
+  if (raD < 0)
+    raD += 24;
+  
+  //mySerial.print("raD:\t");
+  //mySerial.println(raD, 4);
+  
+  // Update the global variables
+  RA = raD;
+  declination = decD;
+  
+}
+
+
+double deg2rad(double deg) {
+  return (deg * 1000 / 57296);
+}
+
+double rad2deg(double rad)  {
+  return (rad * 57296 / 1000);
+}
 
 void serialEvent() {
   while (Serial.available()) {
@@ -362,27 +470,10 @@ void loop() {
   updateEncoders();
   updateAzimuth();
   updateElevation();
+  updateEqu();
   //updateRA();
   //updateDec();
 
-  Serial.print("LST:\t");
-  Serial.println(getHMS(LST_hours));
-  delay(500);
-  Serial.print("Az:\t");
-  Serial.println(azimuth, 4);
-  delay(500);
-  Serial.print("El:\t");
-  Serial.println(elevation, 4);
-  delay(500);
-  Serial.print("AzEnc:\t");
-  Serial.println(azEncoderCount);
-  delay(500);
-  Serial.print("ElEnc:\t");
-  Serial.println(elEncoderCount);
-  delay(500);
-  Serial.println("");
-  /* 
-  // Fun test code
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
@@ -395,6 +486,32 @@ void loop() {
   Serial.print(':');
   Serial.print(now.second(), DEC);
   Serial.println();
+
+  Serial.print("LST:\t");
+  Serial.println(getHMS(LST_hours));
+  delay(500);
+  Serial.print("Az:\t");
+  Serial.println(azimuth, 4);
+  delay(500);
+  Serial.print("El:\t");
+  Serial.println(elevation, 4);
+  delay(500);
+  //Serial.print("AzEnc:\t");
+  //Serial.println(azEncoderCount);
+  //delay(500);
+  //Serial.print("ElEnc:\t");
+  //Serial.println(elEncoderCount);
+  //delay(500);
+  Serial.print("RA:\t");
+  Serial.println(RA, 4);
+  delay(500);
+  Serial.print("Dec:\t");
+  Serial.println(declination, 4);
+  delay(500);
+  Serial.println("");
+  /* 
+  // Fun test code
+  
 
   Serial.print("LST:\t");
   Serial.println(LST_hours, 4);
