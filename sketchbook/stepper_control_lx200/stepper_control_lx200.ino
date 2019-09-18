@@ -195,17 +195,20 @@ void parseLX200(String thisCommand)
       case 'm':
         switch (inputString.charAt(2)) {
           case 'u': // slew elevation up 1000 steps
-            // slew command
-            mySerial.println("Slew UP");
+            relativeMove(1, 1000);
+            //mySerial.println("Slew UP");
             break;
           case 'd': // slew elevation down 1000 steps
-            mySerial.println("Slew DOWN");
+            relativeMove(1, -1000);
+            //mySerial.println("Slew DOWN");
             break;
           case 'l': // slew azimuth CCW (left) 1000 steps
-            mySerial.println("Slew left");
+            relativeMove(0, -1000);
+            //mySerial.println("Slew CCW");
             break;
           case 'r': // slew azimuth CW (right) 1000 steps
-            mySerial.println("Slew right");
+            relativeMove(0, 1000);
+            //mySerial.println("Slew CW");
             break;
         } // Case m Char2
         break;  // Case m
@@ -451,9 +454,7 @@ double rad2deg(double rad)  {
 
 // *************** STEPPER MOTION COMMANDS START************************
 
-// Moves relative
-// I need to put this code in the 
-// loop so it doesnt block while running
+// Move relative
 void relativeMove(int axis, long steps)  {
   if (axis == 0)          // azimuth axis
   { 
@@ -467,6 +468,7 @@ void relativeMove(int axis, long steps)  {
       stepperX.enableOutputs();
       movingX = true;
       stepperX.move(steps);
+      //mySerial.println("az not in limit");
     }
     
   }
@@ -482,11 +484,11 @@ void relativeMove(int axis, long steps)  {
       stepperY.enableOutputs();
       movingY = true;
       stepperY.move(steps);
+      //mySerial.println("el not in limit");
     }
 
   }
   
-  mySerial.println("Relative move");
 }
 
 // Set maximum
@@ -719,19 +721,46 @@ void setup() {
   DateTime UTCTime(now.unixtime() - 3600 * UTCOffset);   // Adjust the time from local to UTC
   rtc.adjust(UTCTime);
 
+  // Set up encoder max speeds and accels
+  setMaxSpeed(0, 1000);     // azimuth
+  setMaxSpeed(1, 1000);     // elevation
+  setAccel(0, 500);         // azimuth
+  setAccel(1, 500);         // elevation
+  setSpeed(0, 1000);        // azimuth
+  setSpeed(1, 1000);        // elevation
 }
  
 void loop() {
 
   // Update the RTC
-  DateTime now = rtc.now();
+  //DateTime now = rtc.now();
 
   // Update LST
-  LST_time();
-  updateEncoders();
-  updateAzimuth();
-  updateElevation();
-  updateEqu();
+  //LST_time();
+  //updateEncoders();
+  //updateAzimuth();
+  //updateElevation();
+  //updateEqu();
+
+
+  // ******************************* Motion ***********************************
+  
+  // Relative move - az
+  if (movingX && (abs(stepperX.distanceToGo())) > 0) {
+    stepperX.run();
+  } else  {
+    movingX = false;
+  }
+  
+  // Relative move - el
+  if (movingY && (abs(stepperY.distanceToGo())) > 0) {
+    stepperY.run();
+  } else  {
+    movingY = false;
+  }
+
+
+  // ******************************* Motion ***********************************
 
 
   // ************************* Check hard limits ******************************
