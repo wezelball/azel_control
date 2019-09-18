@@ -37,6 +37,17 @@ int azLimitCCW = 4;
 int elLimitUp = 3;
 int elLimitDown = 10;
 
+// Hard limit flags
+bool azMovingCW = false;    // az rotating clockwise 
+bool azMovingCCW = false;   // az rotating anti-clockwise
+bool azCWLimit = false;     // at the CW limit 
+bool azCCWLimit = false;    // at the CW limit 
+
+bool elMovingUp = false;    // elevation rotating upwards
+bool elMovingDown = false;  // elevation rotating downwards
+bool elDownLimit = false;   // at the down limit
+bool elUpLimit = false;     // at the up limit
+
 float UTCOffset = -4.0;     // your timezone relative to UTC
 
 double M,Y,D,MN,H,S;        // current UTC time
@@ -49,8 +60,8 @@ double azimuth;             // current azimuth - use same reference as CdC
 double elevation;           // current elevation - use same reference as CdC
 double initialAz = 180.0;   // initial azimuth - use same reference as CdC
 double initialEl = 45.0;    // initial elevation - use same reference as CdC
-double RA;					        // current right ascension;
-double declination;			    // current declination
+double RA;					// current right ascension;
+double declination;			// current declination
 
 long azEncoderCount;        // the current azimuth encoder count
 long elEncoderCount;        // the current elevation encoder count
@@ -59,11 +70,11 @@ double elEncRes = 1.667e-5; // elevation encoder resolution in degrees per pulse
 
 int RA_step_direction = 1;
 int DEC_step_direction = 1;
-String inputString = "";         // a string to hold incoming data
-boolean stringComplete = false;  // whether the string is complete
-boolean RA_tracking_Enabled = true; // Always track - Currently unused
-boolean RA_steppingEnabled = true; // Non-default RA movement if we are doing something other than tracking
-boolean DEC_steppingEnabled = false; // DEC movement is always optional
+String inputString = "";         		// a string to hold incoming data
+boolean stringComplete = false;  		// whether the string is complete
+boolean RA_tracking_Enabled = true; 	// Always track - Currently unused
+boolean RA_steppingEnabled = true; 		// Non-default RA movement if we are doing something other than tracking
+boolean DEC_steppingEnabled = false; 	// DEC movement is always optional
 
 // ****************************** END GLOBALS ***************************************
 
@@ -172,25 +183,29 @@ void parseLX200(String thisCommand)
       case 'G': // Get Data
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
-            Serial.print("123*56\'57#"); // Bogus placeholder FIXME
-            mySerial.println("sent az");
+            Serial.print(getDMS(azimuth,3));
+            //Serial.print("123*56\'57#"); // Bogus placeholder FIXME
+            mySerial.println(getDMS(azimuth,3));
             break;
           case 'D': // Declination
-            Serial.print("+68*58\'17#"); // Bogus placeholder FIXME
-            mySerial.println("sent dec");
+            Serial.print(getDMS(declination,2));
+            //Serial.print("+68*58\'17#"); // Bogus placeholder FIXME
+            mySerial.println(getDMS(declination,2));
             break;
           case 'S': // Sidereal Time 
             Serial.print(getHMS(LST_hours));
             mySerial.println(getHMS(LST_hours));
             break;
           case 'A': // Elevation
-            Serial.print("+30*25\'40#");
-            mySerial.println("+30*25\'40#");
+            Serial.print(getDMS(elevation,2));
+            //Serial.print("+30*25\'40#");
+            mySerial.println(getDMS(elevation,2));
             //mySerial.println("sent el");
             break;
           case 'R': // right ascension
-            Serial.print("09:57:04#");
-            mySerial.println("sent RA");
+            Serial.print(getHMS(RA));
+            //Serial.print("09:57:04#");
+            mySerial.println(getHMS(RA));
             break;
           //break;
           case 'V':
@@ -229,7 +244,8 @@ void LST_time(){
     LST_hours = LST_degrees/15;
 }
 
-// Return H:M:S#
+// Return HH:MM:SS#
+// The input must be in decimal hours
 String getHMS(double h_dec)  {
   int h;
   int m;
@@ -241,6 +257,44 @@ String getHMS(double h_dec)  {
   s = (float(h_dec) - float(h) - float(m)/60.0) * 3600.0;  // seconds
 
   result = pad_int(h,2) + ':' + pad_int(m,2) + ':' + pad_int(int(s),2) + '#';
+  return result;
+}
+
+// Return sDD*MM'SS# or sDDD*MM'SS#
+// The input must be in decimal degrees
+// place is the number of digits in the degrees format to return
+// Azimuth has 3 places, where declination has 2
+String getDMS(double d_dec, int places)  {
+  int d;
+  int m;
+  float s;
+  String sign;		// the polarity of the value
+  String result;
+  
+  d = int(d_dec);                 // hours (int)
+  m = int((float)(d_dec - d) * 60.0);      // minutes
+  s = (float(d_dec) - float(d) - float(m)/60.0) * 3600.0;  // seconds
+
+  // make everything positive, we already know the sign
+  d = abs(d);
+  m = abs(m);
+  s = abs(s);
+
+  // Determine the sign
+  if(d_dec < 0.0) {
+      sign = "-";
+  } else {
+      sign = '+';
+  }
+
+  // Build the result string - note the backslash escape
+  // Angles with 2 places get a sign
+  if(places == 2)
+    result = sign + pad_int(d,places) + '*' + pad_int(m,2) + '\'' + pad_int(int(s),2) + '#';
+  // Angles with 3 places (azimuth) don't get a sign
+  if(places == 3)
+    result = pad_int(d,places) + '*' + pad_int(m,2) + '\'' + pad_int(int(s),2) + '#';
+  
   return result;
 }
 
@@ -423,6 +477,57 @@ void serialEvent() {
 
 }
 
+/*
+ * Gets the value if the limit swtich
+ * axis = 0 if azimuth, 1 if elevation
+ *   
+ *   axis       limit    meaning
+ *   ----       -----    -------
+ *   azimuth     0       max CW
+ *   azimuth     1       max CCW
+ *   elevation   0       max UP
+ *   elevation   1       max DOWN
+ *   
+ *   returns     1       limit reached
+ *               0       limit not reached
+ *   logic is inverted with internal pullup          
+ *     
+ *   This code could use some optimization!
+*/
+int getLimit(int axis, int limit) {
+   if (axis == 0) {                         // azimuth
+    if (limit == 0) {
+      if (digitalRead(azLimitCW) == HIGH)   // CW limit not reached
+        return 0;
+
+      if (digitalRead(azLimitCW) == LOW)    // CW limit reached
+        return 1;
+        
+    } else if (limit == 1) {
+      if (digitalRead(azLimitCCW) == HIGH)  // CCW limit not reached
+        return 0;
+
+      if (digitalRead(azLimitCCW) == LOW)   // CCW limit reached
+        return 1;
+    }
+  } else if (axis == 1) {
+    if (limit == 0) {
+      if (digitalRead(elLimitUp) == HIGH)   // UP limit not reached
+        return 0;
+
+      if (digitalRead(elLimitUp) == LOW)    // UP limit reached
+        return 1;
+        
+    } else if (limit == 1) {
+      if (digitalRead(elLimitDown) == HIGH) // DOWN limit not reached
+        return 0;
+
+      if (digitalRead(elLimitDown) == LOW)  // DOWN limit reached
+        return 1;
+    }
+  }
+}
+
 void setup() {
  
   // Initialize I2C communications as Master
@@ -431,8 +536,21 @@ void setup() {
   // Setup serial monitor
   Serial.begin(9600);
 
+  // Serial dubugging port
   mySerial.begin(9600);
   mySerial.println("Hello, world?");
+
+  // Stepper setup
+
+  // Hard limits
+  pinMode(azLimitCW, INPUT_PULLUP);
+  pinMode(azLimitCCW, INPUT_PULLUP);
+  pinMode(elLimitUp, INPUT_PULLUP);
+  pinMode(elLimitDown, INPUT_PULLUP);
+  
+  // Setup stepper enable pins
+  stepperX.setEnablePin(7);   // using an enable pin
+  stepperY.setEnablePin(7);
 
   delay(3000); // wait for console opening
 
@@ -471,9 +589,40 @@ void loop() {
   updateAzimuth();
   updateElevation();
   updateEqu();
-  //updateRA();
-  //updateDec();
 
+
+  // ************************* Check hard limits ******************************
+  if ((getLimit(0,0) == 0) && azMovingCW) {           // az max CW
+    stepperX.disableOutputs();                  // stop as fast as possible
+    azMovingCW = false;
+    azCWLimit = true;
+  } else if ((getLimit(0,1) == 0) && azMovingCCW) {   // az max CCW
+    stepperX.disableOutputs();                  // stop as fast as possible
+    azMovingCCW = false;
+    azCCWLimit = true;
+  } else {                                      // reset flags
+    azCWLimit = false;
+    azCCWLimit = false;
+  }
+
+  // Check hard limits
+  if ((getLimit(1,0) == 0) && elMovingUp) {           // el max up
+    stepperY.disableOutputs();                  // stop as fast as possible
+    elMovingUp = false;
+    elUpLimit = true;
+  } else if ((getLimit(1,1) == 0) && elMovingDown) {  // el max down
+    stepperY.disableOutputs();                  // stop as fast as possible
+    elMovingDown = false;
+    elDownLimit = true;
+  } else {                                      // reset flags
+    elUpLimit = false;
+    elDownLimit = false;
+  }
+  
+  // ************************* Check hard limits ******************************
+
+  
+  /*
   Serial.print(now.year(), DEC);
   Serial.print('/');
   Serial.print(now.month(), DEC);
@@ -509,9 +658,6 @@ void loop() {
   Serial.println(declination, 4);
   delay(500);
   Serial.println("");
-  /* 
-  // Fun test code
-  
 
   Serial.print("LST:\t");
   Serial.println(LST_hours, 4);
@@ -529,7 +675,6 @@ void loop() {
   Serial.print("Elevation:\t");
   Serial.println(getEncoderPosition(1));
   mySerial.println("Test..");
-  // Fun test code
   */
   
 }
