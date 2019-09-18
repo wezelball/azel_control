@@ -60,8 +60,8 @@ double azimuth;             // current azimuth - use same reference as CdC
 double elevation;           // current elevation - use same reference as CdC
 double initialAz = 180.0;   // initial azimuth - use same reference as CdC
 double initialEl = 45.0;    // initial elevation - use same reference as CdC
-double RA;					// current right ascension;
-double declination;			// current declination
+double RA;					        // current right ascension;
+double declination;			    // current declination
 
 long azEncoderCount;        // the current azimuth encoder count
 long elEncoderCount;        // the current elevation encoder count
@@ -72,9 +72,9 @@ int RA_step_direction = 1;
 int DEC_step_direction = 1;
 String inputString = "";         		// a string to hold incoming data
 boolean stringComplete = false;  		// whether the string is complete
-boolean RA_tracking_Enabled = true; 	// Always track - Currently unused
-boolean RA_steppingEnabled = true; 		// Non-default RA movement if we are doing something other than tracking
-boolean DEC_steppingEnabled = false; 	// DEC movement is always optional
+boolean RA_tracking_Enabled = true; // Always track - Currently unused
+boolean RA_steppingEnabled = true; 	// Non-default RA movement if we are doing something other than tracking
+boolean DEC_steppingEnabled = false;// DEC movement is always optional
 
 // ****************************** END GLOBALS ***************************************
 
@@ -184,12 +184,10 @@ void parseLX200(String thisCommand)
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
             Serial.print(getDMS(azimuth,3));
-            //Serial.print("123*56\'57#"); // Bogus placeholder FIXME
             mySerial.println(getDMS(azimuth,3));
             break;
           case 'D': // Declination
             Serial.print(getDMS(declination,2));
-            //Serial.print("+68*58\'17#"); // Bogus placeholder FIXME
             mySerial.println(getDMS(declination,2));
             break;
           case 'S': // Sidereal Time 
@@ -198,13 +196,10 @@ void parseLX200(String thisCommand)
             break;
           case 'A': // Elevation
             Serial.print(getDMS(elevation,2));
-            //Serial.print("+30*25\'40#");
             mySerial.println(getDMS(elevation,2));
-            //mySerial.println("sent el");
             break;
           case 'R': // right ascension
             Serial.print(getHMS(RA));
-            //Serial.print("09:57:04#");
             mySerial.println(getHMS(RA));
             break;
           //break;
@@ -346,83 +341,51 @@ void updateEqu()  {
   double cosHA;   	// cosine of the hour angle
   double haRPrime;	// hour angle, in radians  
   double sinA;		  // sin(azimuth)
-  //double haR;		  // hour angle, in radians
   double haD;		    // hour angle,  in degrees
   double haH;       // hour angle, hours
   double decD;		  // declination angle, in degrees
   double raD;		    // right ascension, degrees
 
-  // Test variables for debugging
-  /*
-  double latitude_test = 52.0;
-  double elevation_test = 19.334444;
-  double azimuth_test = 283.271111;
-  double LST_hours_test = 0.401389;
-  */
-  
-
   // convert all angles in radians before using trig functions
-  //latR = deg2rad(latitude_test);
   latR = deg2rad(latitude);
-  //azR = deg2rad(azimuth_test);
   azR = deg2rad(azimuth);
-  //altR = deg2rad(elevation_test);
   altR = deg2rad(elevation);
 
   // solve sin(dec) = sin(alt) * sin(lat) + cos(alt) * cos(lat) * cos(az)
   sinDec = sin(altR) * sin(latR) + cos(altR) * cos(latR) * cos(azR);
-  //mySerial.print("sinDec:\t");
-  //mySerial.println(sinDec, 4);
   
   // Declination, in radians
   decR = asin(sinDec);
   // Convert dec to degrees
   decD = rad2deg(decR);
-  //mySerial.print("Dec:\t");
-  //mySerial.println(decD, 4);
 
   // solve cos(hourAngle) = (sin(alt) - sin(lat)*sin(dec) )/(cos(lat) * cos(dec) )
   cosHA = (sin(altR) - sin(latR) * sinDec)/( cos(latR) * cos(decR) );
-  //mySerial.print("cosHA:\t");
-  //mySerial.println(cosHA, 4);
   
   // hour angle, unadjusted
   haRPrime = acos(cosHA);
+
   // find sin(azimuth) 
   sinA = sin(azR);
-  //mySerial.print("sinA:\t");
-  //mySerial.println(sinA, 4);
-  
   
   // If sin(A) is negative, true hour angle is H'
   // if positive, true hour angle is 360 - H'
   if (sinA < 0)	{
-	//haR = haRPrime;
 	haD = rad2deg(haRPrime);
   } else if (sinA > 0)	{
 	haD = 360.0 - rad2deg(haRPrime);
   }
 
-  //mySerial.print("haD:\t");
-  //mySerial.println(haD, 4);
-
   // convert H into hours by dividing by 15 (15 degrees per hour)
   haH = haD/15.0;
 
-  //mySerial.print("haH:\t");
-  //mySerial.println(haH, 4);
-  
   // Now find the right ascension
   // LST - H
-  //raD = LST_hours_test - haH;
   raD = LST_hours - haH;
   // If the result is negative, add 24 (hours)
   if (raD < 0)
     raD += 24;
-  
-  //mySerial.print("raD:\t");
-  //mySerial.println(raD, 4);
-  
+    
   // Update the global variables
   RA = raD;
   declination = decD;
@@ -442,8 +405,7 @@ void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    //mySerial.print("rcv: ");
-    //mySerial.println(inChar);
+
     // Is it the Ack character?
    if (inChar == 6) 
   { 
@@ -454,8 +416,7 @@ void serialEvent() {
   } 
     // add it to the inputString:
     inputString += inChar;
-    //mySerial.println("Something");
-    //mySerial.println(inChar);
+
     if (inputString.startsWith(":"))   
     {
       if (inputString.endsWith("#"))   
