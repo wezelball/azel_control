@@ -43,17 +43,28 @@ bool azMovingCCW = false;   // az rotating anti-clockwise
 bool azCWLimit = false;     // at the CW limit 
 bool azCCWLimit = false;    // at the CW limit 
 
+// Stepper motion flags
 bool elMovingUp = false;    // elevation rotating upwards
 bool elMovingDown = false;  // elevation rotating downwards
 bool elDownLimit = false;   // at the down limit
 bool elUpLimit = false;     // at the up limit
+bool movingX = false;       // azimuth axis is moving
+bool movingY = false;       // elevation axis is moving
+bool stoppingX = false;     // azimuth axis is deceling to stop
+bool stoppingY = false;     // elevation axis is deceling to stop
 
+bool slewingX = false;      // TODO: get rid of this if possible, too specific
+bool slewingY = false;      // TODO: get rid of this if possible, too specific
+bool stoppingXSlew = false; // TODO: get rid of this if possible, too specific 
+bool stoppingYSlew = false; // TODO: get rid of this if possible, too specific 
+
+// Set this from CdC
 float UTCOffset = -4.0;     // your timezone relative to UTC
+double longitude =-77.924;  // your longtitude.
+double latitude =37.791;    // your latitude.
 
 double M,Y,D,MN,H,S;        // current UTC time
 double A,B;
-double longitude =-77.924;  // your longtitude.
-double latitude =37.791;    // your latitude.
 double LST_degrees;         // variable to store local side real time(LST) in degrees.
 double LST_hours;           // variable to store local side real time(LST) in decimal hours.
 double azimuth;             // current azimuth - use same reference as CdC
@@ -109,6 +120,7 @@ void parseLX200(String thisCommand)
  switch (inputString.charAt(0)) { // If this isnt 58 (:), something is wrong!
      case ':':
       switch (inputString.charAt(1)) {
+        // ***************** S **********************
         case 'S':// Set Stuff
           switch (inputString.charAt(2)) {
               case 'w': // Slew rate
@@ -117,6 +129,9 @@ void parseLX200(String thisCommand)
               break;
           }// end :Sw
           break; //Case S Char2
+        // ***************** S **********************
+        //
+        // ***************** R **********************
         case 'R':// Rate Control - R
           switch (inputString.charAt(2)) {
           case 'C':
@@ -141,6 +156,9 @@ void parseLX200(String thisCommand)
           break;
       } // CaseR Char2
         break; // End Rate Control
+        // ***************** R **********************
+        //
+        // ***************** M **********************
         case 'M':  // Movement Control - M
           switch (inputString.charAt(2)) {
           case 'w':
@@ -169,17 +187,46 @@ void parseLX200(String thisCommand)
           break;
           } // CaseM Char2
         break; // End movemont control
+      // ***************** M **********************
+      //
+      // ***************** m **********************
+      // Stepper test commands
+      // remove after debugging
+      case 'm':
+        switch (inputString.charAt(2)) {
+          case 'u': // slew elevation up 1000 steps
+            // slew command
+            mySerial.println("Slew UP");
+            break;
+          case 'd': // slew elevation down 1000 steps
+            mySerial.println("Slew DOWN");
+            break;
+          case 'l': // slew azimuth CCW (left) 1000 steps
+            mySerial.println("Slew left");
+            break;
+          case 'r': // slew azimuth CW (right) 1000 steps
+            mySerial.println("Slew right");
+            break;
+        } // Case m Char2
+        break;  // Case m
+      // ***************** Q **********************
       case 'Q': // Stop Moving - Q
         RA_steppingEnabled = 1; // We still move RA 
         //RA_StepInterval = initialRA_StepInterval; // We just set the speed so that stars should be "stationary" relative to everything else
         DEC_steppingEnabled = 0;
         mySerial.println ("Stepping halted");
         break;
+      // ***************** Q **********************
+      //
+      // ***************** X **********************
       case 'X': // Stop TOTALLY
-  RA_steppingEnabled = 0; // Stop moving, for bench testing
-  DEC_steppingEnabled = 0;
-  mySerial.println ("Stepping totally halted");
-  break;
+        RA_steppingEnabled = 0; // Stop moving, for bench testing
+        DEC_steppingEnabled = 0;
+        mySerial.println ("Stepping totally halted");
+        break;
+      // ***************** X **********************
+      //
+      // ***************** G **********************
       case 'G': // Get Data
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
@@ -212,6 +259,7 @@ void parseLX200(String thisCommand)
             } // CaseGV Char3       
           break; // CaseG
         } // CaseG Char2
+        // ***************** G **********************
        break; // FC Break
       } // Ending First Character Loop
     } // Ending Init Character Loop
@@ -400,6 +448,140 @@ double deg2rad(double deg) {
 double rad2deg(double rad)  {
   return (rad * 57296 / 1000);
 }
+
+// *************** STEPPER MOTION COMMANDS START************************
+
+// Moves relative
+// I need to put this code in the 
+// loop so it doesnt block while running
+void relativeMove(int axis, long steps)  {
+  if (axis == 0)          // azimuth axis
+  { 
+    if (steps > 0)
+      azMovingCW = true;        // rotating clockwise
+    else if (steps < 0)
+      azMovingCCW = true;       // rotating anti-clockwise
+
+    // Don't run the motor against a hard stop
+    if ((azMovingCW && !azCWLimit) || (azMovingCCW && !azCCWLimit)) {
+      stepperX.enableOutputs();
+      movingX = true;
+      stepperX.move(steps);
+    }
+    
+  }
+  else if (axis == 1)     // elevation axis
+  {
+    if (steps > 0)
+      elMovingUp = true;        // rotating up
+    else if (steps < 0)
+      elMovingDown = true;      // rotating down
+
+    // Don't run the motor against a hard stop
+    if ((elMovingDown && !elDownLimit) || (elMovingUp && !elUpLimit)) {
+      stepperY.enableOutputs();
+      movingY = true;
+      stepperY.move(steps);
+    }
+
+  }
+  
+  mySerial.println("Relative move");
+}
+
+// Set maximum
+void setMaxSpeed(int axis, int speed)  {
+  
+  if (axis == 0)
+    stepperX.setMaxSpeed(speed);  
+  else if (axis == 1) 
+    stepperY.setMaxSpeed(speed);  
+
+  mySerial.println("Set max speed");
+}
+
+// Sets desired speed for runSpeed()
+void setSpeed(int axis, int speed)  {
+  if (axis == 0)
+    stepperX.setSpeed((float)speed);
+  else if (axis == 1) 
+    stepperX.setSpeed((float)speed);
+    
+  mySerial.println("Set speed");;
+}
+
+void runSpeed(int axis)  {     // must add hard limit checks 
+  if (axis == 0)
+    slewingX = true;
+  else if (axis == 1)
+    slewingY = true;
+
+  mySerial.println("Run speed");
+}
+
+void stop(int axis)  {
+  if (axis == 0)
+  {
+    stepperX.stop();
+    stoppingXSlew = true;
+    slewingX = false;
+  } 
+  else if (axis == 1)
+  {
+    stepperY.stop();
+    stoppingYSlew = true;
+    slewingY = false;
+  }
+
+  mySerial.println("Stop");
+}
+
+int setAccel(int axis, int accel)  {
+  if (axis == 0)
+    stepperX.setAcceleration((float)accel);
+  else if (axis == 1)
+    stepperY.setAcceleration((float)accel);
+    
+  mySerial.println("Set accel");
+}
+
+long getCurPosition(int axis){
+  if (axis == 0)
+    return stepperX.currentPosition();
+  else if (axis == 1)
+    return stepperY.currentPosition();
+}
+
+void setCurPosition(int axis, long position) {   // add axis as an argument
+  if (axis == 0)
+    stepperX.setCurrentPosition(position);
+  else if (axis == 1)
+    stepperY.setCurrentPosition(position);
+    
+  mySerial.println("set position");
+}
+
+void moveToAbsolute(int axis, long absolute) {   // must add hard limits check here
+  if (axis == 0)
+  {
+    stepperX.moveTo(absolute);
+    movingX = true;
+  }
+  else if (axis == 1)
+  {
+    stepperY.moveTo(absolute);
+    movingY = true;
+  }
+  
+  // moving = true;
+  
+  mySerial.println("move to abs");
+}
+
+
+
+
+// *************** STEPPER MOTION COMMANDS END  ************************
 
 void serialEvent() {
   while (Serial.available()) {
