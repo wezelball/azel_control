@@ -1,5 +1,6 @@
 
 
+
 // Include Arduino Wire library for I2C
 #include <Wire.h>
 // Date and time functions using a DS3231 RTC connected via I2C and Wire lib
@@ -90,19 +91,36 @@ boolean RA_tracking_Enabled = true; // Always track - Currently unused
 boolean RA_steppingEnabled = true; 	// Non-default RA movement if we are doing something other than tracking
 boolean DEC_steppingEnabled = false;// DEC movement is always optional
 
+// This is just for debugging - send data to mySerial every 1000 msec
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+const unsigned long period = 1000;  //the value is a number of milliseconds
+
+
 // ****************************** END GLOBALS ***************************************
 
 
 // encoder = 0    azimuth
 // encoder = 1    elavation
 long getEncoderPosition(int encoder) {
+  int i;
+   long az;
+   long el;
+   String az_str;
+   String el_str;
+  
   // Write a command to the Slave
   Wire.beginTransmission(SLAVE_ADDR);
-  Wire.write((byte)encoder);
+  Wire.write((byte)0);
   Wire.endTransmission();
 
   // Read response from Slave
   // Read back ANSWERSIZE characters
+  // This will return a string with az and el values 
+  // concantenated, and separated by a colon
+  // "123456:-654321"
+  // Has been tested with 6 digits each, one of the 
+  // values was negative
   Wire.requestFrom(SLAVE_ADDR,ANSWERSIZE);
   
   // Add characters to string
@@ -113,13 +131,25 @@ long getEncoderPosition(int encoder) {
       response += b;
   }
 
-  return response.toInt();
+  // Parse out the separate values
+  i = response.indexOf(':');
+  az_str = response.substring(0, i) + '\0';
+  el_str = response.substring(i+1) + '\0';
+
+  az = az_str.toInt();
+  el = el_str.toInt();
+  
+  if(encoder == 0)
+    return az;
+
+  if(encoder == 1)
+    return el;
 }
 
 void parseLX200(String thisCommand)
 {
  //mySerial.println(thisCommand);
- mySerial.println(inputString);
+ //mySerial.println(inputString);
  switch (inputString.charAt(0)) { // If this isnt 58 (:), something is wrong!
      case ':':
       switch (inputString.charAt(1)) {
@@ -166,19 +196,19 @@ void parseLX200(String thisCommand)
           switch (inputString.charAt(2)) {
           case 'w':
             relativeMove(0, 1000);
-            mySerial.println("Move RA forwards (west)");
+            //mySerial.println("Move RA forwards (west)");
           break;
           case 'e':
             relativeMove(0, -1000);
-            mySerial.println("Move RA backwards (east) ");
+            //mySerial.println("Move RA backwards (east) ");
           break;
           case 'n':
             relativeMove(1, 1000);
-            mySerial.println("Move DEC forwards (north)");
+            //mySerial.println("Move DEC forwards (north)");
           break;
           case 's':
             relativeMove(1, -1000);
-            mySerial.println("Move DEC backwards (south)");
+            //mySerial.println("Move DEC backwards (south)");
           break;
           } // CaseM Char2
         break; // End movemont control
@@ -191,19 +221,19 @@ void parseLX200(String thisCommand)
         switch (inputString.charAt(2)) {
           case 'u': // slew elevation up 1000 steps
             relativeMove(1, 1000);
-            mySerial.println("Slew UP");
+            //mySerial.println("Slew UP");
             break;
           case 'd': // slew elevation down 1000 steps
             relativeMove(1, -1000);
-            mySerial.println("Slew DOWN");
+            //mySerial.println("Slew DOWN");
             break;
           case 'l': // slew azimuth CCW (left) 1000 steps
             relativeMove(0, -1000);
-            mySerial.println("Slew CCW");
+            //mySerial.println("Slew CCW");
             break;
           case 'r': // slew azimuth CW (right) 1000 steps
             relativeMove(0, 1000);
-            mySerial.println("Slew CW");
+            //mySerial.println("Slew CW");
             break;
         } // Case m Char2
         break;  // Case m
@@ -229,23 +259,23 @@ void parseLX200(String thisCommand)
         switch (inputString.charAt(2)) {
           case 'Z': // Azimuth
             Serial.print(getDMS(azimuth,3));
-            mySerial.println(getDMS(azimuth,3));
+            //mySerial.println(getDMS(azimuth,3));
             break;
           case 'D': // Declination
             Serial.print(getDMS(declination,2));
-            mySerial.println(getDMS(declination,2));
+            //mySerial.println(getDMS(declination,2));
             break;
           case 'S': // Sidereal Time 
             Serial.print(getHMS(LST_hours));
-            mySerial.println(getHMS(LST_hours));
+            //mySerial.println(getHMS(LST_hours));
             break;
           case 'A': // Elevation
             Serial.print(getDMS(elevation,2));
-            mySerial.println(getDMS(elevation,2));
+            //mySerial.println(getDMS(elevation,2));
             break;
           case 'R': // right ascension
             Serial.print(getHMS(RA));
-            mySerial.println(getHMS(RA));
+            //mySerial.println(getHMS(RA));
             break;
           //break;
           case 'V':
@@ -755,6 +785,9 @@ void setup() {
   setSpeed(0, 2000);        // azimuth
   setSpeed(1, 2000);        // elevation
 
+  // For debugging - print data once a second
+  startMillis = millis();  //initial start time
+
   mySerial.println("Setup complete");
 }
  
@@ -770,6 +803,16 @@ void loop() {
   updateElevation();
   updateEqu();
 
+  // For debugging - print once per second
+  currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+  if (currentMillis - startMillis >= period)  //test whether the period has elapsed
+  {
+    mySerial.println(azEncoderCount);
+    //mySerial.println(elEncoderCount);
+    
+    startMillis = currentMillis;  //IMPORTANT to save the start time
+  }
+  
 
   // ******************************* Motion ***********************************
   

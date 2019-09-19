@@ -9,7 +9,7 @@
 #define SLAVE_ADDR 9
  
 // Define Slave answer size
-#define ANSWERSIZE 8
+#define ANSWERSIZE 16
 
 // Set up temporary software serial
 SoftwareSerial mySerial(11, 12); // RX, TX - debug
@@ -19,8 +19,10 @@ Encoder azEnc(2,4);
 Encoder elEnc(3,5);
 
 long position;    // encoder position
-char str[8];      // string value of position
+char str[17];     // string value of position
 String answer;    // reply to master
+char az[8];       // the azimuth encoder string
+char el[8];       // the elevation encoder string
 int command;      // command from master
  
 void setup() {
@@ -67,17 +69,18 @@ void requestEvent() {
  
 void loop() {
 
-  // What command did master send?
+  // Only command 0 allowed
   if(command == 0) {
     position = azEnc.read();
-    ltoa(position,str,10);
+    ltoa(position, az, 10);
+    position = elEnc.read();
+    ltoa(position,el,10);
+    sprintf(str, "%s:%s",az,el);
+    
+    //str = position;
     answer = str;
   }
-  else if (command == 1) {
-    position = elEnc.read();
-    ltoa(position,str,10);
-    answer = str;
-  } else {
+   else {
     answer = "999999";
   }
 
