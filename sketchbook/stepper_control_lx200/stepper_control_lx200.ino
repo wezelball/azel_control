@@ -165,27 +165,19 @@ void parseLX200(String thisCommand)
         case 'M':  // Movement Control - M
           switch (inputString.charAt(2)) {
           case 'w':
-            RA_step_direction = 1;
-            RA_steppingEnabled = true;
-            // We really just need to speed things up
-            //RA_StepInterval = (initialRA_StepInterval /4);
+            relativeMove(0, 1000);
             mySerial.println("Move RA forwards (west)");
           break;
           case 'e':
-            RA_step_direction = 1;
-            RA_steppingEnabled = true;
-            // We really just need to slow things down
-            //RA_StepInterval = (initialRA_StepInterval *4);
+            relativeMove(0, -1000);
             mySerial.println("Move RA backwards (east) ");
           break;
           case 'n':
-            DEC_step_direction = 0;
-            DEC_steppingEnabled = true;
+            relativeMove(1, 1000);
             mySerial.println("Move DEC forwards (north)");
           break;
           case 's':
-            DEC_step_direction = 1;
-            DEC_steppingEnabled = true;
+            relativeMove(1, -1000);
             mySerial.println("Move DEC backwards (south)");
           break;
           } // CaseM Char2
