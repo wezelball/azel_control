@@ -58,6 +58,9 @@ bool slewingY = false;      // TODO: get rid of this if possible, too specific
 bool stoppingXSlew = false; // TODO: get rid of this if possible, too specific 
 bool stoppingYSlew = false; // TODO: get rid of this if possible, too specific 
 
+bool stepperXRun = false; // flag is passed to the Timer1 ISR
+bool stepperYRun = false; // flag is passed to the Timer1 ISR
+
 // Set this from CdC
 float UTCOffset = -4.0;     // your timezone relative to UTC
 double longitude =-77.924;  // your longtitude.
@@ -196,19 +199,19 @@ void parseLX200(String thisCommand)
         switch (inputString.charAt(2)) {
           case 'u': // slew elevation up 1000 steps
             relativeMove(1, 1000);
-            //mySerial.println("Slew UP");
+            mySerial.println("Slew UP");
             break;
           case 'd': // slew elevation down 1000 steps
             relativeMove(1, -1000);
-            //mySerial.println("Slew DOWN");
+            mySerial.println("Slew DOWN");
             break;
           case 'l': // slew azimuth CCW (left) 1000 steps
             relativeMove(0, -1000);
-            //mySerial.println("Slew CCW");
+            mySerial.println("Slew CCW");
             break;
           case 'r': // slew azimuth CW (right) 1000 steps
             relativeMove(0, 1000);
-            //mySerial.println("Slew CW");
+            mySerial.println("Slew CW");
             break;
         } // Case m Char2
         break;  // Case m
@@ -499,7 +502,7 @@ void setMaxSpeed(int axis, int speed)  {
   else if (axis == 1) 
     stepperY.setMaxSpeed(speed);  
 
-  mySerial.println("Set max speed");
+  //mySerial.println("Set max speed");
 }
 
 // Sets desired speed for runSpeed()
@@ -509,7 +512,7 @@ void setSpeed(int axis, int speed)  {
   else if (axis == 1) 
     stepperX.setSpeed((float)speed);
     
-  mySerial.println("Set speed");;
+  //mySerial.println("Set speed");;
 }
 
 void runSpeed(int axis)  {     // must add hard limit checks 
@@ -518,7 +521,7 @@ void runSpeed(int axis)  {     // must add hard limit checks
   else if (axis == 1)
     slewingY = true;
 
-  mySerial.println("Run speed");
+  //mySerial.println("Run speed");
 }
 
 void stop(int axis)  {
@@ -535,7 +538,7 @@ void stop(int axis)  {
     slewingY = false;
   }
 
-  mySerial.println("Stop");
+  //mySerial.println("Stop");
 }
 
 int setAccel(int axis, int accel)  {
@@ -544,7 +547,7 @@ int setAccel(int axis, int accel)  {
   else if (axis == 1)
     stepperY.setAcceleration((float)accel);
     
-  mySerial.println("Set accel");
+  //mySerial.println("Set accel");
 }
 
 long getCurPosition(int axis){
@@ -560,7 +563,7 @@ void setCurPosition(int axis, long position) {   // add axis as an argument
   else if (axis == 1)
     stepperY.setCurrentPosition(position);
     
-  mySerial.println("set position");
+  //mySerial.println("set position");
 }
 
 void moveToAbsolute(int axis, long absolute) {   // must add hard limits check here
@@ -577,7 +580,7 @@ void moveToAbsolute(int axis, long absolute) {   // must add hard limits check h
   
   // moving = true;
   
-  mySerial.println("move to abs");
+  //mySerial.println("move to abs");
 }
 
 
@@ -673,8 +676,39 @@ int getLimit(int axis, int limit) {
   }
 }
 
+// Timer1 interrupt at 2kHz services stepper motion 
+ISR(TIMER1_COMPA_vect){
+  if(stepperXRun) {
+    stepperX.run();
+    //Serial.println('a');
+  }
+    
+  if(stepperYRun) {
+    stepperY.run();
+    //Serial.println('e');
+  }
+}
+
 void setup() {
  
+  // Setup timer1 to interrupt at 2 kHz
+  cli();//stop interrupts
+  
+  TCCR1A = 0;// set entire TCCR2A register to 0
+  TCCR1B = 0;// same for TCCR2B
+  TCNT1  = 0;//initialize counter value to 0
+  // set compare match register for 2khz increments
+  //OCR1A = 62;// = (16*10^6) / (2000*64) - 1 (must be <65536)
+  OCR1A = 15;// = (16*10^6) / (2000*64) - 1 (must be <65536)
+  // turn on CTC mode
+  TCCR1B |= (1 << WGM12);
+  // Set CS01 and CS00 bits for 64 prescaler
+  TCCR1B |= (1 << CS12) | (1 << CS10);   
+  // enable timer compare interrupt
+  TIMSK1 |= (1 << OCIE1A);
+  
+  sei();//allow interrupts
+  
   // Initialize I2C communications as Master
   Wire.begin();
   
@@ -722,41 +756,47 @@ void setup() {
   rtc.adjust(UTCTime);
 
   // Set up encoder max speeds and accels
-  setMaxSpeed(0, 1000);     // azimuth
-  setMaxSpeed(1, 1000);     // elevation
-  setAccel(0, 500);         // azimuth
-  setAccel(1, 500);         // elevation
-  setSpeed(0, 1000);        // azimuth
-  setSpeed(1, 1000);        // elevation
+  setMaxSpeed(0, 2000);     // azimuth
+  setMaxSpeed(1, 2000);     // elevation
+  setAccel(0, 1000);         // azimuth
+  setAccel(1, 1000);         // elevation
+  setSpeed(0, 2000);        // azimuth
+  setSpeed(1, 2000);        // elevation
+
+  mySerial.println("Setup complete");
 }
  
 void loop() {
 
   // Update the RTC
-  //DateTime now = rtc.now();
+  DateTime now = rtc.now();
 
   // Update LST
-  //LST_time();
-  //updateEncoders();
-  //updateAzimuth();
-  //updateElevation();
-  //updateEqu();
+  LST_time();
+  updateEncoders();
+  updateAzimuth();
+  updateElevation();
+  updateEqu();
 
 
   // ******************************* Motion ***********************************
   
   // Relative move - az
   if (movingX && (abs(stepperX.distanceToGo())) > 0) {
-    stepperX.run();
+    //stepperX.run();
+    stepperXRun = true;
   } else  {
     movingX = false;
+    stepperXRun = false;
   }
   
   // Relative move - el
   if (movingY && (abs(stepperY.distanceToGo())) > 0) {
-    stepperY.run();
+    //stepperY.run();
+    stepperYRun = true;
   } else  {
     movingY = false;
+    stepperYRun = false;
   }
 
 
