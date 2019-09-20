@@ -15,8 +15,8 @@
 SoftwareSerial mySerial(11, 12); // RX, TX - debug
 
 // Instantiate the encoders
-Encoder azEnc(2,4);
-Encoder elEnc(3,5);
+Encoder azEnc(3,5);
+Encoder elEnc(2,4);
 
 long position;    // encoder position
 char str[17];     // string value of position

@@ -80,8 +80,10 @@ double declination;			    // current declination
 
 long azEncoderCount;        // the current azimuth encoder count
 long elEncoderCount;        // the current elevation encoder count
-double azEncRes = 1.667e-5; // azimuth encoder resolution in degrees per pulse
-double elEncRes = 1.667e-5; // elevation encoder resolution in degrees per pulse
+// azimuth and encoder resolutions in degrees per pulse
+// assume 10:1 gear ratio and 600 PPR encoder
+double azEncRes = 0.06;   
+double elEncRes = 0.06;
 
 int RA_step_direction = 1;
 int DEC_step_direction = 1;
