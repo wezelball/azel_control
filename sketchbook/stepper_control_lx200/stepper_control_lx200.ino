@@ -469,7 +469,22 @@ void updateEqu()  {
   declination = decD;
   
 }
-
+// Calculate the RA traking speed
+double getAzSpeed()  {
+  double latR;  // latitude in radians
+  double zR;    // zenith distance in radians
+  double azR;   // azimuth in radians
+  double pi = 3.14159265; // needs no introduction
+  double azVelocity;
+  
+  // Convert angles to radians
+  latR = deg2rad(latitude);
+  azR = deg2rad(azimuth);
+  zR = deg2rad(pi/2 - elevation);
+  
+  azVelocity = rad2deg((sin(latR)*sin(zR) - cos(latR)*cos(zR)*cos(azR))/sin(zR));
+  return azVelocity;
+}
 
 double deg2rad(double deg) {
   return (deg * 1000 / 57296);
@@ -809,8 +824,7 @@ void loop() {
   currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
   if (currentMillis - startMillis >= period)  //test whether the period has elapsed
   {
-    mySerial.println(azEncoderCount);
-    //mySerial.println(elEncoderCount);
+    mySerial.println(getAzSpeed(), 4);
     
     startMillis = currentMillis;  //IMPORTANT to save the start time
   }
