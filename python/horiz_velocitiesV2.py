@@ -5,15 +5,31 @@ Created on Mon Sep 16 09:42:27 2019
 
 @author: dcohen
 """
-
+import sys
 import ephem
 import math 
 
+# Convert a string value of angle to decimal degrees
+# Accepts the following formats:
+# 1. A decimal degree value, like 39.50
+# 2. A space separate value, like dd mm ss.ss or dd mm.m
+# 3. A colon separated value, like dd:mm:ss.s
+# Returns
+# Decimal value of angle in degrees
+def dms2dec(str_angle):
+    try:
+        value = float(str_angle)
+    except ValueError as error:
+        if len(str_angle.split(' ')) == 3:
+            vlist =  str_angle.split(' ')
+            value = float(vlist[0]) + (float(vlist[1])/60.0) + (float(vlist[1])/3600.0)
+        elif len(str_angle.split(':')) == 3:
+            print("Colon separated value")
+            vlist =  str_angle.split(':')
+            value = float(vlist[0]) + (float(vlist[1])/60.0) + (float(vlist[1])/3600.0)
+    finally:
+        return value
 
-#def getCurrentLST():
-#    gumSpring.date = ephem.now()
-#    print("Now: %s: " % gumSpring.date)
-#    return (gumSpring.sidereal_time())
 
 
 # This is a translation from Starlink fortran library
@@ -34,6 +50,12 @@ print("")
 latitude = 37.79        # degrees
 azimuth = 186.0         # degrees
 elevation = 28.0        # degrees
+
+azString = input("Azimuth: ")
+elString = input("Elevation: ")
+
+azimuth = dms2dec(azString)
+elevation = dms2dec(elString)
 
 # convert to radians
 azR = math.radians(azimuth)
