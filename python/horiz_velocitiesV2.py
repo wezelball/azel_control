@@ -161,3 +161,8 @@ print("Azimuth velocity: %f degrees/sec" %  azV)
 print("Elevation velocity: %f degrees/sec" % elV)
 print("Azimuth velocity: %f arcsec/sec" %  (3600.0 * azV))
 print("Elevation velocity: %f arcsec/sec" % (3600.0 * elV))
+
+# Calculate the stepping rate
+# There are 400 steps per motor revolution, and 10 motor revolutions
+# per gearbox revolution, or 4000 steps per gearbox revolution
+# The chain gear ratios are as follows
