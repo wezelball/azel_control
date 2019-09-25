@@ -166,3 +166,28 @@ print("Elevation velocity: %f arcsec/sec" % (3600.0 * elV))
 # There are 400 steps per motor revolution, and 10 motor revolutions
 # per gearbox revolution, or 4000 steps per gearbox revolution
 # The chain gear ratios are as follows
+#
+# For azimuth, the 18t/13t gear reduction reduces the PPR to 
+# 4000 * (13/18) = 2889 PPR at the worm gear
+# 
+# For elevation, the 13t/18t gear reduction increases the PPR to 
+# 4000 * (18/13) = 5538 PPR at the worm gear
+#
+# The worm ratio is simply the number of teeth in the worm wheel,
+# for a single-start worm.  The worm wheel is 50-teeth, so that
+# multiplies the PPR as follows:
+#
+# Azimuth: 2889 PPR at worm gear * 50 = 144444.4444 PPR
+# Elevation: 5538 PPR at worm gear * 50 = 276923.076923 PPR
+#
+# Divide both sides by 360 to get the pulses per degree
+#
+# Azimuth = 144450/360 = 401.234567901 pulses per degree
+# Elevation = 276900/360 = 769.230769231 pulses per degree
+# 
+# Multiply the velocities in degrees/second * pulses/degree = pulses/second
+azVelPPS = 400 * 10 * (13.0/18.0) * 50 / 360 * azV
+elVelPPS = 400 * 10 * (18.0/13.0) * 50 / 360 * elV
+
+print("Azimuth velocity: %f pulses/sec" %  azVelPPS)
+print("Elevation velocity: %f pulses/sec" % elVelPPS)
