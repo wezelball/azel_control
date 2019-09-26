@@ -35,8 +35,8 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
 // Hard limits
 int azLimitCW = 2;
 int azLimitCCW = 4;
-int elLimitUp = 3;
-int elLimitDown = 10;
+int elLimitUp = 10;
+int elLimitDown = 3;
 
 // Hard limit flags
 bool azMovingCW = false;    // az rotating clockwise 
@@ -103,7 +103,7 @@ const unsigned long period = 1000;  //the value is a number of milliseconds
 
 
 // encoder = 0    azimuth
-// encoder = 1    elavation
+// encoder = 1    elevation
 long getEncoderPosition(int encoder) {
   int i;
    long az;
@@ -159,10 +159,18 @@ void parseLX200(String thisCommand)
         case 'S':// Set Stuff
           switch (inputString.charAt(2)) {
               case 'w': // Slew rate
-                Serial.println(1);
+                //Serial.println(1);
                 mySerial.println("set max slew");
               break;
-          }// end :Sw
+              case 'r': // set target RA
+                mySerial.print("Target RA\t");
+                mySerial.println(inputString.substring(3,11));
+              break;
+              case 'd': 
+                mySerial.print("Target Dec\t");
+                mySerial.println(inputString.substring(3,12));
+              break;
+          }// end :S
           break; //Case S Char2
         // ***************** S **********************
         //
@@ -824,7 +832,7 @@ void loop() {
   currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
   if (currentMillis - startMillis >= period)  //test whether the period has elapsed
   {
-    mySerial.println(getAzSpeed(), 4);
+    //mySerial.println(getAzSpeed(), 4);
     
     startMillis = currentMillis;  //IMPORTANT to save the start time
   }
