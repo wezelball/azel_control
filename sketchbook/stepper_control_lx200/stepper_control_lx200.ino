@@ -163,12 +163,16 @@ void parseLX200(String thisCommand)
                 mySerial.println("set max slew");
               break;
               case 'r': // set target RA
-                mySerial.print("Target RA\t");
-                mySerial.println(inputString.substring(3,11));
+                //mySerial.print("Target RA\t");
+                //mySerial.println(inputString.substring(3,11));
+                mySerial.println(getDDD(inputString.substring(3,11),1));
+                //getDDD(inputString.substring(3,11),1);
               break;
               case 'd': 
-                mySerial.print("Target Dec\t");
-                mySerial.println(inputString.substring(3,12));
+                //mySerial.print("Target Dec\t");
+                //mySerial.println(inputString.substring(3,12));
+                mySerial.println(getDDD(inputString.substring(3,12),0));
+                //getDDD(inputString.substring(3,12),0);
               break;
           }// end :S
           break; //Case S Char2
@@ -396,6 +400,61 @@ String pad_int(int value, int places) {
   result = data;
   return result;
     
+}
+
+// Converts a string value in the form of either 
+// sDD*MM.SS or HH:MM:SS
+// to a floating point (or double?) value
+// s is the sign
+// The prefix and suffix from CdC must be 
+// stripped off
+// type = 0 for angle format sDD*MM.SS
+// type = 1 for hour format HH:MM:SS
+float getDDD(String value, int type) {
+  int angle;
+  int h;      // hour
+  int m;      // minute
+  int s;      // second
+  String h_s, a_s, m_s, s_s, sign;  // hours, minutes, seconds,as string
+
+  mySerial.println(value);
+  
+  if (type == 0)  {
+    sign = value.substring(0,1);
+    a_s = value.substring(1,3);
+    angle = a_s.toInt();
+    m_s = value.substring(4,6);
+    m = m_s.toInt();
+    s_s = value.substring(7,9);
+    s = s_s.toInt();
+    
+    //mySerial.println(sign);
+    //mySerial.println(angle);
+    //mySerial.println(m);
+    //mySerial.println(s);
+    
+    if (sign == "+") {
+      //mySerial.print("+");
+      return(float(angle) + float(m/60.0) + float(s/3600.0));
+    } else if (sign == '-') {
+      mySerial.print("-");
+      return(-1 * (float(angle) + float(m/60.0) + float(s/3600.0)));
+    }
+  }
+  else if (type == 1) {
+    h_s = value.substring(0,2);
+    h = h_s.toInt();
+    m_s = value.substring(3,5);
+    m = m_s.toInt();
+    s_s = value.substring(6,8);
+    s = s_s.toInt();
+    /*
+    mySerial.println(h);
+    mySerial.println(m);
+    mySerial.println(s);
+    */
+    return(float(h) + float(m/60.0) + float(s/3600.0));
+  }
 }
 
 void updateAzimuth() {
