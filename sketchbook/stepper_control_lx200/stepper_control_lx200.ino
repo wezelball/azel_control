@@ -168,7 +168,7 @@ void parseLX200(String thisCommand)
                 mySerial.println(getDDD(inputString.substring(3,11),1));
                 //getDDD(inputString.substring(3,11),1);
               break;
-              case 'd': 
+              case 'd': // set target Dec
                 //mySerial.print("Target Dec\t");
                 //mySerial.println(inputString.substring(3,12));
                 mySerial.println(getDDD(inputString.substring(3,12),0));
