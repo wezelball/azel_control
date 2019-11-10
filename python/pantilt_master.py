@@ -9,8 +9,9 @@ import os
 
 bus = smbus.SMBus(1)
 
-# I2C address of Arduino Slave
-i2c_address = 0x05
+# I2C address of Arduino Slaves
+steppers_i2c_address = 0x04
+encoders_i2c_address = 0x05
 i2c_cmd = 0x01
 
 def ConvertStringToBytes(src):
@@ -20,26 +21,29 @@ def ConvertStringToBytes(src):
     return converted
 
 def ConvertBytesToString(src):
-	result = ""
-	for i in src:
-		result += chr(i)
+    result = ""
+    for i in src:
+	result += chr(i)
 		
-	return result
+    return result
 		
 def getEncoders():
-	data = '0'	# send one byte
-	bytesToSend = ConvertStringToBytes(data)
-	bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
+    data = '0'	# send one byte
+    bytesToSend = ConvertStringToBytes(data)
+    bus.write_i2c_block_data(encoders_i2c_address, i2c_cmd, bytesToSend)
 	
-	replyBytes = bus.read_i2c_block_data(i2c_address, 0, 16)
-	reply = ConvertBytesToString(replyBytes)
+    replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
+    reply = ConvertBytesToString(replyBytes)
 	
-	return reply
+    return reply
 
+def sendStepperCommand(cmd):
+    bytesToSend = ConvertStringToBytes(cmd)
+    bus.write_i2c_block_data(steppers_i2c_address, i2c_cmd, bytesToSend)
+	
+    replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 16)
+    reply = ConvertBytesToString(replyBytes)
 
-# send welcome message at start-up
-#bytesToSend = ConvertStringToBytes("Hello Uno")
-#bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
 
 # loop to send message
 exit = False
@@ -47,9 +51,17 @@ while not exit:
     r = raw_input('Enter something, "q" to quit: ')
     print(r)
     
-    print(getEncoders())
+    if r == '0':
+	print(getEncoders())
+		
+    if r == '1':
+	print(sendStepperCommand("1"))
+		
+    if r == '2':
+	print(sendStepperCommand("2"))
     
-    
+    if r == '3':
+	print(sendStepperCommand("3"))
     
     if r=='q':
         exit=True
