@@ -30,7 +30,9 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
 long position;
 char str[17];
 String answer;
-String command;
+String rawCommand;
+int command;    // command from RPi
+long param;     // command parameter from RPi
 
 // Hard limits
 int azLimitCW = 2;
@@ -63,6 +65,39 @@ bool stepperXRun = false; // flag is passed to the Timer1 ISR
 bool stepperYRun = false; // flag is passed to the Timer1 ISR
 
 // ****************************** END GLOBALS ****************************************
+
+// **************************** BEGIN UTILITY FUNCTIONS ******************************
+
+// Accepts full command string from RPi and returns command number as integer
+int parseCommand(String cmd) {
+  int i;
+  String cmdString;
+
+  i = cmd.indexOf(':');
+  cmdString = cmd.substring(0, i) + '\0';
+
+  Serial.print("command: ");
+  Serial.println(cmdString.toInt());
+  
+  return (int)cmdString.toInt();
+}
+
+// Accepts full command string from RPi and returns parameter as long
+long parseParameter(String cmd) {
+  int i;
+  String paramString;  
+
+  i = cmd.indexOf(':');
+  paramString = cmd.substring(i+1) + '\0';
+
+  Serial.print("param: ");
+  Serial.println(paramString.toInt());
+
+  return paramString.toInt();
+}
+
+
+// ***************************** END UTILITY FUNCTIONS *******************************
 
 
 // *********************** BEGIN STEPPER MOTION COMMANDS *****************************
@@ -287,16 +322,18 @@ void setup() {
 void loop() {
 
   // Evaluate motion command
-  if (command == "1") {
-    relativeMove(0, 1000);
-    command = "";
+  if (command == 1) {
+    relativeMove(0, param);
+    command = 0;
+    param = 0;
   }
 
-  if (command == "2") {
-    relativeMove(1, 1000);
-    command = "";
+  if (command == 2) {
+    relativeMove(1, param);
+    command = 0;
+    param = 0;
   }
-  
+
 
   // ******************************* Motion ***********************************
   
@@ -355,8 +392,8 @@ void loop() {
 void receiveEvent(int howMany) {
     
   int numOfBytes = Wire.available();
-  Serial.print("Num bytes: ");
-  Serial.println(numOfBytes);
+
+  Serial.print("RPi: ");
   
   byte b = Wire.read();  //cmd
   //Serial.print("cmd: ");
@@ -365,14 +402,22 @@ void receiveEvent(int howMany) {
   //display message received, as char
   for(int i=0; i<numOfBytes-1; i++){
     char data = Wire.read();
-    command.concat(data);
+    rawCommand.concat(data);
     Serial.print(data);  
   }
   Serial.println();
-  Serial.print("cmd: ");
-  Serial.println(command);
-}
+  //Serial.print("cmd: ");
+  //Serial.println(command);
 
+  command = parseCommand(rawCommand);
+  param = parseParameter(rawCommand);
+  rawCommand = "";
+  //Serial.print("cmd: ");
+  //Serial.println(command);
+  //Serial.print("param: ");
+  //Serial.println(param);
+  //Serial.println();
+}
 
 void requestEvent() {
  
@@ -386,6 +431,4 @@ void requestEvent() {
   
   // Send response back to Master
   Wire.write(response,sizeof(response));
-
-  //command = "";
 }

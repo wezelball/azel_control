@@ -41,8 +41,10 @@ def sendStepperCommand(cmd):
     bytesToSend = ConvertStringToBytes(cmd)
     bus.write_i2c_block_data(steppers_i2c_address, i2c_cmd, bytesToSend)
 	
-    replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 16)
-    reply = ConvertBytesToString(replyBytes)
+    #replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 16)
+    #reply = ConvertBytesToString(replyBytes)
+    
+    #return reply
 
 
 # loop to send message
@@ -52,16 +54,23 @@ while not exit:
     print(r)
     
     if r == '0':
-	print(getEncoders())
+		print(getEncoders())
 		
     if r == '1':
-	print(sendStepperCommand("1"))
+		#print(sendStepperCommand("1:1000"))
+		sendStepperCommand("1:1000")
 		
     if r == '2':
-	print(sendStepperCommand("2"))
+		#print(sendStepperCommand("2:2000"))
+		sendStepperCommand("2:2000")
     
     if r == '3':
-	print(sendStepperCommand("3"))
-    
+		#print(sendStepperCommand("2:2000"))
+		sendStepperCommand("1:-1000")
+
+    if r == '4':
+		#print(sendStepperCommand("2:2000"))
+		sendStepperCommand("2:-2000")
+
     if r=='q':
         exit=True
