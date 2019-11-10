@@ -3,10 +3,9 @@
 import smbus
 import time
 import os
+import ephem
 
-# display system info
-#print os.uname()
-
+# Set up the i2c bus
 bus = smbus.SMBus(1)
 
 # I2C address of Arduino Slaves
@@ -45,15 +44,50 @@ def getEncoders():
     
     return tuple(encStringList)
 
+# Send a stepper motion command to te Uno
 def sendStepperCommand(cmd):
     bytesToSend = ConvertStringToBytes(cmd)
     bus.write_i2c_block_data(steppers_i2c_address, i2c_cmd, bytesToSend)
 	
+	# TODO - fix this - the Uno is not returning values
     #replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 16)
     #reply = ConvertBytesToString(replyBytes)
-    
     #return reply
 
+def processCmd(cmd):
+	switcher = {
+		':Mn#':slewNorth,
+		':Me#':slewEast,
+		':Mw#':slewWest,
+		':Ms#':slewSouth,
+		':Q#':stopAllSlew,
+		'0':printEncoders
+	}
+	func=switcher.get(cmd,lambda :'Invalid')
+	return func()
+	
+def slewNorth():
+	print "Slewing north"
+	sendStepperCommand("2:6000")
+	
+def slewEast():
+	print "Slewing east"
+	sendStepperCommand("1:-6000")
+	
+def slewWest():
+	print "Slewing west"
+	sendStepperCommand("1:6000")
+	
+def slewSouth():
+	print "Slewing south"
+	sendStepperCommand("2:-6000")
+
+def stopAllSlew():
+	print "Stopping all slew"
+	sendStepperCommand("3:0")
+
+def printEncoders():
+	print(getEncoders())
 
 # loop to send message
 exit = False
@@ -61,24 +95,7 @@ while not exit:
     r = raw_input('Enter something, "q" to quit: ')
     print(r)
     
-    if r == '0':
-		print(getEncoders())
-		
-    if r == '1':
-		#print(sendStepperCommand("1:1000"))
-		sendStepperCommand("1:1000")
-		
-    if r == '2':
-		#print(sendStepperCommand("2:2000"))
-		sendStepperCommand("2:2000")
+    processCmd(r)
     
-    if r == '3':
-		#print(sendStepperCommand("2:2000"))
-		sendStepperCommand("1:-1000")
-
-    if r == '4':
-		#print(sendStepperCommand("2:2000"))
-		sendStepperCommand("2:-2000")
-
     if r=='q':
         exit=True

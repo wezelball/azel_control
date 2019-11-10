@@ -321,17 +321,24 @@ void setup() {
 
 void loop() {
 
-  // Evaluate motion command
-  if (command == 1) {
-    relativeMove(0, param);
-    command = 0;
-    param = 0;
-  }
-
-  if (command == 2) {
-    relativeMove(1, param);
-    command = 0;
-    param = 0;
+  switch(command) {
+    case 1:
+      relativeMove(0, param);
+      command = 0;
+      param = 0;
+      break;
+    case 2:
+      relativeMove(1, param);
+      command = 0;
+      param = 0;
+      break;
+    case 3:
+      stop(0);
+      stop (1);
+    default:
+      command = 0;
+      param = 0;
+      break;
   }
 
 
@@ -406,17 +413,10 @@ void receiveEvent(int howMany) {
     Serial.print(data);  
   }
   Serial.println();
-  //Serial.print("cmd: ");
-  //Serial.println(command);
 
   command = parseCommand(rawCommand);
   param = parseParameter(rawCommand);
   rawCommand = "";
-  //Serial.print("cmd: ");
-  //Serial.println(command);
-  //Serial.print("param: ");
-  //Serial.println(param);
-  //Serial.println();
 }
 
 void requestEvent() {
