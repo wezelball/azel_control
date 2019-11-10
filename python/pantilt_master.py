@@ -26,7 +26,8 @@ def ConvertBytesToString(src):
 		
 	return result
 		
-def getEncoder(data):
+def getEncoders():
+	data = '0'	# send one byte
 	bytesToSend = ConvertStringToBytes(data)
 	bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
 	
@@ -43,16 +44,11 @@ def getEncoder(data):
 # loop to send message
 exit = False
 while not exit:
-    r = raw_input('Enter something, "q" to quit"')
+    r = raw_input('Enter something, "q" to quit: ')
     print(r)
     
-    #bytesToSend = ConvertStringToBytes(r)
-    #bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
+    print(getEncoders())
     
-    print(getEncoder(r))
-    
-    #reply = bus.read_i2c_block_data(i2c_address, 0, 16)
-    #print (ConvertBytesToString(reply))
     
     
     if r=='q':

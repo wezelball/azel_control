@@ -1,58 +1,90 @@
+/*
+ * nano_encoder_slave.ino
+ * Arduino Nano dedicated to reading az-el encoders
+ * Dave Cohen
+ * 
+ */
 
+// Include Encoder library
 #include <Encoder.h>
-#include <SoftwareSerial.h>
- 
 // Include Arduino Wire library for I2C
 #include <Wire.h>
- 
-// Define Slave I2C Address
-#define SLAVE_ADDRESS 0x05
- 
+// #include <SoftwareSerial.h>
+
 // Define Slave answer size
 #define ANSWERSIZE 16
+#define SLAVE_ADDRESS 0x05
 
 // Set up temporary software serial
-SoftwareSerial mySerial(11, 12); // RX, TX - debug
+// SoftwareSerial mySerial(11, 12); // RX, TX - debug
 
 // Instantiate the encoders
 Encoder azEnc(3,5);
 Encoder elEnc(2,4);
 
-long position;    // encoder position
-char str[17];     // string value of position
-String answer;    // reply to master
-char az[8];       // the azimuth encoder string
-char el[8];       // the elevation encoder string
-int command;      // command from master
- 
+long position;
+char str[17];
+String answer;
+char az[8];
+char el[8];
+int command;
+
 void setup() {
  
-  // Initialize I2C communications as Slave
-  Wire.begin(SLAVE_ADDRESS);
-  
-  // Function to run when data requested from master
-  Wire.onRequest(requestEvent); 
-  
-  // Function to run when data received from master
-  Wire.onReceive(receiveEvent);
-  
   // Setup Serial Monitor 
   Serial.begin(9600);
 
   // Software serial
-  mySerial.begin(9600);
-}
- 
-void receiveEvent() {
- 
-  // Read while data received
-  while (0 < Wire.available()) {
-    byte x = Wire.read();
-    command = int(x);
-  }
+  // mySerial.begin(9600);
   
+  Wire.begin(SLAVE_ADDRESS);
+
+  // Read the data from RPi
+  Wire.onReceive(receiveEvent);
+  // Write data to RPi
+  Wire.onRequest(requestEvent);
 }
- 
+
+void loop() {
+  position = azEnc.read();
+  //position = 1276481l;
+  ltoa(position, az, 10);
+  position = elEnc.read();
+  //position = 327681l;
+  ltoa(position,el,10);
+  sprintf(str, "%s:%s",az,el);  
+  //str = position;
+  answer = str;
+
+  /*
+  delay(100);
+
+  // Print what was reveived from Uno to hardware port
+  while (mySerial.available()>0) {
+    Serial.println(mySerial.readString());
+  }
+  */
+}
+
+void receiveEvent(int howMany) {
+    
+  int numOfBytes = Wire.available();
+  Serial.print("Num bytes: ");
+  Serial.println(numOfBytes);
+  
+  byte b = Wire.read();  //cmd
+  Serial.print("cmd: ");
+  Serial.println(b);
+
+  //display message received, as char
+  for(int i=0; i<numOfBytes-1; i++){
+    char data = Wire.read();
+    Serial.print(data);  
+  }
+  Serial.println();
+}
+
+
 void requestEvent() {
  
   // Setup byte variable in the correct size
@@ -65,32 +97,4 @@ void requestEvent() {
   
   // Send response back to Master
   Wire.write(response,sizeof(response));
-}
- 
-void loop() {
-
-  // Only command 0 allowed
-  if(command == 0) {
-    //position = azEnc.read();
-    position = 276481l;
-    ltoa(position, az, 10);
-    //position = elEnc.read();
-    position = 327681l;
-    ltoa(position,el,10);
-    sprintf(str, "%s:%s",az,el);
-    
-    //str = position;
-    answer = str;
-  }
-   else {
-    answer = "999999";
-  }
-
-  delay(100);
-
-  // Print what was reveived from Uno to hardware port
-  while (mySerial.available()>0) {
-    Serial.println(mySerial.readString());
-  }
-
 }
