@@ -72,10 +72,10 @@ void loop() {
   // Only command 0 allowed
   if(command == 0) {
     //position = azEnc.read();
-    position = 27648l;
+    position = 276481l;
     ltoa(position, az, 10);
     //position = elEnc.read();
-    position = 32768l;
+    position = 327681l;
     ltoa(position,el,10);
     sprintf(str, "%s:%s",az,el);
     
