@@ -26,8 +26,12 @@ def ConvertBytesToString(src):
 	result += chr(i)
 		
     return result
-		
+
+# Read the encoder values from the Nano as a tuple
+# 1st element is azimuth
+# 2nd element is elevation
 def getEncoders():
+    encStringList = []
     data = '0'	# send one byte
     bytesToSend = ConvertStringToBytes(data)
     bus.write_i2c_block_data(encoders_i2c_address, i2c_cmd, bytesToSend)
@@ -35,7 +39,11 @@ def getEncoders():
     replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
     reply = ConvertBytesToString(replyBytes)
 	
-    return reply
+    encByteList = reply.split(':')
+    for i in encByteList:
+		encStringList.append(int(i.rstrip('\x00')))
+    
+    return tuple(encStringList)
 
 def sendStepperCommand(cmd):
     bytesToSend = ConvertStringToBytes(cmd)
