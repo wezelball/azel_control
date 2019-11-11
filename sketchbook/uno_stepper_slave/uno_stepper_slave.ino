@@ -283,6 +283,46 @@ int getLimit(int axis, int limit) {
 
 // *********************** END STEPPER MOTION COMMANDS *******************************
 
+// *********************************** BEGIN i2C *************************************
+void receiveEvent(int howMany) {
+    
+  int numOfBytes = Wire.available();
+
+  Serial.print("RPi: ");
+  
+  byte b = Wire.read();  //cmd
+  //Serial.print("cmd: ");
+  //Serial.println(b);
+
+  //display message received, as char
+  for(int i=0; i<numOfBytes-1; i++){
+    char data = Wire.read();
+    rawCommand.concat(data);
+    Serial.print(data);  
+  }
+  Serial.println();
+
+  command = parseCommand(rawCommand);
+  param = parseParameter(rawCommand);
+  rawCommand = "";
+}
+
+void requestEvent() {
+ 
+  // Setup byte variable in the correct size
+  byte response[ANSWERSIZE];
+  
+  // Format answer as array
+  for (byte i=0;i<ANSWERSIZE;i++) {
+    response[i] = (byte)answer.charAt(i);
+  }
+  
+  // Send response back to Master
+  Wire.write(response,sizeof(response));
+}
+
+// *********************************** END i2C *************************************
+
 void setup() {
  
   // Setup Serial Monitor 
@@ -310,31 +350,34 @@ void setup() {
 
   // This is for debugging only
   // Set up encoder max speeds and accels
-  setMaxSpeed(0, 2000);     // azimuth
-  setMaxSpeed(1, 2000);     // elevation
-  setAccel(0, 1000);         // azimuth
-  setAccel(1, 1000);         // elevation
-  setSpeed(0, 2000);        // azimuth
-  setSpeed(1, 2000);        // elevation
+  setMaxSpeed(0, 500);     // azimuth
+  setMaxSpeed(1, 500);     // elevation
+  setAccel(0, 500);         // azimuth
+  setAccel(1, 500);         // elevation
+  setSpeed(0, 500);        // azimuth
+  setSpeed(1, 500);        // elevation
 
 }
 
 void loop() {
 
   switch(command) {
-    case 1:
+    case 1:     // azimuth
       relativeMove(0, param);
       command = 0;
       param = 0;
+      answer = "azRelMov";
       break;
-    case 2:
+    case 2:     // elevation
       relativeMove(1, param);
       command = 0;
       param = 0;
+      answer = "elRelMov";
       break;
     case 3:
       stop(0);
       stop (1);
+      answer = "stop";
     default:
       command = 0;
       param = 0;
@@ -394,41 +437,4 @@ void loop() {
 
   // ************************* Check hard limits ******************************
  
-}
-
-void receiveEvent(int howMany) {
-    
-  int numOfBytes = Wire.available();
-
-  Serial.print("RPi: ");
-  
-  byte b = Wire.read();  //cmd
-  //Serial.print("cmd: ");
-  //Serial.println(b);
-
-  //display message received, as char
-  for(int i=0; i<numOfBytes-1; i++){
-    char data = Wire.read();
-    rawCommand.concat(data);
-    Serial.print(data);  
-  }
-  Serial.println();
-
-  command = parseCommand(rawCommand);
-  param = parseParameter(rawCommand);
-  rawCommand = "";
-}
-
-void requestEvent() {
- 
-  // Setup byte variable in the correct size
-  byte response[ANSWERSIZE];
-  
-  // Format answer as array
-  for (byte i=0;i<ANSWERSIZE;i++) {
-    response[i] = (byte)answer.charAt(i);
-  }
-  
-  // Send response back to Master
-  Wire.write(response,sizeof(response));
 }
