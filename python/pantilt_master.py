@@ -3,7 +3,9 @@
 import smbus
 import time
 import os
+import datetime
 import ephem
+import threading
 
 # Set up the i2c bus
 bus = smbus.SMBus(1)
@@ -12,6 +14,34 @@ bus = smbus.SMBus(1)
 steppers_i2c_address = 0x04
 encoders_i2c_address = 0x05
 i2c_cmd = 0x01
+
+# This thread is where communications will eventually 
+# take place
+class periodicThread (threading.Thread):
+   def __init__(self, threadID, name):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.name = name
+      self.running = True
+      self.delay = 0.5
+      self.lastAz, self.lastEl = getEncoders()
+      
+   def run(self):
+       while(self.running):
+            time.sleep(self.delay)
+            self.az,self.el = getEncoders()
+            self.azVel = (self.az - self.lastAz)/self.delay
+            self.elVel = (self.el - self.lastEl)/self.delay
+            self.lastAz,self.lastEl = getEncoders()
+            #Update the logfile
+	    log.write(time.strftime('%H:%M:%S') + ',' +  str(self.az) + ',' + str(self.el) + \
+			',' +  str(self.azVel) + ',' + str(self.elVel) + '\n')
+
+   def print_time(self,threadName):
+       print ("%s: %s") % (threadName, time.ctime(time.time()))
+   
+   def stop(self):
+       self.running = False
 
 def ConvertStringToBytes(src):
     converted = []
@@ -87,11 +117,16 @@ def printEncoders():
 # loop to send message
 exit = False
 
-# Don't include a date, ephem will assume "now"
-#gumSpring = ephem.Observer()
-#gumSpring.lon = '-77:55:27'
-#gumSpring.lat = '37:47:26'
-#gumSpring.elevation = 116   # i'm calling this heightASL from now on
+# There needs to be a logfile
+logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
+log = open(logfile, 'w')
+# Write the header
+log.write("Time,azEncoder, elEncoder" + '\n')
+
+
+# Start the comms thread after initialization
+commThread = periodicThread(1, "Thread-1")
+commThread.start()
 
 while not exit:
     r = raw_input('Enter something, "q" to quit: ')
@@ -100,3 +135,7 @@ while not exit:
     
     if r=='q':
         exit=True
+
+# Exit program here
+commThread.stop()
+log.close()
