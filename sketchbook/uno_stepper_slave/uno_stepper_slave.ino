@@ -170,21 +170,67 @@ void runSpeed(int axis)  {     // must add hard limit checks
   //mySerial.println("Run speed");
 }
 
+// Stops with deceleration ramp
 void stop(int axis)  {
   if (axis == 0)
   {
     stepperX.stop();
     stoppingXSlew = true;
     slewingX = false;
+    azMovingCW = false;
+    azMovingCCW = false;
   } 
   else if (axis == 1)
   {
     stepperY.stop();
     stoppingYSlew = true;
     slewingY = false;
+    elMovingUp = false;
+    elMovingDown = false;
   }
 
-  //mySerial.println("Stop");
+}
+
+// There is a bug when this function is called
+// and a later move is performed, it starts
+// at full speed with no accel
+/*
+ * Stops immediately, no decel ramp   
+ * axis = 0 stop azimuth
+ * axis = 1 stop elevation
+ * any other number = stop both
+ */
+void fastStop(int axis) {
+  if (axis == 0)
+  {
+    stepperX.disableOutputs();
+    stoppingXSlew = false;
+    slewingX = false;
+    azMovingCW = false;
+    azMovingCCW = false;
+  } 
+  else if (axis == 1)
+  {
+    stepperY.disableOutputs();
+    stoppingYSlew = false;
+    slewingY = false;
+    elMovingUp = false;
+    elMovingDown = false;
+  }
+  else
+  {
+    stepperX.disableOutputs();
+    stepperY.disableOutputs();
+    stoppingXSlew = false;
+    slewingX = false;
+    stoppingYSlew = false;
+    slewingY = false;
+    azMovingCW = false;
+    azMovingCCW = false;
+    elMovingUp = false;
+    elMovingDown = false;   
+  }
+  
 }
 
 int setAccel(int axis, int accel)  {
@@ -377,7 +423,24 @@ void loop() {
     case 3:
       stop(0);
       stop (1);
-      answer = "stop";
+      answer = "stopAll";
+      break;
+    case 4:
+      stop(0);
+      //answer = "stopAz";
+      break;
+    case 5:
+      stop(1);
+      //answer = "stopEl";
+      break;
+    case 6:
+      fastStop(0);
+      //answer = "fastStopAz";
+      break;
+    case 7:
+      fastStop(1);
+      //answer = "fastStopEl";
+      break;
     default:
       command = 0;
       param = 0;

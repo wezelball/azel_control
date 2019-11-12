@@ -84,18 +84,8 @@ def sendStepperCommand(cmd):
     reply = ConvertBytesToString(replyBytes)
     return reply
 
-def processCmd(cmd):
-	switcher = {
-		':Mn#':slewNorth,
-		':Me#':slewEast,
-		':Mw#':slewWest,
-		':Ms#':slewSouth,
-		':Q#':stopAllSlew,
-		'0':printEncoders
-	}
-	func=switcher.get(cmd,lambda :'Invalid')
-	return func()
-	
+
+# Command functions
 def slewNorth():
 	print (sendStepperCommand("2:6000"))
 	
@@ -113,6 +103,38 @@ def stopAllSlew():
 
 def printEncoders():
 	print(getEncoders())
+
+def stopAz():
+	sendStepperCommand("4:0")
+
+def stopEl():
+	sendStepperCommand("5:0")
+
+# There is a bug when quickStop functions are called
+# and a later move is performed, it starts
+# at full speed with no accel
+def quickStopAz():
+	sendStepperCommand("6:0")
+	
+def quickStopEl():
+	sendStepperCommand("7:0")
+
+# Process menu command
+def processCmd(cmd):
+	switcher = {
+		':Mn#':slewNorth,
+		':Me#':slewEast,
+		':Mw#':slewWest,
+		':Ms#':slewSouth,
+		':Q#':stopAllSlew,
+		'0':printEncoders,
+		'1':stopAz,
+		'2':stopEl,
+		'3':quickStopAz,
+		'4':quickStopEl
+	}
+	func=switcher.get(cmd,lambda :'Invalid')
+	return func()
 
 # loop to send message
 exit = False
