@@ -15,8 +15,9 @@ steppers_i2c_address = 0x04
 encoders_i2c_address = 0x05
 i2c_cmd = 0x01
 
-# This thread is where communications will eventually 
-# take place
+# *********************** BEGIN CLASSES ******************************
+
+# This thread is for updating live parameters
 class periodicThread (threading.Thread):
    def __init__(self, threadID, name):
       threading.Thread.__init__(self)
@@ -29,19 +30,39 @@ class periodicThread (threading.Thread):
    def run(self):
        while(self.running):
             time.sleep(self.delay)
-            self.az,self.el = getEncoders()
-            self.azVel = (self.az - self.lastAz)/self.delay
-            self.elVel = (self.el - self.lastEl)/self.delay
+            variable.azPos, variable.elPos = getEncoders()
+            variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
+            variable.elVelocity = (variable.elPos - self.lastEl)/self.delay
             self.lastAz,self.lastEl = getEncoders()
             #Update the logfile
-	    log.write(time.strftime('%H:%M:%S') + ',' +  str(self.az) + ',' + str(self.el) + \
-			',' +  str(self.azVel) + ',' + str(self.elVel) + '\n')
+	    log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + \
+			',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
    def print_time(self,threadName):
        print ("%s: %s") % (threadName, time.ctime(time.time()))
    
    def stop(self):
        self.running = False
+
+class Variables():
+	def __init__(self):
+		# initialize limit switches
+		self.azCWLimit = False
+		self.azCCWLimit = False
+		self.elUpLimit = False
+		self.elDownLimit = False
+		
+		self.azVelocity = 0
+		self.elVelocity = 0
+		self.azPos = 0
+		self.elPos = 0
+		
+		
+		# homing flags
+		self.homed = False
+		self.homing = False
+
+# ************************* END CLASSES ******************************
 
 def ConvertStringToBytes(src):
     converted = []
@@ -65,6 +86,7 @@ def getEncoders():
     bytesToSend = ConvertStringToBytes(data)
     bus.write_i2c_block_data(encoders_i2c_address, i2c_cmd, bytesToSend)
 	
+    # I'm getting occasional i/o errors in the next statement
     replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
     reply = ConvertBytesToString(replyBytes)
 	
@@ -119,6 +141,26 @@ def quickStopAz():
 def quickStopEl():
 	sendStepperCommand("7:0")
 
+# returns 0 if limit made
+def getAzCWLimit():
+	variable.azCWLimit = sendStepperCommand("8:0")
+	print(variable.azCWLimit)
+
+# returns 0 if limit made	
+def getAzCCWLimit():
+	variable.azCCWLimit = sendStepperCommand("9:0")
+	print(variable.azCCWLimit)
+
+# returns 0 if limit made
+def getElUpLimit():
+	variable.azUpLimit = sendStepperCommand("10:0")
+	print(variable.azUpLimit)
+	
+# returns 0 if limit made
+def getElDownLimit():
+	variable.azDownLimit = sendStepperCommand("11:0")
+	print(variable.azDownLimit)
+
 # Process menu command
 def processCmd(cmd):
 	switcher = {
@@ -131,7 +173,11 @@ def processCmd(cmd):
 		'1':stopAz,
 		'2':stopEl,
 		'3':quickStopAz,
-		'4':quickStopEl
+		'4':quickStopEl,
+		'5':getAzCWLimit,
+		'6':getAzCCWLimit,
+		'7':getElUpLimit,
+		'8':getElDownLimit
 	}
 	func=switcher.get(cmd,lambda :'Invalid')
 	return func()
@@ -145,6 +191,8 @@ log = open(logfile, 'w')
 # Write the header
 log.write("Time,azEncoder, elEncoder" + '\n')
 
+# Instantiate global variables
+variable = Variables()
 
 # Start the comms thread after initialization
 commThread = periodicThread(1, "Thread-1")

@@ -427,20 +427,31 @@ void loop() {
       break;
     case 4:
       stop(0);
-      //answer = "stopAz";
+      answer = "stopAz";
       break;
     case 5:
       stop(1);
-      //answer = "stopEl";
+      answer = "stopEl";
       break;
     case 6:
       fastStop(0);
-      //answer = "fastStopAz";
+      answer = "fStopAz";
       break;
     case 7:
       fastStop(1);
-      //answer = "fastStopEl";
+      answer = "fStopEl";
       break;
+    case 8:
+      answer = getLimit(0,0);   // azimuth CW limit
+      break;
+    case 9:
+      answer = getLimit(0,1);   // azimuth CCW limit
+      break;
+    case 10:
+      answer = getLimit(1,0);   // elevation UP limit
+      break;
+    case 11:
+      answer = getLimit(1,1);   // elevation DOWM limit
     default:
       command = 0;
       param = 0;
