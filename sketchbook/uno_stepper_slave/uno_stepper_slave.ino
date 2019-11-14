@@ -142,7 +142,6 @@ void relativeMove(int axis, long steps)  {
 
 // Set maximum
 void setMaxSpeed(int axis, int speed)  {
-  
   if (axis == 0)
     stepperX.setMaxSpeed(speed);  
   else if (axis == 1) 
@@ -236,9 +235,9 @@ void fastStop(int axis) {
 }
 
 int setAccel(int axis, int accel)  {
-  if (axis == 0)
+  if (axis == 0)        // azimuth
     stepperX.setAcceleration((float)accel);
-  else if (axis == 1)
+  else if (axis == 1)   // elevation
     stepperY.setAcceleration((float)accel);
     
   //mySerial.println("Set accel");
@@ -416,7 +415,43 @@ void processCommand(){
       answer = "_______" + String(getLimit(1,0));   
       break;
     case 11:    // elevation DOWN limit
-      answer = "_______" + String(getLimit(1,1));   
+      answer = "_______" + String(getLimit(1,1));
+    case 12:    // set azimuth speed
+      setSpeed(0, param);
+      command = 0;
+      param = 0;
+      answer = "azSpeed\n";
+      break;
+    case 13:    // set elevation speed
+      setSpeed(1, param);
+      command = 0;
+      param = 0;
+      answer = "elSpeed\n";
+      break;
+    case 14:    // set azimuth accel
+      setAccel(0, param);
+      command = 0;
+      param = 0;
+      answer = "azAccel\n";
+      break;
+    case 15:    // set elevation accel
+      setAccel(1, param);
+      command = 0;
+      param = 0;
+      answer = "elAccel\n";
+      break;
+    case 16:    // set azimuth max speed
+      setMaxSpeed(0, param);
+      command = 0;
+      param = 0;
+      answer = "azMxSpd\n";
+      break;
+    case 17:    // set elevation max speed
+      setMaxSpeed(1, param);
+      command = 0;
+      param = 0;
+      answer = "elMxSpd\n";
+      break;
     default:
       command = 0;
       param = 0;
@@ -453,12 +488,12 @@ void setup() {
 
   // This is for debugging only
   // Set up encoder max speeds and accels
-  setMaxSpeed(0, 500);     // azimuth
-  setMaxSpeed(1, 500);     // elevation
-  setAccel(0, 500);         // azimuth
-  setAccel(1, 500);         // elevation
-  setSpeed(0, 500);        // azimuth
-  setSpeed(1, 500);        // elevation
+  //setMaxSpeed(0, 500);     // azimuth
+  //setMaxSpeed(1, 500);     // elevation
+  //setAccel(0, 500);         // azimuth
+  //setAccel(1, 500);         // elevation
+  //setSpeed(0, 500);        // azimuth
+  //setSpeed(1, 500);        // elevation
 
 }
 

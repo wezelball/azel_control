@@ -76,6 +76,18 @@ class Variables():
 
 # ************************* END CLASSES ******************************
 
+# Sets inital values
+def setInitialValues():
+    #setAzSpeed(250)
+    setAzMaxSpeed(2000)
+    time.sleep(0.25)
+    setAzAccel(1500)
+    time.sleep(0.25)
+    #setElSpeed(250)
+    setElMaxSpeed(2000)
+    time.sleep(0.25)
+    setElAccel(1500)
+
 def sendMessage(priority, message, i2c_address):
     messageQ.append((priority, message))
     messageQ.sort(reverse = True)
@@ -141,32 +153,61 @@ def sendStepperCommand(cmd):
     return reply
 
 # Process functions
+def setAzSpeed(speed):
+    cmd = "12" + ':' + str(speed)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
+
+def setAzMaxSpeed(speed):
+    cmd = "16" + ':' + str(speed)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
+
+def setElSpeed(speed):
+    cmd = "13" + ':' + str(speed)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
+
+def setElMaxSpeed(speed):
+    cmd = "17" + ':' + str(speed)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
+
+def setAzAccel(accel):
+    cmd = "14" + ':' + str(accel)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
+
+def setElAccel(accel):
+    cmd = "15" + ':' + str(accel)
+    print("command: %s" % cmd)
+    print (sendStepperCommand(cmd))
 
 
 # Command functions
 def slewNorth():
-   print (sendStepperCommand("2:3000"))
+    print (sendStepperCommand("2:4000"))
 	
 def slewEast():
-   print(sendStepperCommand("1:3000"))
+    print(sendStepperCommand("1:4000"))
 	
 def slewWest():
-   print(sendStepperCommand("1:-3000"))
+    print(sendStepperCommand("1:-4000"))
 	
 def slewSouth():
-   print(sendStepperCommand("2:-3000"))
+    print(sendStepperCommand("2:-4000"))
 
 def stopAllSlew():
-   print(sendStepperCommand("3:0"))
+    print(sendStepperCommand("3:0"))
 
 def printEncoders():
-   print(getEncoders())
+    print(getEncoders())
 
 def stopAz():
-   print(sendStepperCommand("4:0"))
+    print(sendStepperCommand("4:0"))
 
 def stopEl():
-   print(sendStepperCommand("5:0"))
+    print(sendStepperCommand("5:0"))
 
 # There is a bug when quickStop functions are called
 # and a later move is performed, it starts
@@ -175,7 +216,7 @@ def quickStopAz():
    print(sendStepperCommand("6:0"))
 	
 def quickStopEl():
-   print(sendStepperCommand("7:0"))
+    print(sendStepperCommand("7:0"))
 
 # returns 0 if limit made
 def isAzCWLimit():
@@ -254,6 +295,9 @@ variable = Variables()
 # Start the comms thread after initialization
 commThread = periodicThread(1, "Thread-1")
 commThread.start()
+
+# Set initial values - motor speeds, etc
+setInitialValues()
 
 while not exit:
     r = raw_input('Enter something, "q" to quit: ')
