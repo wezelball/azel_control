@@ -270,9 +270,6 @@ void moveToAbsolute(int axis, long absolute) {   // must add hard limits check h
     movingY = true;
   }
   
-  // moving = true;
-  
-  //mySerial.println("move to abs");
 }
 
 /*
@@ -408,16 +405,16 @@ void processCommand(){
       answer = "fStopEl\n";
       break;
     case 8:
-      answer = getLimit(0,0);   // azimuth CW limit
+      answer = "_______" + String(getLimit(0,0));   // azimuth CW limit
       break;
     case 9:
-      answer = getLimit(0,1);   // azimuth CCW limit
+      answer = "_______" + String(getLimit(0,1));   // azimuth CCW limit
       break;
     case 10:
-      answer = getLimit(1,0);   // elevation UP limit
+      answer = "_______" + String(getLimit(1,0));   // elevation UP limit
       break;
     case 11:
-      answer = getLimit(1,1);   // elevation DOWM limit
+      answer = "_______" + String(getLimit(1,1));   // elevation DOWN limit
     default:
       command = 0;
       param = 0;

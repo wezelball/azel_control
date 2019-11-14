@@ -27,7 +27,7 @@ class periodicThread (threading.Thread):
       self.threadID = threadID
       self.name = name
       self.running = True
-      self.delay = 2.0
+      self.delay = 0.5
       self.lastAz, self.lastEl = getEncoders()
       
    def run(self):
@@ -46,6 +46,7 @@ class periodicThread (threading.Thread):
    
    def stop(self):
       self.running = False
+      log.close()
 
 class Variables():
    def __init__(self):
@@ -75,17 +76,21 @@ def sendMessage(priority, message, i2c_address):
         # 1 is the highest priority
         # higher numbers are lower priority
         next_message = messageQ.pop()
-        #print("next_mesg: %s" % str(next_message)) 
         bytesToSend = ConvertStringToBytes(next_message[1])
-        bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
         reply = ""
         replyBytes = ""
-        if i2c_address == steppers_i2c_address:
-            replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 8)
-        else:
-            replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
+        try:
+            bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
+
+            if i2c_address == steppers_i2c_address:
+                replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 8)
+            else:
+                replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
+            
+            reply = ConvertBytesToString(replyBytes)
+        except IOError:
+            reply = "Error"
         
-        reply = ConvertBytesToString(replyBytes)
         return reply
 
 def ConvertStringToBytes(src):
@@ -110,7 +115,14 @@ def getEncoders():
     reply = sendMessage(1, cmd, encoders_i2c_address)
     encByteList = reply.split(':')
     for i in encByteList:
-        encStringList.append(int(i.rstrip('\x00')))
+        try:
+            encStringList.append(int(i.rstrip('\x00')))
+        except ValueError:
+            # This will happen if there is a bus error,
+            # which does happen
+            # This is not a real fix, now the position
+            # is wrong - but what do I do?
+            encStringList.append(0)
     
     return tuple(encStringList)
 
@@ -122,16 +134,16 @@ def sendStepperCommand(cmd):
 
 # Command functions
 def slewNorth():
-   print (sendStepperCommand("2:1000"))
+   print (sendStepperCommand("2:3000"))
 	
 def slewEast():
-   print(sendStepperCommand("1:1000"))
+   print(sendStepperCommand("1:3000"))
 	
 def slewWest():
-   print(sendStepperCommand("1:-1000"))
+   print(sendStepperCommand("1:-3000"))
 	
 def slewSouth():
-   print(sendStepperCommand("2:-1000"))
+   print(sendStepperCommand("2:-3000"))
 
 def stopAllSlew():
    print(sendStepperCommand("3:0"))
@@ -140,19 +152,19 @@ def printEncoders():
    print(getEncoders())
 
 def stopAz():
-   sendStepperCommand("4:0")
+   print(sendStepperCommand("4:0"))
 
 def stopEl():
-   sendStepperCommand("5:0")
+   print(sendStepperCommand("5:0"))
 
 # There is a bug when quickStop functions are called
 # and a later move is performed, it starts
 # at full speed with no accel
 def quickStopAz():
-   sendStepperCommand("6:0")
+   print(sendStepperCommand("6:0"))
 	
 def quickStopEl():
-   sendStepperCommand("7:0")
+   print(sendStepperCommand("7:0"))
 
 # returns 0 if limit made
 def getAzCWLimit():
@@ -221,4 +233,4 @@ while not exit:
 
 # Exit program here
 commThread.stop()
-log.close()
+#log.close()
