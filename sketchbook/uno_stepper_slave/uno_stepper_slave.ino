@@ -10,7 +10,7 @@
 #include "AccelStepper.h"
 
 // Define Slave answer size
-#define ANSWERSIZE 16
+#define ANSWERSIZE 8
 #define SLAVE_ADDRESS 0x04
 
 // AccelStepper Instances
@@ -29,7 +29,7 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
 
 long position;
 char str[17];
-String answer;
+String answer;  // must be 8 bytes, or 7 characters
 String rawCommand;
 int command;    // command from RPi
 long param;     // command parameter from RPi
@@ -359,7 +359,7 @@ void requestEvent() {
   byte response[ANSWERSIZE];
   
   // Format answer as array
-  for (byte i=0;i<ANSWERSIZE;i++) {
+  for (byte i=0;i<answer.length();i++) {
     response[i] = (byte)answer.charAt(i);
   }
   
@@ -412,34 +412,34 @@ void loop() {
       relativeMove(0, param);
       command = 0;
       param = 0;
-      answer = "azRelMov";
+      answer = "azRelMv\n";
       break;
     case 2:     // elevation
       relativeMove(1, param);
       command = 0;
       param = 0;
-      answer = "elRelMov";
+      answer = "elRelMv\n";
       break;
     case 3:
       stop(0);
       stop (1);
-      answer = "stopAll";
+      answer = "stopAll\n";
       break;
     case 4:
       stop(0);
-      answer = "stopAz";
+      answer = "stopAz_\n";
       break;
     case 5:
       stop(1);
-      answer = "stopEl";
+      answer = "stopEl_\n";
       break;
     case 6:
       fastStop(0);
-      answer = "fStopAz";
+      answer = "fStopAz\n";
       break;
     case 7:
       fastStop(1);
-      answer = "fStopEl";
+      answer = "fStopEl\n";
       break;
     case 8:
       answer = getLimit(0,0);   // azimuth CW limit
