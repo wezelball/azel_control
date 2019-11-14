@@ -56,6 +56,15 @@ class Variables():
       self.elUpLimit = False
       self.elDownLimit = False
 		
+      # Process variables
+      self.azHomingSpeed = 500;
+      self.elHomingSpeed = 500;
+      self.azSlewSpeed = 500;
+      self.elSlewSpeed = 500;
+      self.azAccel = 500;
+      self.elAccel = 500;
+      
+      # Real-time values
       self.azVelocity = 0
       self.elVelocity = 0
       self.azPos = 0
@@ -130,6 +139,8 @@ def getEncoders():
 def sendStepperCommand(cmd):
     reply = sendMessage(1, cmd, steppers_i2c_address)
     return reply
+
+# Process functions
 
 
 # Command functions

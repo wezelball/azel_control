@@ -203,6 +203,7 @@ void stop(int axis)  {
 void fastStop(int axis) {
   if (axis == 0)
   {
+    stepperX.stop();
     stepperX.disableOutputs();
     stoppingXSlew = false;
     slewingX = false;
@@ -211,6 +212,7 @@ void fastStop(int axis) {
   } 
   else if (axis == 1)
   {
+    stepperY.stop();
     stepperY.disableOutputs();
     stoppingYSlew = false;
     slewingY = false;
@@ -371,50 +373,50 @@ void requestEvent() {
 // Called from i2c receive event
 void processCommand(){
   switch(command) {
-    case 1:     // azimuth
+    case 1:     // azimuth relative move
       relativeMove(0, param);
       command = 0;
       param = 0;
       answer = "azRelMv\n";
       break;
-    case 2:     // elevation
+    case 2:     // elevation relative move
       relativeMove(1, param);
       command = 0;
       param = 0;
       answer = "elRelMv\n";
       break;
-    case 3:
+    case 3:     // stop all with decel
       stop(0);
       stop (1);
       answer = "stopAll\n";
       break;
-    case 4:
-      stop(0);
+    case 4:     // stop azimuth with decel
+      stop(0);  
       answer = "stopAz_\n";
       break;
-    case 5:
+    case 5:     // stop elevation with decel
       stop(1);
       answer = "stopEl_\n";
       break;
-    case 6:
+    case 6:     // stop azimuith immediate
       fastStop(0);
       answer = "fStopAz\n";
       break;
-    case 7:
+    case 7:     // stop elevation immediate
       fastStop(1);
       answer = "fStopEl\n";
       break;
-    case 8:
-      answer = "_______" + String(getLimit(0,0));   // azimuth CW limit
+    case 8:     // azimuth CW limit
+      answer = "_______" + String(getLimit(0,0));   
       break;
-    case 9:
-      answer = "_______" + String(getLimit(0,1));   // azimuth CCW limit
+    case 9:     // azimuth CCW limit
+      answer = "_______" + String(getLimit(0,1));   
       break;
-    case 10:
-      answer = "_______" + String(getLimit(1,0));   // elevation UP limit
+    case 10:    // elevation UP limit
+      answer = "_______" + String(getLimit(1,0));   
       break;
-    case 11:
-      answer = "_______" + String(getLimit(1,1));   // elevation DOWN limit
+    case 11:    // elevation DOWN limit
+      answer = "_______" + String(getLimit(1,1));   
     default:
       command = 0;
       param = 0;
