@@ -167,24 +167,45 @@ def quickStopEl():
    print(sendStepperCommand("7:0"))
 
 # returns 0 if limit made
-def getAzCWLimit():
-   variable.azCWLimit = sendStepperCommand("8:0")
-   print(variable.azCWLimit)
+def isAzCWLimit():
+    variable.azCWLimit = sendStepperCommand("8:0")
+    if variable.azCWLimit.find('0') <> -1:
+        print "True"
+        return True
+    elif variable.azCWLimit.find('1') <> -1:
+        print "False"
+        return False
+    
 
 # returns 0 if limit made	
-def getAzCCWLimit():
-   variable.azCCWLimit = sendStepperCommand("9:0")
-   print(variable.azCCWLimit)
+def isAzCCWLimit():
+    variable.azCCWLimit = sendStepperCommand("9:0")
+    if variable.azCCWLimit.find('0') <> -1:
+        print "True"
+        return True
+    elif variable.azCCWLimit.find('1') <> -1:
+        print "False"
+        return False
 
 # returns 0 if limit made
-def getElUpLimit():
-   variable.azUpLimit = sendStepperCommand("10:0")
-   print(variable.azUpLimit)
+def isElUpLimit():
+    variable.elUpLimit = sendStepperCommand("10:0")
+    if variable.elUpLimit.find('0') <> -1:
+        print "True"
+        return True
+    elif variable.elUpLimit.find('1') <> -1:
+        print "False"
+        return False
 	
 # returns 0 if limit made
-def getElDownLimit():
-   variable.azDownLimit = sendStepperCommand("11:0")
-   print(variable.azDownLimit)
+def isElDownLimit():
+    variable.elDownLimit = sendStepperCommand("11:0")
+    if variable.elDownLimit.find('0') <> -1:
+        print "True"
+        return True
+    elif variable.elDownLimit.find('1') <> -1:
+        print "False"
+        return False
 
 # Process menu command
 def processCmd(cmd):
@@ -199,10 +220,10 @@ def processCmd(cmd):
 		'2':stopEl,
 		'3':quickStopAz,
 		'4':quickStopEl,
-		'5':getAzCWLimit,
-		'6':getAzCCWLimit,
-		'7':getElUpLimit,
-		'8':getElDownLimit
+		'5':isAzCWLimit,
+		'6':isAzCCWLimit,
+		'7':isElUpLimit,
+		'8':isElDownLimit
 	}
 	func=switcher.get(cmd,lambda :'Invalid')
 	return func()
