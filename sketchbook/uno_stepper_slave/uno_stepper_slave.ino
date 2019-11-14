@@ -29,7 +29,7 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
 
 long position;
 char str[17];
-String answer;  // must be 8 bytes, or 7 characters
+String answer = "";  // must be 8 bytes, or 7 characters
 String rawCommand;
 int command;    // command from RPi
 long param;     // command parameter from RPi
@@ -334,23 +334,24 @@ void receiveEvent(int howMany) {
     
   int numOfBytes = Wire.available();
 
-  Serial.print("RPi: ");
+  //Serial.print("RPi: ");
   
   byte b = Wire.read();  //cmd
-  //Serial.print("cmd: ");
-  //Serial.println(b);
 
   //display message received, as char
   for(int i=0; i<numOfBytes-1; i++){
     char data = Wire.read();
     rawCommand.concat(data);
-    Serial.print(data);  
+    //Serial.print(data);  
   }
-  Serial.println();
+  //Serial.println();
 
   command = parseCommand(rawCommand);
   param = parseParameter(rawCommand);
   rawCommand = "";
+
+  // Process the i2c command from master RPi
+  processCommand();
 }
 
 void requestEvent() {
@@ -365,48 +366,13 @@ void requestEvent() {
   
   // Send response back to Master
   Wire.write(response,sizeof(response));
+
 }
 
 // *********************************** END i2C *************************************
 
-void setup() {
- 
-  // Setup Serial Monitor 
-  Serial.begin(9600);
-
-
-  Wire.begin(SLAVE_ADDRESS);
-
-  // Read the data from RPi
-  Wire.onReceive(receiveEvent);
-  // Write data to RPi
-  Wire.onRequest(requestEvent);
-
-  // Stepper and limits setup
-  
-  // Hard limits
-  pinMode(azLimitCW, INPUT_PULLUP);
-  pinMode(azLimitCCW, INPUT_PULLUP);
-  pinMode(elLimitUp, INPUT_PULLUP);
-  pinMode(elLimitDown, INPUT_PULLUP);
-  
-  // Setup stepper enable pins
-  stepperX.setEnablePin(7);   // using an enable pin
-  stepperY.setEnablePin(7);
-
-  // This is for debugging only
-  // Set up encoder max speeds and accels
-  setMaxSpeed(0, 500);     // azimuth
-  setMaxSpeed(1, 500);     // elevation
-  setAccel(0, 500);         // azimuth
-  setAccel(1, 500);         // elevation
-  setSpeed(0, 500);        // azimuth
-  setSpeed(1, 500);        // elevation
-
-}
-
-void loop() {
-
+// Called from i2c receive event
+void processCommand(){
   switch(command) {
     case 1:     // azimuth
       relativeMove(0, param);
@@ -457,6 +423,47 @@ void loop() {
       param = 0;
       break;
   }
+  
+}
+
+
+void setup() {
+ 
+  // Setup Serial Monitor 
+  Serial.begin(9600);
+
+
+  Wire.begin(SLAVE_ADDRESS);
+
+  // Read the data from RPi
+  Wire.onReceive(receiveEvent);
+  // Write data to RPi
+  Wire.onRequest(requestEvent);
+
+  // Stepper and limits setup
+  
+  // Hard limits
+  pinMode(azLimitCW, INPUT_PULLUP);
+  pinMode(azLimitCCW, INPUT_PULLUP);
+  pinMode(elLimitUp, INPUT_PULLUP);
+  pinMode(elLimitDown, INPUT_PULLUP);
+  
+  // Setup stepper enable pins
+  stepperX.setEnablePin(7);   // using an enable pin
+  stepperY.setEnablePin(7);
+
+  // This is for debugging only
+  // Set up encoder max speeds and accels
+  setMaxSpeed(0, 500);     // azimuth
+  setMaxSpeed(1, 500);     // elevation
+  setAccel(0, 500);         // azimuth
+  setAccel(1, 500);         // elevation
+  setSpeed(0, 500);        // azimuth
+  setSpeed(1, 500);        // elevation
+
+}
+
+void loop() {
 
 
   // ******************************* Motion ***********************************
