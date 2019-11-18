@@ -31,7 +31,8 @@ class periodicThread (threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        self.delay = 0.5
+        #self.delay = 0.5
+        self.delay = 2.0
         self.lastAz, self.lastEl = getEncoders()
 
     def run(self):
@@ -142,7 +143,7 @@ def ConvertBytesToString(src):
 # Read the encoder values from the Nano as a tuple
 # 1st element is azimuth
 # 2nd element is elevation
-# I'm getting bus errors periodicvally, which might
+# I'm getting bus errors periodically, which might
 # be due to excessive cable length
 def getEncoders():
     encPosList = []
@@ -195,6 +196,25 @@ def setElAccel(accel):
     print("command: %s" % cmd)
     print (sendStepperCommand(cmd))
 
+# Watches the axis while it's homing
+# When home limit made, terminate homing mode 
+# If the encoder velocity approaches zero while
+#  homing, issue an estop and error
+#
+# axis = 0    azimuth
+# axis = 1    elevation
+#
+# Currently assumes that home positions are
+# az = west and el = down
+def watchHomingAxis(axis):
+    if axis == 0:
+        if isAzCCWLimit == True:
+            variable.azHoming = False
+            variable.azHomed = True
+    elif axis == 1:
+        if isElDownLimit == True:
+            variable.elHoming = False
+            variable.elHomed = True
 
 # Command functions
 def slewNorth():
@@ -284,6 +304,23 @@ def homeElevation():
     #sendStepperCommand("1:-20000"))
     pass
 
+# Sets both encoder axes to zero
+# Use when both encoders are in home position and stopped
+def zeroEncoders():
+    encPosList = []
+    cmd = '1'
+    reply = sendMessage(1, cmd, encoders_i2c_address)
+    encByteList = reply.split(':')
+    for i in encByteList:
+        try:
+            encPosList.append(int(i.rstrip('\x00')))
+        except ValueError:
+            # Bus error, assign last known values of encoder
+            # positions - this is ugly and might cause issues
+            encPosList = variable.azPos, variable.elPos
+
+    return tuple(encPosList)    
+
 def processCmd(cmd):
     switcher = {
         ':Mn#':slewNorth,
@@ -301,7 +338,8 @@ def processCmd(cmd):
                 '7':isElUpLimit,
                 '8':isElDownLimit,
                 '9':homeAzimuth,
-                '10':homeElevation
+                '10':homeElevation,
+                '11':zeroEncoders
     }
     func=switcher.get(cmd,lambda :'Invalid')
     return func()

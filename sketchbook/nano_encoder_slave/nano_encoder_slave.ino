@@ -34,9 +34,6 @@ void setup() {
   // Setup Serial Monitor 
   Serial.begin(9600);
 
-  // Software serial
-  // mySerial.begin(9600);
-  
   Wire.begin(SLAVE_ADDRESS);
 
   // Read the data from RPi
@@ -46,31 +43,31 @@ void setup() {
 }
 
 void loop() {
-  position = azEnc.read();
-  //position = 1276481l;
-  ltoa(position, az, 10);
-  position = elEnc.read();
-  //position = 327681l;
-  ltoa(position,el,10);
-  sprintf(str, "%s:%s",az,el);  
-  //str = position;
-  answer = str;
-
-  /*
-  delay(100);
-
-  // Print what was reveived from Uno to hardware port
-  while (mySerial.available()>0) {
-    Serial.println(mySerial.readString());
+  // Get current encoder position
+  if (command == 0) {
+    position = azEnc.read();
+    ltoa(position, az, 10);
+    position = elEnc.read();
+    ltoa(position,el,10);
   }
-  */
+  // Zero both encoders
+  else if (command == 1)  {
+    azEnc.write(0);
+    elEnc.write(0);
+    position = 0l;
+    ltoa(position, az, 10);
+    ltoa(position, el, 10);
+  }
+  
+  sprintf(str, "%s:%s",az,el);  
+  answer = str;
 }
 
 void receiveEvent(int howMany) {
     
   int numOfBytes = Wire.available();
-  Serial.print("Num bytes: ");
-  Serial.println(numOfBytes);
+  //Serial.print("Num bytes: ");
+  //Serial.println(numOfBytes);
   
   byte b = Wire.read();  //cmd
   Serial.print("cmd: ");
@@ -79,7 +76,8 @@ void receiveEvent(int howMany) {
   //display message received, as char
   for(int i=0; i<numOfBytes-1; i++){
     char data = Wire.read();
-    Serial.print(data);  
+    Serial.print(data);
+    command = data - '0';  
   }
   Serial.println();
 }
