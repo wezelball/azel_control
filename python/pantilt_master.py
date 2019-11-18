@@ -3,10 +3,10 @@
 # pantilt_master.py
 # Dave Cohen
 
-import sys
+#import sys
 import smbus
 import time
-import os
+#import os
 import datetime
 #import ephem
 import threading
@@ -90,15 +90,15 @@ class Variables():
 
 # Sets inital values
 def setInitialValues():
-    #setAzSpeed(250)
-    setAzMaxSpeed(2000)
+    setAzSpeed(1000)
+    setAzMaxSpeed(1000)
     time.sleep(0.25)
-    setAzAccel(1500)
+    setAzAccel(500)
     time.sleep(0.25)
-    #setElSpeed(250)
-    setElMaxSpeed(2000)
+    setElSpeed(500)
+    setElMaxSpeed(1000)
     time.sleep(0.25)
-    setElAccel(1500)
+    setElAccel(500)
 
 def sendMessage(priority, message, i2c_address):
     messageQ.append((priority, message))
@@ -142,22 +142,22 @@ def ConvertBytesToString(src):
 # Read the encoder values from the Nano as a tuple
 # 1st element is azimuth
 # 2nd element is elevation
+# I'm getting bus errors periodicvally, which might
+# be due to excessive cable length
 def getEncoders():
-    encStringList = []
+    encPosList = []
     cmd = '0'	# send one byte
     reply = sendMessage(1, cmd, encoders_i2c_address)
     encByteList = reply.split(':')
     for i in encByteList:
         try:
-            encStringList.append(int(i.rstrip('\x00')))
+            encPosList.append(int(i.rstrip('\x00')))
         except ValueError:
-            # This will happen if there is a bus error,
-            # which does happen
-            # This is not a real fix, now the position
-            # is wrong - but what do I do?
-            encStringList.append(0)
+            # Bus error, assign last known values of encoder
+            # positions - this is ugly and might cause issues
+            encPosList = variable.azPos, variable.elPos
 
-    return tuple(encStringList)
+    return tuple(encPosList)
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
