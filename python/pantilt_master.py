@@ -48,9 +48,23 @@ class periodicThread (threading.Thread):
 
             # watch for limits reached if homing
             if variable.azHoming == True:
-                pass
-
-
+                #print("azHoming")
+                if isAzCCWLimit() == True:
+                    variable.azHomed = True
+                    #print("azHomed")
+                    
+            if variable.elHoming == True:
+                #print("elHoming")
+                if isElUpLimit() == True:
+                    variable.elHomed = True
+                    #print("elHomed")
+                    
+            if variable.azHoming and variable.azHomed and variable.elHoming and variable.elHomed:
+                print("Homed")
+                variable.azHoming = False
+                variable.elHoming = False
+                zeroEncoders()
+                
 
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
@@ -218,19 +232,27 @@ def watchHomingAxis(axis):
 
 # Command functions
 def slewNorth():
-    print (sendStepperCommand("2:4000"))
+    print (sendStepperCommand("2:8000"))
 
 def slewEast():
-    print(sendStepperCommand("1:4000"))
+    print(sendStepperCommand("1:8000"))   
 
 def slewWest():
-    print(sendStepperCommand("1:-4000"))
+    print(sendStepperCommand("1:-8000"))
 
 def slewSouth():
-    print(sendStepperCommand("2:-4000"))
+    print(sendStepperCommand("2:-8000"))
 
 def stopAllSlew():
     print(sendStepperCommand("3:0"))
+
+def relMoveAz(distance):
+    cmd = '1:' + str(distance)
+    print (sendStepperCommand(cmd)) 
+
+def relMoveEl(distance):
+    cmd = '2:' + str(distance)
+    print (sendStepperCommand(cmd))
 
 def printEncoders():
     print(getEncoders())
@@ -254,55 +276,52 @@ def quickStopEl():
 def isAzCWLimit():
     variable.azCWLimit = sendStepperCommand("8:0")
     if variable.azCWLimit.find('0') != -1:
-        print ("True")
+        #print ("True")
         return True
     elif variable.azCWLimit.find('1') != -1:
-        print ("False")
+        #print ("False")
         return False
-
 
 # returns 0 if limit made	
 def isAzCCWLimit():
     variable.azCCWLimit = sendStepperCommand("9:0")
     if variable.azCCWLimit.find('0') != -1:
-        print ("True")
+        #print ("True")
         return True
     elif variable.azCCWLimit.find('1') != -1:
-        print ("False")
+        #print ("False")
         return False
 
 # returns 0 if limit made
 def isElUpLimit():
     variable.elUpLimit = sendStepperCommand("10:0")
     if variable.elUpLimit.find('0') != -1:
-        print ("True")
+        #print ("True")
         return True
     elif variable.elUpLimit.find('1') != -1:
-        print ("False")
+        #print ("False")
         return False
 
 # returns 0 if limit made
 def isElDownLimit():
     variable.elDownLimit = sendStepperCommand("11:0")
     if variable.elDownLimit.find('0') != -1:
-        print ("True")
+        #print ("True")
         return True
     elif variable.elDownLimit.find('1') != -1:
-        print ("False")
+        #print ("False")
         return False
 
 # For now, let's home west
 def homeAzimuth():
     variable.azHoming = True
     # slew west a long friggin way
-    #sendStepperCommand("1:-20000"))
-    pass
+    relMoveAz(-40000)
 
 def homeElevation():
     variable.elHoming = True
-    # slew west a long friggin way
-    #sendStepperCommand("1:-20000"))
-    pass
+    # slew south a long friggin way
+    relMoveEl(40000)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
@@ -324,22 +343,22 @@ def zeroEncoders():
 def processCmd(cmd):
     switcher = {
         ':Mn#':slewNorth,
-            ':Me#':slewEast,
-                ':Mw#':slewWest,
-                ':Ms#':slewSouth,
-                ':Q#':stopAllSlew,
-                '0':printEncoders,
-                '1':stopAz,
-                '2':stopEl,
-                '3':quickStopAz,
-                '4':quickStopEl,
-                '5':isAzCWLimit,
-                '6':isAzCCWLimit,
-                '7':isElUpLimit,
-                '8':isElDownLimit,
-                '9':homeAzimuth,
-                '10':homeElevation,
-                '11':zeroEncoders
+        ':Me#':slewEast,
+        ':Mw#':slewWest,
+        ':Ms#':slewSouth,
+        ':Q#':stopAllSlew,
+        '0':printEncoders,
+        '1':stopAz,
+        '2':stopEl,
+        '3':quickStopAz,
+        '4':quickStopEl,
+        '5':isAzCWLimit,
+        '6':isAzCCWLimit,
+        '7':isElUpLimit,
+        '8':isElDownLimit,
+        '9':homeAzimuth,
+        '10':homeElevation,
+        '11':zeroEncoders
     }
     func=switcher.get(cmd,lambda :'Invalid')
     return func()

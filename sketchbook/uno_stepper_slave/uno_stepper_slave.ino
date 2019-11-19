@@ -486,15 +486,6 @@ void setup() {
   stepperX.setEnablePin(7);   // using an enable pin
   stepperY.setEnablePin(7);
 
-  // This is for debugging only
-  // Set up encoder max speeds and accels
-  //setMaxSpeed(0, 500);     // azimuth
-  //setMaxSpeed(1, 500);     // elevation
-  //setAccel(0, 500);         // azimuth
-  //setAccel(1, 500);         // elevation
-  //setSpeed(0, 500);        // azimuth
-  //setSpeed(1, 500);        // elevation
-
 }
 
 void loop() {
