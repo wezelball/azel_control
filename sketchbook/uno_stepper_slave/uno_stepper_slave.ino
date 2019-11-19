@@ -515,12 +515,14 @@ void loop() {
 
   // ************************* Check hard limits ******************************
   if ((getLimit(0,0) == 0) && azMovingCW) {           // az max CW
-    stepperX.disableOutputs();                  // stop as fast as possible
-    azMovingCW = false;
+    //stepperX.disableOutputs();                  // stop as fast as possible
+    //azMovingCW = false;
+    fastStop(0);
     azCWLimit = true;
   } else if ((getLimit(0,1) == 0) && azMovingCCW) {   // az max CCW
-    stepperX.disableOutputs();                  // stop as fast as possible
-    azMovingCCW = false;
+    //stepperX.disableOutputs();                  // stop as fast as possible
+    //azMovingCCW = false;
+    fastStop(0);
     azCCWLimit = true;
   } else {                                      // reset flags
     azCWLimit = false;
@@ -529,12 +531,14 @@ void loop() {
 
   // Check hard limits
   if ((getLimit(1,0) == 0) && elMovingUp) {           // el max up
-    stepperY.disableOutputs();                  // stop as fast as possible
-    elMovingUp = false;
+    //stepperY.disableOutputs();                  // stop as fast as possible
+    //elMovingUp = false;
+    fastStop(1);
     elUpLimit = true;
   } else if ((getLimit(1,1) == 0) && elMovingDown) {  // el max down
-    stepperY.disableOutputs();                  // stop as fast as possible
-    elMovingDown = false;
+    //stepperY.disableOutputs();                  // stop as fast as possible
+    //elMovingDown = false;
+    fastStop(1);
     elDownLimit = true;
   } else {                                      // reset flags
     elUpLimit = false;
