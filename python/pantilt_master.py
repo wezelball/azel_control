@@ -277,16 +277,24 @@ def encoderDegreesToPulses(degrees):
 
 # ****************** Command functions ***********************
 def slewNorth():
-    print (sendStepperCommand("2:8000"))
+    # should replace this with relMoveEl(distance)
+    #print (sendStepperCommand("2:8000"))
+    relMoveEl(8000)
 
 def slewEast():
-    print(sendStepperCommand("1:8000"))   
+    # should replace this with relMoveAz(distance)
+    #print(sendStepperCommand("1:8000"))
+    relMoveAz(8000)
 
 def slewWest():
-    print(sendStepperCommand("1:-8000"))
+    # should replace this with relMoveAz(distance)
+    #print(sendStepperCommand("1:-8000"))
+    relMoveAz(-8000)
 
 def slewSouth():
-    print(sendStepperCommand("2:-8000"))
+    # should replace this with relMoveEl(distance)
+    #print(sendStepperCommand("2:-8000"))
+    relMoveEl(-8000)
 
 def stopAllSlew():
     print(sendStepperCommand("3:0"))
@@ -385,28 +393,33 @@ def zeroEncoders():
 
     return tuple(encPosList)    
 
-def processCmd(cmd):
-    switcher = {
-        ':Mn#':slewNorth,
-        ':Me#':slewEast,
-        ':Mw#':slewWest,
-        ':Ms#':slewSouth,
-        ':Q#':stopAllSlew,
-        '0':printEncoders,
-        '1':stopAz,
-        '2':stopEl,
-        '3':quickStopAz,
-        '4':quickStopEl,
-        '5':isAzCWLimit,
-        '6':isAzCCWLimit,
-        '7':isElUpLimit,
-        '8':isElDownLimit,
-        '9':homeAzimuth,
-        '10':homeElevation,
-        '11':zeroEncoders
-    }
-    func=switcher.get(cmd,lambda :'Invalid')
-    return func()
+# Called if no case passed to switch function
+def case_default():
+    print("No case")
+
+def switchCase(case):
+    return {
+        ":Mn#":slewNorth,
+        ":Me#":slewEast,
+        ":Mw#":slewWest,
+        ":Ms#":slewSouth,
+        ":Q#":stopAllSlew,
+        "0":printEncoders,
+        "1":stopAz,
+        "2":stopEl,
+        "3":quickStopAz,
+        "4":quickStopEl,
+        "5":isAzCWLimit,
+        "6":isAzCCWLimit,
+        "7":isElUpLimit,
+        "8":isElDownLimit,
+        "9":homeAzimuth,
+        "10":homeElevation,
+        "11":zeroEncoders,
+        "12":relMoveAz,       # requires distance
+        "13":relMoveEl,       # requires distance  
+    }.get(case, case_default)
+
 
 # loop to send message
 exit = False
@@ -429,11 +442,17 @@ setInitialValues()
 
 while not exit:
 
-    r = str(input('-> '))
+    # Get the user command
+    r = input('-> ')
+    cmdList = r.split()
 
-    processCmd(r)
+    # Pass the command to the switch construct
+    if len(cmdList) == 1:           # command with no parms
+        switchCase(cmdList[0])()
+    elif len(cmdList) == 2:         # command with one parm
+        switchCase(cmdList[0])(cmdList[1])
 
-    if r=='q':
+    if cmdList[0] == 'q':
         exit=True
 
 # Exit program here
