@@ -229,8 +229,53 @@ def watchHomingAxis(axis):
         if isElDownLimit == True:
             variable.elHoming = False
             variable.elHomed = True
+            
+# Given stepper pulses, return degrees
+# Assume the zeroth pulse is a 0 degrees (no offset)
+# Negative values are allowed
+# axis 0 = azimuth
+# axis 1 = elevation
+def stepperPulsesToDegrees(axis, pulses):
+    # for azimuth axis
+    # remember, reduce speed = multiply resolution
+    # 400 pulses per rev (2x microstepping)
+    # multiplied by 10:1 gearbox on output of stepper
+    # multiplied by 13/18 for chain reduction
+    # multiplied by 40 for # teeth in worm wheel (guess)
+    if axis == 0:
+        degrees = float(pulses)/401.250
+    elif axis == 1:
+        degrees = float(pulses)/769.166
+            
+    return degrees
+        
+# Given position in degrees, return pulses
+# Assume the zeroth degree is at pulse 0 (no offset)
+# Negative values are allowed
+# axis 0 = azimuth
+# axis 1 = elevation
+def stepperDegreesToPulses(axis, degrees):
+    if axis == 0:
+        pulses = degrees * 401.250
+    elif axis == 1:
+        pulses = degrees * 769.166
+        
+    return int(pulses)
 
-# Command functions
+# Given encoder pulses, return degree equivalent
+# The encoder gear relationships on both axes
+# are identical
+def encoderPulsesToDegrees(pulses):
+    degreesPerPulse = 0.092308
+    degrees = pulses * degreesPerPulse
+    return degrees
+
+def encoderDegreesToPulses(degrees):
+    pulsesPerDegree = 10.83333333
+    pulses = degrees * pulsesPerDegree
+    return pulses
+
+# ****************** Command functions ***********************
 def slewNorth():
     print (sendStepperCommand("2:8000"))
 
