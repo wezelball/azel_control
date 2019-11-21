@@ -10,7 +10,7 @@ import time
 import datetime
 #import ephem
 import threading
-#import timer
+from threading import Timer
 import logging
 
 # Set up the i2c bus
@@ -25,6 +25,27 @@ i2c_cmd = 0x01
 messageQ = []
 
 # *********************** BEGIN CLASSES ******************************
+
+class RepeatingTimer(object):
+
+    def __init__(self, interval, f, *args, **kwargs):
+        self.interval = interval
+        self.f = f
+        self.args = args
+        self.kwargs = kwargs
+
+        self.timer = None
+
+    def callback(self):
+        self.f(*self.args, **self.kwargs)
+        self.start()
+
+    def cancel(self):
+        self.timer.cancel()
+
+    def start(self):
+        self.timer = Timer(self.interval, self.callback)
+        self.timer.start()
 
 # This thread is for updating live parameters
 class periodicThread (threading.Thread):
@@ -44,7 +65,7 @@ class periodicThread (threading.Thread):
             variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
             variable.elVelocity = (variable.elPos - self.lastEl)/self.delay
             self.lastAz,self.lastEl = getEncoders()
-            #Update the logfile
+            # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + \
                       ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
@@ -67,6 +88,36 @@ class periodicThread (threading.Thread):
                 variable.elHoming = False
                 zeroEncoders()
                 
+            # Monitor the run status of the steppers,
+            # updating the process varaibles
+            # This will used to invoke jam detection later
+            if isRunning(0):    # azimuth
+                variable.isAzRunning = True
+                # Look to see if stopped
+                if variable.azVelocity < 1.0:
+                    if variable.azFailTiming == False:
+                        az_fail_timer.start()
+                        variable.azFailTiming = True
+                        logging.debug("periodicThread.run() azFailTiming = True")
+                else:   # running above min velocity
+                    if variable.azFailTiming == True:
+                        az_fail_timer.cancel()
+                        variable.azFailTiming = False
+                        logging.debug("periodicThread.run() azFailTiming = False")
+                
+            if isRunning(1):    # elevation
+                variable.isElRunning = True
+                # Look to see if stopped
+                if variable.elVelocity < 1.0:
+                    if variable.elFailTiming == False:
+                        el_fail_timer.start()
+                        variable.elFailTiming = True
+                        logging.debug("periodicThread.run() elFailTiming = True")
+                else:   # running above min velocity
+                    if variable.elFailTiming == True:
+                        el_fail_timer.cancel()
+                        variable.elFailTiming = False
+                        logging.debug("periodicThread.run() elFailTiming = False")                
 
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
@@ -104,6 +155,10 @@ class Variables():
         self.azHoming = False
         self.elHomed = False
         self.elHoming = False
+        
+        # fail timer flags
+        self.azFailTiming = False
+        self.elFailTiming = False
 
 # ************************* END CLASSES ******************************
 
@@ -119,6 +174,8 @@ def setInitialValues():
     time.sleep(0.25)
     setElAccel(500)
 
+# Sends the message over the i2c bus, using a 
+# prioritized messageQ
 def sendMessage(priority, message, i2c_address):
     messageQ.append((priority, message))
     messageQ.sort(reverse = True)
@@ -244,7 +301,7 @@ def setElAccel(accel):
 # Watches the axis while it's homing
 # When home limit made, terminate homing mode 
 # If the encoder velocity approaches zero while
-#  homing, issue an estop and error
+# homing, issue an estop and error
 #
 # axis = 0    azimuth
 # axis = 1    elevation
@@ -406,16 +463,21 @@ def isElDownLimit():
 # For now, let's home west
 def homeAzimuth():
     variable.azHoming = True
+    logging.debug("homeAzimuth()")
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
     variable.elHoming = True
+    logging.debug("homeElevation()")
     # slew south a long friggin way
     relMoveEl(40000)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
+# I really need to pass an axis as argument and 
+# have this zero each encoder separately.  Most of the
+# work would be in the Nano
 def zeroEncoders():
     encPosList = []
     cmd = '1'
@@ -447,15 +509,23 @@ def isRunning(axis):
     logging.debug("isRunning() axis %s result %s", axis, result)    
 
     if result == "1":
-        print("True")
+        #print("True")
         return True
     else:
-        print("False")
+        #print("False")
         return False
     
+def azJam():
+    logging.debug("azJam() timeout")
+    #print("azimuth jam detected")
+    
+def elJam():
+    logging.debug("elJam() timeout")
+    #print("elevation jam detected")
+
 # Called if no case passed to switch function
 def case_default():
-    print("No case")
+    #print("No case")
     logging.debug("case_default() entered")
 
 def switchCase(case):
@@ -486,7 +556,7 @@ def switchCase(case):
 # loop to send message
 exit = False
 
-# There needs to be a logfile for process parameters
+# Process logfile for live process parameters
 logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
 log = open(logfile, 'w')
 # Write the header
@@ -504,7 +574,8 @@ commThread = periodicThread(1, "Thread-1")
 commThread.start()
 
 # Set timer thread
-#fail_timer = threading.Timer(1.0, testTimer)
+az_fail_timer = RepeatingTimer(1.0, azJam)
+el_fail_timer = RepeatingTimer(1.0, elJam)
 
 # Set initial values - motor speeds, etc
 setInitialValues()
