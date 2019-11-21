@@ -146,8 +146,6 @@ void setMaxSpeed(int axis, int speed)  {
     stepperX.setMaxSpeed(speed);  
   else if (axis == 1) 
     stepperY.setMaxSpeed(speed);  
-
-  //mySerial.println("Set max speed");
 }
 
 // Sets desired speed for runSpeed()
@@ -156,8 +154,6 @@ void setSpeed(int axis, int speed)  {
     stepperX.setSpeed((float)speed);
   else if (axis == 1) 
     stepperX.setSpeed((float)speed);
-    
-  //mySerial.println("Set speed");
 }
 
 void runSpeed(int axis)  {     // must add hard limit checks 
@@ -165,8 +161,6 @@ void runSpeed(int axis)  {     // must add hard limit checks
     slewingX = true;
   else if (axis == 1)
     slewingY = true;
-
-  //mySerial.println("Run speed");
 }
 
 // Stops with deceleration ramp
@@ -239,8 +233,6 @@ int setAccel(int axis, int accel)  {
     stepperX.setAcceleration((float)accel);
   else if (axis == 1)   // elevation
     stepperY.setAcceleration((float)accel);
-    
-  //mySerial.println("Set accel");
 }
 
 long getCurPosition(int axis){
@@ -255,8 +247,6 @@ void setCurPosition(int axis, long position) {   // add axis as an argument
     stepperX.setCurrentPosition(position);
   else if (axis == 1)
     stepperY.setCurrentPosition(position);
-    
-  //mySerial.println("set position");
 }
 
 void moveToAbsolute(int axis, long absolute) {   // must add hard limits check here
@@ -331,8 +321,6 @@ int getLimit(int axis, int limit) {
 void receiveEvent(int howMany) {
     
   int numOfBytes = Wire.available();
-
-  //Serial.print("RPi: ");
   
   byte b = Wire.read();  //cmd
 
@@ -342,7 +330,6 @@ void receiveEvent(int howMany) {
     rawCommand.concat(data);
     //Serial.print(data);  
   }
-  //Serial.println();
 
   command = parseCommand(rawCommand);
   param = parseParameter(rawCommand);
@@ -456,9 +443,25 @@ void processCommand(){
       memset(str, '\0', sizeof(str));
       ltoa(getCurPosition(param), str, 10);
       answer = str;
-      Serial.print("answer: ");
-      Serial.println(answer);
-       
+      //Serial.print("answer: ");
+      //Serial.println(answer);
+      command = 0;
+      param = 0;
+      break;
+    case 19:    // is stepper running?
+      if (param == 0) {           // azimuth
+        if (stepperX.isRunning()) {
+          answer = "1";
+        } else {
+          answer = "0";
+        } 
+      } else if (param == 1)  {   // elevation
+        if (stepperY.isRunning()) {
+          answer = "1";
+        } else {
+          answer = "0";
+        }
+      }
       command = 0;
       param = 0;
       break;
@@ -525,13 +528,9 @@ void loop() {
 
   // ************************* Check hard limits ******************************
   if ((getLimit(0,0) == 0) && azMovingCW) {           // az max CW
-    //stepperX.disableOutputs();                  // stop as fast as possible
-    //azMovingCW = false;
     fastStop(0);
     azCWLimit = true;
   } else if ((getLimit(0,1) == 0) && azMovingCCW) {   // az max CCW
-    //stepperX.disableOutputs();                  // stop as fast as possible
-    //azMovingCCW = false;
     fastStop(0);
     azCCWLimit = true;
   } else {                                      // reset flags
@@ -541,13 +540,9 @@ void loop() {
 
   // Check hard limits
   if ((getLimit(1,0) == 0) && elMovingUp) {           // el max up
-    //stepperY.disableOutputs();                  // stop as fast as possible
-    //elMovingUp = false;
     fastStop(1);
     elUpLimit = true;
   } else if ((getLimit(1,1) == 0) && elMovingDown) {  // el max down
-    //stepperY.disableOutputs();                  // stop as fast as possible
-    //elMovingDown = false;
     fastStop(1);
     elDownLimit = true;
   } else {                                      // reset flags

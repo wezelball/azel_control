@@ -10,7 +10,8 @@ import time
 import datetime
 #import ephem
 import threading
-import re
+#import timer
+import logging
 
 # Set up the i2c bus
 bus = smbus.SMBus(1)
@@ -89,6 +90,8 @@ class Variables():
         self.elSlewSpeed = 500;
         self.azAccel = 500;
         self.elAccel = 500;
+        self.isAzRunning = False;
+        self.isElRunning = False;
 
         # Real-time values
         self.azVelocity = 0
@@ -180,17 +183,18 @@ def getEncoders():
 # axis 0 = azimuth
 # axis 1 = elevation
 def getStepperPosn(axis):
-    result = ""
-    
     cmd = "18" + ':' + str(axis)
     reply  = sendStepperCommand(cmd)
     
+    # iterate through the string and pick out digits only
+    result = ""
     for i in reply:
         if ord(i) >= 48 and ord(i) <= 57:
             result += i
     
     # for debugging
     print ("result: %s" %result)
+    logging.debug("getStepperPosn() returned %s", result)
     
     return int(result)
     
@@ -203,33 +207,39 @@ def sendStepperCommand(cmd):
 # Process functions
 def setAzSpeed(speed):
     cmd = "12" + ':' + str(speed)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setAzSpeed() %s", speed)
 
 def setAzMaxSpeed(speed):
     cmd = "16" + ':' + str(speed)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setAzMaxSpeed() %s", speed)
 
 def setElSpeed(speed):
     cmd = "13" + ':' + str(speed)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setElSpeed() %s", speed)
 
 def setElMaxSpeed(speed):
     cmd = "17" + ':' + str(speed)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setElMaxSpeed() %s", speed)
 
 def setAzAccel(accel):
     cmd = "14" + ':' + str(accel)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setAzAccel() %s", accel)
 
 def setElAccel(accel):
     cmd = "15" + ':' + str(accel)
-    print("command: %s" % cmd)
-    print (sendStepperCommand(cmd))
+    #print("command: %s" % cmd)
+    sendStepperCommand(cmd)
+    logging.debug("setAzAccel() %s", accel)
 
 # Watches the axis while it's homing
 # When home limit made, terminate homing mode 
@@ -299,51 +309,58 @@ def encoderDegreesToPulses(degrees):
 # ****************** Command functions ***********************
 def slewNorth():
     # should replace this with relMoveEl(distance)
-    #print (sendStepperCommand("2:8000"))
+    logging.debug("slewNorth()")
     relMoveEl(8000)
 
 def slewEast():
     # should replace this with relMoveAz(distance)
-    #print(sendStepperCommand("1:8000"))
+    logging.debug("slewEast()")
     relMoveAz(8000)
 
 def slewWest():
     # should replace this with relMoveAz(distance)
-    #print(sendStepperCommand("1:-8000"))
+    logging.debug("slewWest()")
     relMoveAz(-8000)
 
 def slewSouth():
     # should replace this with relMoveEl(distance)
-    #print(sendStepperCommand("2:-8000"))
+    logging.debug("slewSouth()")
     relMoveEl(-8000)
 
 def stopAllSlew():
+    logging.debug("stopAllSlew()")
     print(sendStepperCommand("3:0"))
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
+    logging.debug("relMoveAz(%s)", distance)
     print (sendStepperCommand(cmd)) 
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
+    logging.debug("relMoveEl(%s)", distance)
     print (sendStepperCommand(cmd))
 
 def printEncoders():
     print(getEncoders())
 
 def stopAz():
+    logging.debug("stopAz()")
     print(sendStepperCommand("4:0"))
 
 def stopEl():
+    logging.debug("stopEl()")
     print(sendStepperCommand("5:0"))
 
 # There is a bug when quickStop functions are called
 # and a later move is performed, it starts
 # at full speed with no accel
 def quickStopAz():
+    logging.debug("quickStopAz()")
     print(sendStepperCommand("6:0"))
 
 def quickStopEl():
+    logging.debug("quickStopEl()")
     print(sendStepperCommand("7:0"))
 
 # returns 0 if limit made
@@ -412,11 +429,34 @@ def zeroEncoders():
             # positions - this is ugly and might cause issues
             encPosList = variable.azPos, variable.elPos
 
+    logging.debug("zeroEncoders() returned %s", encPosList)
+    
     return tuple(encPosList)    
 
+# Is the stepper axis running?
+def isRunning(axis):
+    cmd = "19" + ':' + str(axis)
+    reply = sendStepperCommand(cmd)
+
+    # iterate through the string and pick out digits only
+    result = ""
+    for i in reply:
+        if ord(i) >= 48 and ord(i) <= 57:
+            result += i        
+                
+    logging.debug("isRunning() axis %s result %s", axis, result)    
+
+    if result == "1":
+        print("True")
+        return True
+    else:
+        print("False")
+        return False
+    
 # Called if no case passed to switch function
 def case_default():
     print("No case")
+    logging.debug("case_default() entered")
 
 def switchCase(case):
     return {
@@ -440,17 +480,21 @@ def switchCase(case):
         "12":relMoveAz,       # requires distance
         "13":relMoveEl,       # requires distance
         "14":getStepperPosn,  # requires axis, 0=az, 1=el
+        "15":isRunning,       # requires axis, 0=az, 1=el
     }.get(case, case_default)
-
 
 # loop to send message
 exit = False
 
-# There needs to be a logfile
+# There needs to be a logfile for process parameters
 logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
 log = open(logfile, 'w')
 # Write the header
 log.write("Time,azEncoder, elEncoder" + '\n')
+
+# This is the python logging module
+logging.basicConfig(filename='debug.log', filemode='w', \
+                    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 # Instantiate global variables
 variable = Variables()
@@ -458,6 +502,9 @@ variable = Variables()
 # Start the comms thread after initialization
 commThread = periodicThread(1, "Thread-1")
 commThread.start()
+
+# Set timer thread
+#fail_timer = threading.Timer(1.0, testTimer)
 
 # Set initial values - motor speeds, etc
 setInitialValues()
