@@ -28,7 +28,7 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
 // ******************************BEGIN GLOBALS ***************************************
 
 long position;
-char str[17];
+char str[8];
 String answer = "";  // must be 8 bytes, or 7 characters
 String rawCommand;
 int command;    // command from RPi
@@ -451,6 +451,16 @@ void processCommand(){
       command = 0;
       param = 0;
       answer = "elMxSpd\n";
+      break;
+    case 18:    // get current stepper position
+      memset(str, '\0', sizeof(str));
+      ltoa(getCurPosition(param), str, 10);
+      answer = str;
+      Serial.print("answer: ");
+      Serial.println(answer);
+       
+      command = 0;
+      param = 0;
       break;
     default:
       command = 0;

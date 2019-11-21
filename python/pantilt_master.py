@@ -10,6 +10,7 @@ import time
 import datetime
 #import ephem
 import threading
+import re
 
 # Set up the i2c bus
 bus = smbus.SMBus(1)
@@ -173,6 +174,26 @@ def getEncoders():
             encPosList = variable.azPos, variable.elPos
 
     return tuple(encPosList)
+
+
+# Gets he position of the stepper defined by axis
+# axis 0 = azimuth
+# axis 1 = elevation
+def getStepperPosn(axis):
+    result = ""
+    
+    cmd = "18" + ':' + str(axis)
+    reply  = sendStepperCommand(cmd)
+    
+    for i in reply:
+        if ord(i) >= 48 and ord(i) <= 57:
+            result += i
+    
+    # for debugging
+    print ("result: %s" %result)
+    
+    return int(result)
+    
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
@@ -417,7 +438,8 @@ def switchCase(case):
         "10":homeElevation,
         "11":zeroEncoders,
         "12":relMoveAz,       # requires distance
-        "13":relMoveEl,       # requires distance  
+        "13":relMoveEl,       # requires distance
+        "14":getStepperPosn,  # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
 
