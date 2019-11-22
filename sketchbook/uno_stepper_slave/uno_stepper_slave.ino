@@ -76,8 +76,8 @@ int parseCommand(String cmd) {
   i = cmd.indexOf(':');
   cmdString = cmd.substring(0, i) + '\0';
 
-  Serial.print("command: ");
-  Serial.println(cmdString.toInt());
+  //Serial.print("command: ");
+  //Serial.println(cmdString.toInt());
   
   return (int)cmdString.toInt();
 }
@@ -90,8 +90,8 @@ long parseParameter(String cmd) {
   i = cmd.indexOf(':');
   paramString = cmd.substring(i+1) + '\0';
 
-  Serial.print("param: ");
-  Serial.println(paramString.toInt());
+  //Serial.print("param: ");
+  //Serial.println(paramString.toInt());
 
   return paramString.toInt();
 }
@@ -335,6 +335,14 @@ void receiveEvent(int howMany) {
   param = parseParameter(rawCommand);
   rawCommand = "";
 
+  Serial.print("command: ");
+  Serial.println(command);
+  
+  Serial.print("param: ");
+  Serial.println(param);
+
+  Serial.println();
+
   // Process the i2c command from master RPi
   processCommand();
 }
@@ -351,6 +359,9 @@ void requestEvent() {
   
   // Send response back to Master
   Wire.write(response,sizeof(response));
+
+  //Serial.print("answer: ");
+  //Serial.println(answer);
 
 }
 
@@ -498,7 +509,6 @@ void setup() {
   // Setup stepper enable pins
   stepperX.setEnablePin(7);   // using an enable pin
   stepperY.setEnablePin(7);
-
 }
 
 void loop() {
@@ -513,6 +523,7 @@ void loop() {
   } else  {
     movingX = false;
     stepperXRun = false;
+    //stepperX.stop();
   }
   
   // Relative move - el
@@ -522,6 +533,7 @@ void loop() {
   } else  {
     movingY = false;
     stepperYRun = false;
+    //stepperY.stop();
   }
 
   // ******************************* Motion ***********************************
