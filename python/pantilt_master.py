@@ -581,6 +581,40 @@ def zeroEncoders():
     
     return tuple(encPosList)    
 
+def zeroAzEncoder():
+    encPosList = []
+    cmd = '2'
+    reply = sendMessage(1, cmd, encoders_i2c_address)
+    encByteList = reply.split(':')
+    for i in encByteList:
+        try:
+            encPosList.append(int(i.rstrip('\x00')))
+        except ValueError:
+            # Bus error, assign last known values of encoder
+            # positions - this is ugly and might cause issues
+            encPosList = variable.azPos, variable.elPos
+
+    logging.debug("zeroAzEncoder() returned %s", encPosList)
+    
+    return tuple(encPosList)    
+
+def zeroElEncoder():
+    encPosList = []
+    cmd = '3'
+    reply = sendMessage(1, cmd, encoders_i2c_address)
+    encByteList = reply.split(':')
+    for i in encByteList:
+        try:
+            encPosList.append(int(i.rstrip('\x00')))
+        except ValueError:
+            # Bus error, assign last known values of encoder
+            # positions - this is ugly and might cause issues
+            encPosList = variable.azPos, variable.elPos
+
+    logging.debug("zeroAzEncoder() returned %s", encPosList)
+    
+    return tuple(encPosList)
+
 # Is the stepper axis running?
 def isRunning(axis):
     cmd = "19" + ':' + str(axis)
@@ -642,6 +676,8 @@ def switchCase(case):
         "13":relMoveEl,       # requires distance
         "14":getStepperPosn,  # requires axis, 0=az, 1=el
         "15":isRunning,       # requires axis, 0=az, 1=el
+        "16":zeroAzEncoder,
+        "17":zeroElEncoder,
     }.get(case, case_default)
 
 # loop to send message

@@ -58,6 +58,24 @@ void loop() {
     ltoa(position, az, 10);
     ltoa(position, el, 10);
   }
+
+  // Zero azimuth
+  else if (command == 2)  {
+    azEnc.write(0);
+    //elEnc.write(0);
+    position = 0l;
+    ltoa(position, az, 10);
+    //ltoa(position, el, 10);
+  }
+
+  // Zero elevation
+  else if (command == 3)  {
+    //azEnc.write(0);
+    elEnc.write(0);
+    position = 0l;
+    //ltoa(position, az, 10);
+    ltoa(position, el, 10);
+  }
   
   sprintf(str, "%s:%s",az,el);  
   answer = str;
