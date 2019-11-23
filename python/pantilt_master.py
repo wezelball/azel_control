@@ -34,13 +34,48 @@ class motionThread(threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        self.delay = 1.0
+        self.delay = 1.5
+        self.azFailTiming = False
+        self.elFailTiming = False
     
     def run(self):
         while self.running:
             time.sleep(self.delay)
             logging.debug("motionThread() %s running", self.name)
     
+            # Monitor the run status of the steppers,
+            # updating the process varaibles
+            # This will used to invoke jam detection later
+            if variable.isAzRunning == True:    # azimuth
+                # Look to see if stopped
+                if abs(variable.azVelocity) < 10.0:
+                    if self.azFailTiming == False:
+                        self.azFailTiming = True
+                        logging.debug("periodicThread.run() azFailTiming = True")
+                    elif self.azFailTiming == True:
+                        self.azFailTiming == False
+                        azJam()
+                    
+                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
+                    if self.azFailTiming == True:
+                        self.azFailTiming = False
+                        logging.debug("periodicThread.run() azFailTiming = False")
+
+                
+            if variable.isElRunning == True:    # elevation
+                # Look to see if stopped
+                if abs(variable.elVelocity) < 10.0:
+                    if self.elFailTiming == False:
+                        self.elFailTiming = True
+                        logging.debug("periodicThread.run() elFailTiming = True")
+                    elif self.elFailTiming == True:
+                        self.elFailTiming = False
+                        elJam()
+                        
+                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
+                    if self.elFailTiming == True:
+                        self.elFailTiming = False
+                        logging.debug("periodicThread.run() elFailTiming = False")    
         
     def stop(self):
         self.running = False
@@ -68,8 +103,8 @@ class periodicThread (threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        #self.delay = 0.5
-        self.delay = 2.0
+        self.delay = 0.25
+        #self.delay = 2.0
         self.lastAz, self.lastEl = getEncoders()
 
     def run(self):
@@ -83,8 +118,8 @@ class periodicThread (threading.Thread):
             log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + \
                       ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
-            logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
-            logging.debug("periodicThread() elVelocity %s", variable.elVelocity)
+            #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
+            #logging.debug("periodicThread() elVelocity %s", variable.elVelocity)
 
             # watch for limits reached if homing
             if variable.azHoming == True:
@@ -104,44 +139,6 @@ class periodicThread (threading.Thread):
                 variable.azHoming = False
                 variable.elHoming = False
                 zeroEncoders()
-                
-            # Monitor the run status of the steppers,
-            # updating the process varaibles
-            # This will used to invoke jam detection later
-            if isRunning(0):    # azimuth
-                variable.isAzRunning = True
-                # Look to see if stopped
-                if abs(variable.azVelocity) < 10.0:
-                    if variable.azFailTiming == False:
-                        #az_fail_timer.run()
-                        variable.azFailTiming = True
-                        logging.debug("periodicThread.run() azFailTiming = True")
-                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
-                    if variable.azFailTiming == True:
-                        #az_fail_timer.reset(1.0)
-                        variable.azFailTiming = False
-                        logging.debug("periodicThread.run() azFailTiming = False")
-            else:
-
-                #az_fail_timer.reset(1.0)
-                variable.isAzRunning = False
-                
-            if isRunning(1):    # elevation
-                variable.isElRunning = True
-                # Look to see if stopped
-                if abs(variable.elVelocity) < 10.0:
-                    if variable.elFailTiming == False:
-                        #el_fail_timer.run()
-                        variable.elFailTiming = True
-                        logging.debug("periodicThread.run() elFailTiming = True")
-                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
-                    if variable.elFailTiming == True:
-                        #el_fail_timer.reset(1.0)
-                        variable.elFailTiming = False
-                        logging.debug("periodicThread.run() elFailTiming = False")
-            else:
-                #el_fail_timer.reset(1.0)
-                variable.isElRunning = False
 
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
@@ -196,10 +193,6 @@ class Variables():
         self.azHoming = False
         self.elHomed = False
         self.elHoming = False
-        
-        # fail timer flags
-        self.azFailTiming = False
-        self.elFailTiming = False
 
 # ************************* END CLASSES ******************************
 
@@ -433,14 +426,18 @@ def slewSouth():
 def stopAllSlew():
     logging.debug("stopAllSlew()")
     print(sendStepperCommand("3:0"))
+    variable.isAzRunning = False
+    variable.isElRunning = False
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
+    variable.isAzRunning = True
     logging.debug("relMoveAz(%s)", distance)
     print (sendStepperCommand(cmd)) 
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
+    variable.isElRunning = True
     logging.debug("relMoveEl(%s)", distance)
     print (sendStepperCommand(cmd))
 
@@ -450,10 +447,12 @@ def printEncoders():
 def stopAz():
     logging.debug("stopAz()")
     print(sendStepperCommand("4:0"))
+    variable.isAzRunning = False
 
 def stopEl():
     logging.debug("stopEl()")
     print(sendStepperCommand("5:0"))
+    variable.isElRunning = False
 
 # There is a bug when quickStop functions are called
 # and a later move is performed, it starts
@@ -461,10 +460,12 @@ def stopEl():
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
+    variable.isAzRunning = False
 
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
+    variable.isElRunning = False
 
 # returns 0 if limit made
 def isAzCWLimit():
@@ -565,15 +566,12 @@ def isRunning(axis):
     
 def azJam():
     logging.debug("azJam() timeout")
-    #az_fail_timer.reset(1.0)
     variable.azFailTiming = False
     quickStopAz()
     #print("azimuth jam detected")
     
 def elJam():
     logging.debug("elJam() timeout")
-    #az_fail_timer.reset(1.0)
-    variable.azFailTiming = False
     quickStopEl()
     #print("elevation jam detected")
 
