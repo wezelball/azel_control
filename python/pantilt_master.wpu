@@ -4,6 +4,10 @@
 # Wing project file : User-specific branch                       #
 ##################################################################
 [user attributes]
+debug.breakpoints = {loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'): {46L: (0,
+        None,
+        1,
+        0)}}
 debug.err-values = {loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'): {}}
 debug.remote-hosts = (8,
                       [{'agent-port': 0,
@@ -23,12 +27,12 @@ debug.remote-hosts = (8,
                         'winghome': ''}])
 edit.bookmarks = {'switchCase': (loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
                                  {'attrib-starts': [('switchCase|0|',
-        583)],
+        616)],
                                   'category': '',
                                   'code-line': 'def switchCase(case):\n',
                                   'first-line': 621L,
                                   'notes': '',
-                                  'sel-line': 582L})}
+                                  'sel-line': 617L})}
 guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                             'windows': [{'name': 'RuatIt5Hnvcru13fnCw5U3m572'\
         'zPRW2w',
@@ -91,7 +95,7 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                  'primary_view_state': {'area': 'wide',
         'constraint': None,
         'current_pages': [1,
-                          5],
+                          3],
         'notebook_display': 'normal',
         'notebook_percent': 0.2457081545064378,
         'override_title': None,
@@ -196,7 +200,9 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                       'wide',
                       1,
                       {'node-states': [('eval',
-        'cmdList')],
+        'cmdList'),
+                                       ('eval',
+        'self.window')],
                        'tree-state': {'expanded-nodes': [],
                                       'selected-nodes': [(0,)],
                                       'top-node': (0,)}}),
@@ -211,26 +217,557 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
         -1,
         -1),
                        'attrib-starts': [],
-                       'code-line': '-> ',
-                       'first-line': 39L,
+                       'code-line': '',
+                       'first-line': 7L,
                        'folded-linenos': [],
-                       'history': {None: ['12 -1000\n',
-        '12 -2000\n',
-        '13 1000\n',
-        '13 -4000\n',
-        '12 1000\n',
-        '13 -2000\n',
-        'q\n',
-        '12 2000\n',
-        '13 4000\n',
-        '12 -6000\n',
+                       'history': {None: ["--- Logging error ---\nTraceback "\
+        "(most recent call last):\n  File \"/usr/lib/python3.5/logging/__ini"\
+        "t__.py\", line 981, in emit\n    msg = self.format(record)\n  File "\
+        "\"/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n  "\
+        "  return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__"\
+        "init__.py\", line 568, in format\n    record.message = record.getMe"\
+        "ssage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 33"\
+        "1, in getMessage\n    msg = msg % self.args\nTypeError: a float is "\
+        "required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3"\
+        ".1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__"\
+        "\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstr"\
+        "ap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thread"\
+        "ing.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \""\
+        "x-wingide-python-shell://140141280602520/2\", line 137, in run\nMes"\
+        "sage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound metho"\
+        "d MovingAverage.computeAverage of <__main__.MovingAverage object at"\
+        " 0x7606b130>>,)\n--- Logging error ---\nTraceback (most recent call"\
+        " last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 98"\
+        "1, in emit\n    msg = self.format(record)\n  File \"/usr/lib/python"\
+        "3.5/logging/__init__.py\", line 831, in format\n    return fmt.form"\
+        "at(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
+        " 568, in format\n    record.message = record.getMessage()\n  File "\
+        "\"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessage"\
+        "\n    msg = msg % self.args\nTypeError: a float is required\nCall s"\
+        "tack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/d"\
+        "ebug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/l"\
+        "ib/python3.5/threading.py\", line 882, in _bootstrap\n    self._boo"\
+        "tstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 91"\
+        "4, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-s"\
+        "hell://140141280602520/2\", line 140, in run\nMessage: 'periodicThr"\
+        "ead() azAvgVelocity %f'\nArguments: (<bound method MovingAverage.co"\
+        "mputeAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n"\
+        "--- Logging error ---\nTraceback (most recent call last):\n  File "\
+        "\"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n    "\
+        "msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
+        "it__.py\", line 831, in format\n    return fmt.format(record)\n  Fi"\
+        "le \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
+        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
+        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
+        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
+        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
+        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
+        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
+        "602520/2\", line 137, in run\nMessage: 'periodicThread() azAvgVeloc"\
+        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
+        "<__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging error"\
+        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
+        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
+        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
+        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
+        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
+        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
+        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
+        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
+        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
+        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
+        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 14"\
+        "0, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
+        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
+        "rage object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (mo"\
+        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
+        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
+        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
+        "it__.py\", line 568, in format\n    record.message = record.getMess"\
+        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
+        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
+        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
+        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
+        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
+        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
+        "ingide-python-shell://140141280602520/2\", line 137, in run\nMessag"\
+        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
+        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
+        "7606b130>>,)\n--- Logging error ---\nTraceback (most recent call la"\
+        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
+        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
+        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
+        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
+        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
+        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
+        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
+        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
+        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
+        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
+        "://140141280602520/2\", line 140, in run\nMessage: 'periodicThread("\
+        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
+        "eAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n--- L"\
+        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
+        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
+        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
+        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
+        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
+        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
+        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
+        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
+        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
+        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
+        "/2\", line 137, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
+        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
+        "n__.MovingAverage object at 0x7606b130>>,)\n--- Logging error ---\n"\
+        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
+        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
+        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
+        "logging/__init__.py\", line 568, in format\n    record.message = re"\
+        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
+        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
+        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
+        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
+        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
+        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
+        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
+        "  File \"x-wingide-python-shell://140141280602520/2\", line 140, in"\
+        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
+        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
+        "object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most re"\
+        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
+        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
+        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
+        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 568, in format\n    record.message = record.getMessage()"\
+        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
+        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
+        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
+        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
+        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
+        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
+        "-python-shell://140141280602520/2\", line 137, in run\nMessage: 'pe"\
+        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
+        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
+        "30>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
+        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
+        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
+        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
+        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
+        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
+        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
+        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
+        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
+        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
+        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
+        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
+        "141280602520/2\", line 140, in run\nMessage: 'periodicThread() azAv"\
+        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
+        "ge of <__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging"\
+        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
+        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
+        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
+        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
+        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
+        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
+        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
+        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
+        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
+        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
+        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
+        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
+        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
+        "ine 137, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
+        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
+        "ingAverage object at 0x7606b130>>,)\n--- Logging error ---\nTraceba"\
+        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
+        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
+        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
+        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
+        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
+        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
+        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
+        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
+        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
+        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
+        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
+        "\"x-wingide-python-shell://140141280602520/2\", line 140, in run\n"\
+        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
+        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
+        " at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most recent c"\
+        "all last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
+        " 981, in emit\n    msg = self.format(record)\n  File \"/usr/lib/pyt"\
+        "hon3.5/logging/__init__.py\", line 831, in format\n    return fmt.f"\
+        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
+        "ine 568, in format\n    record.message = record.getMessage()\n  Fil"\
+        "e \"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessa"\
+        "ge\n    msg = msg % self.args\nTypeError: a float is required\nCall"\
+        " stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src"\
+        "/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr"\
+        "/lib/python3.5/threading.py\", line 882, in _bootstrap\n    self._b"\
+        "ootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line "\
+        "914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python"\
+        "-shell://140141280602520/2\", line 137, in run\nMessage: 'periodicT"\
+        "hread() azAvgVelocity %f'\nArguments: (<bound method MovingAverage."\
+        "computeAverage of <__main__.MovingAverage object at 0x7606b130>>,)"\
+        "\n--- Logging error ---\nTraceback (most recent call last):\n  File"\
+        " \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n   "\
+        " msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__i"\
+        "nit__.py\", line 831, in format\n    return fmt.format(record)\n  F"\
+        "ile \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
+        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
+        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
+        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
+        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
+        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
+        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
+        "602520/2\", line 140, in run\nMessage: 'periodicThread() azAvgVeloc"\
+        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
+        "<__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging error"\
+        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
+        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
+        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
+        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
+        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
+        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
+        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
+        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
+        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
+        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
+        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 13"\
+        "7, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
+        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
+        "rage object at 0x7606b130>>,)\n--- Logging error ---\nTraceback (mo"\
+        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
+        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
+        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
+        "it__.py\", line 568, in format\n    record.message = record.getMess"\
+        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
+        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
+        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
+        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
+        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
+        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
+        "ingide-python-shell://140141280602520/2\", line 140, in run\nMessag"\
+        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
+        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
+        "7606b190>>,)\n--- Logging error ---\nTraceback (most recent call la"\
+        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
+        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
+        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
+        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
+        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
+        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
+        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
+        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
+        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
+        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
+        "://140141280602520/2\", line 137, in run\nMessage: 'periodicThread("\
+        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
+        "eAverage of <__main__.MovingAverage object at 0x7606b130>>,)\n--- L"\
+        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
+        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
+        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
+        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
+        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
+        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
+        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
+        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
+        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
+        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
+        "/2\", line 140, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
+        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
+        "n__.MovingAverage object at 0x7606b190>>,)\n--- Logging error ---\n"\
+        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
+        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
+        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
+        "logging/__init__.py\", line 568, in format\n    record.message = re"\
+        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
+        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
+        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
+        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
+        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
+        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
+        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
+        "  File \"x-wingide-python-shell://140141280602520/2\", line 137, in"\
+        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
+        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
+        "object at 0x7606b130>>,)\n--- Logging error ---\nTraceback (most re"\
+        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
+        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
+        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
+        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 568, in format\n    record.message = record.getMessage()"\
+        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
+        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
+        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
+        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
+        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
+        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
+        "-python-shell://140141280602520/2\", line 140, in run\nMessage: 'pe"\
+        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
+        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
+        "90>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
+        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
+        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
+        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
+        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
+        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
+        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
+        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
+        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
+        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
+        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
+        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
+        "141280602520/2\", line 137, in run\nMessage: 'periodicThread() azAv"\
+        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
+        "ge of <__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging"\
+        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
+        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
+        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
+        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
+        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
+        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
+        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
+        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
+        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
+        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
+        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
+        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
+        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
+        "ine 140, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
+        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
+        "ingAverage object at 0x7606b190>>,)\n--- Logging error ---\nTraceba"\
+        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
+        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
+        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
+        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
+        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
+        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
+        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
+        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
+        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
+        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
+        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
+        "\"x-wingide-python-shell://140141280602520/2\", line 137, in run\n"\
+        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
+        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
+        " at 0x7606b130>>,)\n--- Logging error ---\nTraceback (most recent c"\
+        "all last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
+        " 981, in emit\n    msg = self.format(record)\n  File \"/usr/lib/pyt"\
+        "hon3.5/logging/__init__.py\", line 831, in format\n    return fmt.f"\
+        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
+        "ine 568, in format\n    record.message = record.getMessage()\n  Fil"\
+        "e \"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessa"\
+        "ge\n    msg = msg % self.args\nTypeError: a float is required\nCall"\
+        " stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src"\
+        "/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr"\
+        "/lib/python3.5/threading.py\", line 882, in _bootstrap\n    self._b"\
+        "ootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line "\
+        "914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python"\
+        "-shell://140141280602520/2\", line 140, in run\nMessage: 'periodicT"\
+        "hread() azAvgVelocity %f'\nArguments: (<bound method MovingAverage."\
+        "computeAverage of <__main__.MovingAverage object at 0x7606b190>>,)"\
+        "\n--- Logging error ---\nTraceback (most recent call last):\n  File"\
+        " \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n   "\
+        " msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__i"\
+        "nit__.py\", line 831, in format\n    return fmt.format(record)\n  F"\
+        "ile \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
+        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
+        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
+        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
+        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
+        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
+        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
+        "602520/2\", line 137, in run\nMessage: 'periodicThread() azAvgVeloc"\
+        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
+        "<__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging error"\
+        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
+        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
+        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
+        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
+        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
+        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
+        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
+        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
+        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
+        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
+        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 14"\
+        "0, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
+        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
+        "rage object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (mo"\
+        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
+        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
+        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
+        "it__.py\", line 568, in format\n    record.message = record.getMess"\
+        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
+        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
+        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
+        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
+        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
+        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
+        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
+        "ingide-python-shell://140141280602520/2\", line 137, in run\nMessag"\
+        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
+        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
+        "7606b130>>,)\n--- Logging error ---\nTraceback (most recent call la"\
+        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
+        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
+        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
+        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
+        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
+        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
+        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
+        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
+        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
+        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
+        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
+        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
+        "://140141280602520/2\", line 140, in run\nMessage: 'periodicThread("\
+        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
+        "eAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n--- L"\
+        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
+        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
+        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
+        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
+        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
+        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
+        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
+        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
+        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
+        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
+        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
+        "/2\", line 137, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
+        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
+        "n__.MovingAverage object at 0x7606b130>>,)\n--- Logging error ---\n"\
+        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
+        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
+        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
+        "logging/__init__.py\", line 568, in format\n    record.message = re"\
+        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
+        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
+        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
+        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
+        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
+        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
+        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
+        "  File \"x-wingide-python-shell://140141280602520/2\", line 140, in"\
+        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
+        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
+        "object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most re"\
+        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
+        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
+        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
+        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
+        "y\", line 568, in format\n    record.message = record.getMessage()"\
+        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
+        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
+        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
+        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
+        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
+        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
+        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
+        "-python-shell://140141280602520/2\", line 137, in run\nMessage: 'pe"\
+        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
+        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
+        "30>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
+        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
+        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
+        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
+        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
+        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
+        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
+        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
+        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
+        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
+        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
+        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
+        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
+        "141280602520/2\", line 140, in run\nMessage: 'periodicThread() azAv"\
+        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
+        "ge of <__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging"\
+        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
+        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
+        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
+        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
+        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
+        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
+        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
+        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
+        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
+        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
+        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
+        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
+        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
+        "ine 137, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
+        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
+        "ingAverage object at 0x7606b130>>,)\n--- Logging error ---\nTraceba"\
+        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
+        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
+        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
+        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
+        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
+        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
+        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
+        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
+        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
+        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
+        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
+        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
+        "\"x-wingide-python-shell://140141280602520/2\", line 140, in run\n"\
+        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
+        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
+        " at 0x7606b190>>,)\n--- Logging error ---\nq\n",
         '12 -4000\n',
-        '12 8000\n']},
+        '12 12000\n',
+        '1\n',
+        '12 1000\n',
+        '12 2000\n',
+        '13 2000\n',
+        'q\n']},
                        'launch-id': None,
-                       'sel-line': 45L,
-                       'sel-line-start': 456L,
-                       'selection_end': 459L,
-                       'selection_start': 459L,
+                       'sel-line': 13L,
+                       'sel-line-start': 237L,
+                       'selection_end': 237L,
+                       'selection_start': 237L,
                        'zoom': 0L}),
                      ('bookmarks',
                       'wide',
@@ -245,10 +782,13 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                       1,
                       {})],
         'primary_view_state': {'editor_states': ({'bookmarks': ([[loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-        {'attrib-starts': [('azJam|0|',
-                            578)],
-         'code-line': 'def azJam():\n',
-         'first-line': 557L,
+        {'attrib-starts': [('periodicThread|0|',
+                            104),
+                           ('periodicThread|0|.run|0|',
+                            114)],
+         'code-line': '                        logging.debug("periodicThread'\
+                      '.run() azFailTiming = True")\n',
+         'first-line': 136L,
          'folded-linenos': [29L,
                             34L,
                             42L,
@@ -305,152 +845,12 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                             557L,
                             591L,
                             595L],
-         'sel-line': 578L,
-         'sel-line-start': 17044L,
-         'selection_end': 17048L,
-         'selection_start': 17048L,
+         'sel-line': 154L,
+         'sel-line-start': 4750L,
+         'selection_end': 4812L,
+         'selection_start': 4810L,
          'zoom': 0L},
-        1574384857.514783],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('periodicThread|0|',
-                             104),
-                            ('periodicThread|0|.run|0|',
-                             114)],
-          'code-line': '                        variable.azFailTiming = True'\
-                       '\n',
-          'first-line': 136L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             68L,
-                             82L,
-                             84L,
-                             92L,
-                             96L,
-                             99L,
-                             105L,
-                             175L,
-                             178L,
-                             182L,
-                             183L,
-                             219L,
-                             232L,
-                             261L,
-                             267L,
-                             279L,
-                             300L,
-                             318L,
-                             323L,
-                             329L,
-                             335L,
-                             341L,
-                             347L,
-                             353L,
-                             369L,
-                             384L,
-                             403L,
-                             414L,
-                             419L,
-                             425L,
-                             430L,
-                             435L,
-                             440L,
-                             445L,
-                             449L,
-                             454L,
-                             459L,
-                             462L,
-                             466L,
-                             473L,
-                             477L,
-                             482L,
-                             492L,
-                             502L,
-                             512L,
-                             522L,
-                             528L,
-                             539L,
-                             557L,
-                             591L,
-                             595L],
-          'sel-line': 153L,
-          'sel-line-start': 4697L,
-          'selection_end': 4749L,
-          'selection_start': 4749L,
-          'zoom': 0L},
-         1574385112.552021],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('periodicThread|0|',
-                             104),
-                            ('periodicThread|0|.run|0|',
-                             114)],
-          'code-line': '                        logging.debug("periodicThrea'\
-                       'd.run() azFailTiming = True")\n',
-          'first-line': 136L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             68L,
-                             82L,
-                             84L,
-                             92L,
-                             96L,
-                             99L,
-                             105L,
-                             175L,
-                             178L,
-                             182L,
-                             183L,
-                             219L,
-                             232L,
-                             261L,
-                             267L,
-                             279L,
-                             300L,
-                             318L,
-                             323L,
-                             329L,
-                             335L,
-                             341L,
-                             347L,
-                             353L,
-                             369L,
-                             384L,
-                             403L,
-                             414L,
-                             419L,
-                             425L,
-                             430L,
-                             435L,
-                             440L,
-                             445L,
-                             449L,
-                             454L,
-                             459L,
-                             462L,
-                             466L,
-                             473L,
-                             477L,
-                             482L,
-                             492L,
-                             502L,
-                             512L,
-                             522L,
-                             528L,
-                             539L,
-                             557L,
-                             591L,
-                             595L],
-          'sel-line': 154L,
-          'sel-line-start': 4750L,
-          'selection_end': 4812L,
-          'selection_start': 4810L,
-          'zoom': 0L},
-         1574385113.526268],
+        1574385113.526268],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
          {'attrib-starts': [('elJam|0|',
                              584)],
@@ -1241,56 +1641,157 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
           'selection_end': 39967L,
           'selection_start': 39967L,
           'zoom': 0L},
-         1574466962.484957]],
+         1574466962.484957],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [],
+          'code-line': 'variable = Variables()\n',
+          'first-line': 626L,
+          'folded-linenos': [99L,
+                             102L,
+                             110L,
+                             162L,
+                             165L,
+                             169L,
+                             177L,
+                             186L,
+                             219L,
+                             232L,
+                             261L,
+                             267L,
+                             300L,
+                             318L,
+                             323L,
+                             329L,
+                             335L,
+                             341L,
+                             347L,
+                             353L,
+                             369L,
+                             384L,
+                             403L,
+                             414L,
+                             419L,
+                             463L,
+                             466L,
+                             471L,
+                             479L,
+                             484L,
+                             490L,
+                             500L,
+                             510L,
+                             520L,
+                             530L,
+                             536L,
+                             547L,
+                             565L,
+                             598L],
+          'sel-line': 641L,
+          'sel-line-start': 19178L,
+          'selection_end': 19198L,
+          'selection_start': 19189L,
+          'zoom': 0L},
+         1574472778.66604],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [],
+          'code-line': 'variable = Variables()\n',
+          'first-line': 635L,
+          'folded-linenos': [99L,
+                             102L,
+                             110L,
+                             166L,
+                             169L,
+                             173L,
+                             181L,
+                             226L,
+                             239L,
+                             268L,
+                             274L,
+                             307L,
+                             325L,
+                             330L,
+                             336L,
+                             342L,
+                             348L,
+                             354L,
+                             360L,
+                             376L,
+                             391L,
+                             410L,
+                             421L,
+                             426L,
+                             470L,
+                             473L,
+                             478L,
+                             486L,
+                             491L,
+                             497L,
+                             507L,
+                             517L,
+                             527L,
+                             537L,
+                             543L,
+                             554L,
+                             572L,
+                             605L],
+          'sel-line': 648L,
+          'sel-line-start': 19528L,
+          'selection_end': 19548L,
+          'selection_start': 19539L,
+          'zoom': 0L},
+         1574473880.209466]],
         20),
         'current-loc': loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
         'editor-state-list': [(loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-                               {'attrib-starts': [],
-                                'code-line': '\n',
-                                'first-line': 12L,
-                                'folded-linenos': [79L,
-        82L,
-        90L,
-        142L,
-        145L,
-        149L,
-        157L,
-        166L,
-        199L,
-        212L,
-        241L,
+                               {'attrib-starts': [('MovingAverage|0|',
+        30),
+        ('MovingAverage|0|._setWindowSize|0|',
+         36)],
+                                'code-line': '        self.window = [0.0 for'\
+        ' i in range(self.windowsize)]\n',
+                                'first-line': 24L,
+                                'folded-linenos': [51L,
+        100L,
+        103L,
+        111L,
+        174L,
+        177L,
+        181L,
+        189L,
+        234L,
         247L,
-        280L,
-        298L,
-        303L,
-        309L,
+        276L,
+        282L,
         315L,
-        321L,
-        327L,
         333L,
-        349L,
-        364L,
-        383L,
-        394L,
+        338L,
+        344L,
+        350L,
+        356L,
+        362L,
+        368L,
+        384L,
         399L,
-        443L,
-        446L,
-        451L,
-        459L,
-        464L,
-        470L,
-        480L,
-        490L,
-        500L,
-        510L,
-        516L,
-        527L,
+        418L,
+        429L,
+        434L,
+        478L,
+        481L,
+        486L,
+        494L,
+        499L,
+        505L,
+        515L,
+        525L,
+        535L,
         545L,
-        578L],
-                                'sel-line': 28L,
-                                'sel-line-start': 483L,
-                                'selection_end': 483L,
-                                'selection_start': 483L,
+        551L,
+        562L,
+        580L,
+        613L],
+                                'sel-line': 37L,
+                                'sel-line-start': 718L,
+                                'selection_end': 744L,
+                                'selection_start': 744L,
                                 'zoom': 0L})],
         'has-focus': True,
         'locked': False},
@@ -1301,8 +1802,8 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
         'splits': 2,
         'tab_location': 'top',
         'traversal_pos': ((1,
-                           5),
-                          1574470418.371386),
+                           3),
+                          1574474675.34996),
         'user_data': {}},
                  'saved_notebook_display': None,
                  'split_percents': {0: 0.5},

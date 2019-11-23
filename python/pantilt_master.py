@@ -27,6 +27,27 @@ messageQ = []
 
 # *********************** BEGIN CLASSES ******************************
 
+# Moving average class
+class MovingAverage():
+    def __init__(self, windowsize):
+        self.windowsize = windowsize
+        self._setWindowSize(windowsize)
+        self.accumValue = 0.0
+        
+    def _setWindowSize(self, size):
+        self.window = [0.0 for i in range(self.windowsize)]
+        
+    def addValue(self,value):
+        self.window.insert(0,value)
+        self.window.pop()
+        
+    def computeAverage(self):
+        self.accumValue = 0
+        for i in self.window:
+            self.accumValue += i
+            
+        return self.accumValue/len(self.window)
+
 # Checks for failure of motion in either axis
 class motionThread(threading.Thread):
     def __init__(self, threadID, name):
@@ -34,7 +55,7 @@ class motionThread(threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        self.delay = 1.5
+        self.delay = 1.0
         self.azFailTiming = False
         self.elFailTiming = False
     
@@ -48,7 +69,7 @@ class motionThread(threading.Thread):
             # This will used to invoke jam detection later
             if variable.isAzRunning == True:    # azimuth
                 # Look to see if stopped
-                if abs(variable.azVelocity) < 10.0:
+                if abs(variable.azAvgVelocity.computeAverage()) < 5.0:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
                         logging.debug("periodicThread.run() azFailTiming = True")
@@ -56,7 +77,7 @@ class motionThread(threading.Thread):
                         self.azFailTiming == False
                         azJam()
                     
-                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
+                elif abs(variable.azAvgVelocity.computeAverage()) > 5.0:   # running above min velocity
                     if self.azFailTiming == True:
                         self.azFailTiming = False
                         logging.debug("periodicThread.run() azFailTiming = False")
@@ -64,7 +85,7 @@ class motionThread(threading.Thread):
                 
             if variable.isElRunning == True:    # elevation
                 # Look to see if stopped
-                if abs(variable.elVelocity) < 10.0:
+                if abs(variable.elAvgVelocity.computeAverage()) < 5.0:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
                         logging.debug("periodicThread.run() elFailTiming = True")
@@ -72,7 +93,7 @@ class motionThread(threading.Thread):
                         self.elFailTiming = False
                         elJam()
                         
-                elif abs(variable.azVelocity) > 10.0:   # running above min velocity
+                elif abs(variable.elAvgVelocity.computeAverage()) > 5.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
                         logging.debug("periodicThread.run() elFailTiming = False")    
@@ -104,22 +125,37 @@ class periodicThread (threading.Thread):
         self.name = name
         self.running = True
         self.delay = 0.25
-        #self.delay = 2.0
         self.lastAz, self.lastEl = getEncoders()
+        self.azAvgVel = 0.0
+        self.elAvgVel = 0.0
 
     def run(self):
         while(self.running):
             time.sleep(self.delay)
+            # Get position from encoders
             variable.azPos, variable.elPos = getEncoders()
+            # Calculate velocities
             variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
+            variable.azAvgVelocity.addValue(variable.azVelocity)
             variable.elVelocity = (variable.elPos - self.lastEl)/self.delay
+            variable.elAvgVelocity.addValue(variable.elVelocity)
+            
+            # Compute average velocities
+            self.azAvgVel = variable.azAvgVelocity.computeAverage()
+            self.elAvgVel = variable.elAvgVelocity.computeAverage()
+            
+            # Save encoder position to last position
             self.lastAz,self.lastEl = getEncoders()
+            
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + \
                       ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
+            # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
             #logging.debug("periodicThread() elVelocity %s", variable.elVelocity)
+            logging.debug("periodicThread() azAvgVel %s", self.azAvgVel)
+            logging.debug("periodicThread() elAvgVel %s", self.elAvgVel)            
 
             # watch for limits reached if homing
             if variable.azHoming == True:
@@ -185,6 +221,9 @@ class Variables():
         # Real-time values
         self.azVelocity = 0
         self.elVelocity = 0
+        self.azAvgVelocity = MovingAverage(3)
+        self.elAvgVelocity = MovingAverage(3)
+
         self.azPos = 0
         self.elPos = 0
 
