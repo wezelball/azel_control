@@ -58,18 +58,28 @@ class motionThread(threading.Thread):
         self.delay = 1.0
         self.azFailTiming = False
         self.elFailTiming = False
+        self.azAvgVel = 0.0
+        self.elAvgVel = 0.0        
+        
     
     def run(self):
         while self.running:
             time.sleep(self.delay)
-            logging.debug("motionThread() %s running", self.name)
-    
+            #logging.debug("motionThread() %s running", self.name)
+
+            # Compute average velocities
+            self.azAvgVel = variable.azAvgVelocity.computeAverage()
+            self.elAvgVel = variable.elAvgVelocity.computeAverage()            
+
+            #logging.debug("motionThread() azAvgVel %s", self.azAvgVel)
+            #logging.debug("motionThread() elAvgVel %s", self.elAvgVel)
+            
             # Monitor the run status of the steppers,
             # updating the process varaibles
             # This will used to invoke jam detection later
             if variable.isAzRunning == True:    # azimuth
                 # Look to see if stopped
-                if abs(variable.azAvgVelocity.computeAverage()) < 5.0:
+                if abs(variable.azAvgVelocity.computeAverage()) < 1.0:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
                         logging.debug("periodicThread.run() azFailTiming = True")
@@ -77,7 +87,7 @@ class motionThread(threading.Thread):
                         self.azFailTiming == False
                         azJam()
                     
-                elif abs(variable.azAvgVelocity.computeAverage()) > 5.0:   # running above min velocity
+                elif abs(variable.azAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
                     if self.azFailTiming == True:
                         self.azFailTiming = False
                         logging.debug("periodicThread.run() azFailTiming = False")
@@ -85,7 +95,7 @@ class motionThread(threading.Thread):
                 
             if variable.isElRunning == True:    # elevation
                 # Look to see if stopped
-                if abs(variable.elAvgVelocity.computeAverage()) < 5.0:
+                if abs(variable.elAvgVelocity.computeAverage()) < 1.0:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
                         logging.debug("periodicThread.run() elFailTiming = True")
@@ -93,7 +103,7 @@ class motionThread(threading.Thread):
                         self.elFailTiming = False
                         elJam()
                         
-                elif abs(variable.elAvgVelocity.computeAverage()) > 5.0:   # running above min velocity
+                elif abs(variable.elAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
                         logging.debug("periodicThread.run() elFailTiming = False")    
@@ -124,7 +134,7 @@ class periodicThread (threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        self.delay = 0.25
+        self.delay = 0.2
         self.lastAz, self.lastEl = getEncoders()
         self.azAvgVel = 0.0
         self.elAvgVel = 0.0
@@ -154,27 +164,15 @@ class periodicThread (threading.Thread):
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
             #logging.debug("periodicThread() elVelocity %s", variable.elVelocity)
-            logging.debug("periodicThread() azAvgVel %s", self.azAvgVel)
-            logging.debug("periodicThread() elAvgVel %s", self.elAvgVel)            
+            #logging.debug("periodicThread() azAvgVel %s", self.azAvgVel)
+            #logging.debug("periodicThread() elAvgVel %s", self.elAvgVel)            
 
-            # watch for limits reached if homing
+            # Watch homing axes if homing
             if variable.azHoming == True:
-                #print("azHoming")
-                if isAzCCWLimit() == True:
-                    variable.azHomed = True
-                    #print("azHomed")
-                    
+                watchHomingAxis(0)
+            
             if variable.elHoming == True:
-                #print("elHoming")
-                if isElUpLimit() == True:
-                    variable.elHomed = True
-                    #print("elHomed")
-                    
-            if variable.azHoming and variable.azHomed and variable.elHoming and variable.elHomed:
-                print("Homed")
-                variable.azHoming = False
-                variable.elHoming = False
-                zeroEncoders()
+                watchHomingAxis(1)
 
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
@@ -387,14 +385,21 @@ def setElAccel(accel):
 # Currently assumes that home positions are
 # az = west and el = down
 def watchHomingAxis(axis):
+    logging.debug("watchHomingAxis() homing axis %s", axis)
     if axis == 0:
-        if isAzCCWLimit == True:
+        if isAzCCWLimit() == True:
             variable.azHoming = False
             variable.azHomed = True
+            variable.isAzRunning = False
+            zeroAzEncoder()
+            logging.debug("watchHomingAxis() azimuth homed")
     elif axis == 1:
-        if isElDownLimit == True:
+        if isElDownLimit() == True:
             variable.elHoming = False
             variable.elHomed = True
+            variable.isElRunning = False
+            zeroElEncoder()
+            logging.debug("watchHomingAxis() elevation homed")
             
 # Given stepper pulses, return degrees
 # Assume the zeroth pulse is a 0 degrees (no offset)
@@ -500,11 +505,13 @@ def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
     variable.isAzRunning = False
+    variable.azHoming = False
 
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
     variable.isElRunning = False
+    variable.elHoming = False
 
 # returns 0 if limit made
 def isAzCWLimit():
@@ -516,6 +523,9 @@ def isAzCWLimit():
         #print ("False")
         return False
 
+def printIsAzCWLimit():
+    print(isAzCWLimit())
+
 # returns 0 if limit made	
 def isAzCCWLimit():
     variable.azCCWLimit = sendStepperCommand("9:0")
@@ -525,6 +535,9 @@ def isAzCCWLimit():
     elif variable.azCCWLimit.find('1') != -1:
         #print ("False")
         return False
+
+def printIsAzCCWLimit():
+    print(isAzCCWLimit())
 
 # returns 0 if limit made
 def isElUpLimit():
@@ -536,6 +549,9 @@ def isElUpLimit():
         #print ("False")
         return False
 
+def printIsElUpLimit():
+    print(isElUpLimit())
+
 # returns 0 if limit made
 def isElDownLimit():
     variable.elDownLimit = sendStepperCommand("11:0")
@@ -546,18 +562,21 @@ def isElDownLimit():
         #print ("False")
         return False
 
+def printIsElDownLimit():
+    print(isElDownLimit())
+
 # For now, let's home west
 def homeAzimuth():
     variable.azHoming = True
-    logging.debug("homeAzimuth()")
+    logging.debug("homeAzimuth() executed")
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
     variable.elHoming = True
-    logging.debug("homeElevation()")
+    logging.debug("homeElevation() executed")
     # slew south a long friggin way
-    relMoveEl(40000)
+    relMoveEl(-40000)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
@@ -665,10 +684,10 @@ def switchCase(case):
         "2":stopEl,
         "3":quickStopAz,
         "4":quickStopEl,
-        "5":isAzCWLimit,
-        "6":isAzCCWLimit,
-        "7":isElUpLimit,
-        "8":isElDownLimit,
+        "5":printIsAzCWLimit,
+        "6":printIsAzCCWLimit,
+        "7":printIsElUpLimit,
+        "8":printIsElDownLimit,
         "9":homeAzimuth,
         "10":homeElevation,
         "11":zeroEncoders,

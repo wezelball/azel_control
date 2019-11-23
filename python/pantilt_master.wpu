@@ -23,12 +23,12 @@ debug.remote-hosts = (8,
                         'winghome': ''}])
 edit.bookmarks = {'switchCase': (loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
                                  {'attrib-starts': [('switchCase|0|',
-        620)],
+        673)],
                                   'category': '',
                                   'code-line': 'def switchCase(case):\n',
                                   'first-line': 621L,
                                   'notes': '',
-                                  'sel-line': 621L})}
+                                  'sel-line': 674L})}
 guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                             'windows': [{'name': 'RuatIt5Hnvcru13fnCw5U3m572'\
         'zPRW2w',
@@ -56,10 +56,12 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                                0,
                                {'all_tree_states': {loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'): {'e'\
         'xpanded-nodes': [],
-        'selected-nodes': [],
+        'selected-nodes': [[('class def',
+                             loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+                             'MovingAverage')]],
         'top-node': [('function def',
                       loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-                      'azJam')]},
+                      'homeAzimuth')]},
         loc('ssh://pantilt_master//usr/lib/python3.5/threading.py'): {'expan'\
         'ded-nodes': [],
         'selected-nodes': [],
@@ -141,7 +143,7 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                                        'fRegexFlags': 42,
                                        'fReplaceText': '',
                                        'fReverse': False,
-                                       'fSearchText': u'azjam',
+                                       'fSearchText': u'watchHomingAxis',
                                        'fStartPos': 0,
                                        'fStyle': 'text',
                                        'fWholeWords': False,
@@ -216,564 +218,44 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
         -1),
                        'attrib-starts': [],
                        'code-line': '',
-                       'first-line': 22L,
+                       'first-line': 42L,
                        'folded-linenos': [],
-                       'history': {None: ["--- Logging error ---\nTraceback "\
-        "(most recent call last):\n  File \"/usr/lib/python3.5/logging/__ini"\
-        "t__.py\", line 981, in emit\n    msg = self.format(record)\n  File "\
-        "\"/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n  "\
-        "  return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__"\
-        "init__.py\", line 568, in format\n    record.message = record.getMe"\
-        "ssage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 33"\
-        "1, in getMessage\n    msg = msg % self.args\nTypeError: a float is "\
-        "required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3"\
-        ".1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__"\
-        "\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstr"\
-        "ap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thread"\
-        "ing.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \""\
-        "x-wingide-python-shell://140141280602520/2\", line 137, in run\nMes"\
-        "sage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound metho"\
-        "d MovingAverage.computeAverage of <__main__.MovingAverage object at"\
-        " 0x7606b130>>,)\n--- Logging error ---\nTraceback (most recent call"\
-        " last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 98"\
-        "1, in emit\n    msg = self.format(record)\n  File \"/usr/lib/python"\
-        "3.5/logging/__init__.py\", line 831, in format\n    return fmt.form"\
-        "at(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
-        " 568, in format\n    record.message = record.getMessage()\n  File "\
-        "\"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessage"\
-        "\n    msg = msg % self.args\nTypeError: a float is required\nCall s"\
-        "tack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/d"\
-        "ebug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/l"\
-        "ib/python3.5/threading.py\", line 882, in _bootstrap\n    self._boo"\
-        "tstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 91"\
-        "4, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-s"\
-        "hell://140141280602520/2\", line 140, in run\nMessage: 'periodicThr"\
-        "ead() azAvgVelocity %f'\nArguments: (<bound method MovingAverage.co"\
-        "mputeAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n"\
-        "--- Logging error ---\nTraceback (most recent call last):\n  File "\
-        "\"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n    "\
-        "msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
-        "it__.py\", line 831, in format\n    return fmt.format(record)\n  Fi"\
-        "le \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
-        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
-        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
-        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
-        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
-        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
-        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
-        "602520/2\", line 137, in run\nMessage: 'periodicThread() azAvgVeloc"\
-        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
-        "<__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging error"\
-        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
-        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
-        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
-        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
-        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
-        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
-        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
-        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
-        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
-        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
-        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 14"\
-        "0, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
-        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
-        "rage object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (mo"\
-        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
-        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
-        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
-        "it__.py\", line 568, in format\n    record.message = record.getMess"\
-        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
-        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
-        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
-        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
-        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
-        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
-        "ingide-python-shell://140141280602520/2\", line 137, in run\nMessag"\
-        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
-        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
-        "7606b130>>,)\n--- Logging error ---\nTraceback (most recent call la"\
-        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
-        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
-        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
-        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
-        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
-        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
-        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
-        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
-        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
-        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
-        "://140141280602520/2\", line 140, in run\nMessage: 'periodicThread("\
-        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
-        "eAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n--- L"\
-        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
-        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
-        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
-        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
-        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
-        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
-        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
-        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
-        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
-        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
-        "/2\", line 137, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
-        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
-        "n__.MovingAverage object at 0x7606b130>>,)\n--- Logging error ---\n"\
-        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
-        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
-        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
-        "logging/__init__.py\", line 568, in format\n    record.message = re"\
-        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
-        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
-        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
-        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
-        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
-        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
-        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
-        "  File \"x-wingide-python-shell://140141280602520/2\", line 140, in"\
-        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
-        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
-        "object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most re"\
-        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
-        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
-        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
-        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 568, in format\n    record.message = record.getMessage()"\
-        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
-        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
-        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
-        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
-        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
-        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
-        "-python-shell://140141280602520/2\", line 137, in run\nMessage: 'pe"\
-        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
-        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
-        "30>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
-        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
-        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
-        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
-        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
-        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
-        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
-        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
-        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
-        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
-        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
-        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
-        "141280602520/2\", line 140, in run\nMessage: 'periodicThread() azAv"\
-        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
-        "ge of <__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging"\
-        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
-        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
-        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
-        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
-        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
-        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
-        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
-        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
-        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
-        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
-        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
-        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
-        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
-        "ine 137, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
-        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
-        "ingAverage object at 0x7606b130>>,)\n--- Logging error ---\nTraceba"\
-        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
-        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
-        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
-        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
-        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
-        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
-        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
-        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
-        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
-        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
-        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
-        "\"x-wingide-python-shell://140141280602520/2\", line 140, in run\n"\
-        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
-        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
-        " at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most recent c"\
-        "all last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
-        " 981, in emit\n    msg = self.format(record)\n  File \"/usr/lib/pyt"\
-        "hon3.5/logging/__init__.py\", line 831, in format\n    return fmt.f"\
-        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
-        "ine 568, in format\n    record.message = record.getMessage()\n  Fil"\
-        "e \"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessa"\
-        "ge\n    msg = msg % self.args\nTypeError: a float is required\nCall"\
-        " stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src"\
-        "/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr"\
-        "/lib/python3.5/threading.py\", line 882, in _bootstrap\n    self._b"\
-        "ootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line "\
-        "914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python"\
-        "-shell://140141280602520/2\", line 137, in run\nMessage: 'periodicT"\
-        "hread() azAvgVelocity %f'\nArguments: (<bound method MovingAverage."\
-        "computeAverage of <__main__.MovingAverage object at 0x7606b130>>,)"\
-        "\n--- Logging error ---\nTraceback (most recent call last):\n  File"\
-        " \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n   "\
-        " msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__i"\
-        "nit__.py\", line 831, in format\n    return fmt.format(record)\n  F"\
-        "ile \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
-        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
-        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
-        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
-        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
-        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
-        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
-        "602520/2\", line 140, in run\nMessage: 'periodicThread() azAvgVeloc"\
-        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
-        "<__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging error"\
-        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
-        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
-        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
-        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
-        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
-        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
-        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
-        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
-        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
-        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
-        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 13"\
-        "7, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
-        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
-        "rage object at 0x7606b130>>,)\n--- Logging error ---\nTraceback (mo"\
-        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
-        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
-        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
-        "it__.py\", line 568, in format\n    record.message = record.getMess"\
-        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
-        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
-        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
-        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
-        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
-        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
-        "ingide-python-shell://140141280602520/2\", line 140, in run\nMessag"\
-        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
-        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
-        "7606b190>>,)\n--- Logging error ---\nTraceback (most recent call la"\
-        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
-        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
-        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
-        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
-        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
-        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
-        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
-        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
-        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
-        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
-        "://140141280602520/2\", line 137, in run\nMessage: 'periodicThread("\
-        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
-        "eAverage of <__main__.MovingAverage object at 0x7606b130>>,)\n--- L"\
-        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
-        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
-        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
-        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
-        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
-        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
-        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
-        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
-        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
-        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
-        "/2\", line 140, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
-        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
-        "n__.MovingAverage object at 0x7606b190>>,)\n--- Logging error ---\n"\
-        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
-        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
-        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
-        "logging/__init__.py\", line 568, in format\n    record.message = re"\
-        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
-        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
-        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
-        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
-        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
-        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
-        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
-        "  File \"x-wingide-python-shell://140141280602520/2\", line 137, in"\
-        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
-        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
-        "object at 0x7606b130>>,)\n--- Logging error ---\nTraceback (most re"\
-        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
-        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
-        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
-        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 568, in format\n    record.message = record.getMessage()"\
-        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
-        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
-        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
-        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
-        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
-        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
-        "-python-shell://140141280602520/2\", line 140, in run\nMessage: 'pe"\
-        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
-        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
-        "90>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
-        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
-        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
-        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
-        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
-        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
-        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
-        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
-        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
-        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
-        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
-        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
-        "141280602520/2\", line 137, in run\nMessage: 'periodicThread() azAv"\
-        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
-        "ge of <__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging"\
-        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
-        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
-        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
-        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
-        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
-        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
-        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
-        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
-        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
-        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
-        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
-        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
-        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
-        "ine 140, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
-        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
-        "ingAverage object at 0x7606b190>>,)\n--- Logging error ---\nTraceba"\
-        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
-        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
-        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
-        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
-        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
-        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
-        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
-        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
-        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
-        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
-        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
-        "\"x-wingide-python-shell://140141280602520/2\", line 137, in run\n"\
-        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
-        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
-        " at 0x7606b130>>,)\n--- Logging error ---\nTraceback (most recent c"\
-        "all last):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line"\
-        " 981, in emit\n    msg = self.format(record)\n  File \"/usr/lib/pyt"\
-        "hon3.5/logging/__init__.py\", line 831, in format\n    return fmt.f"\
-        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
-        "ine 568, in format\n    record.message = record.getMessage()\n  Fil"\
-        "e \"/usr/lib/python3.5/logging/__init__.py\", line 331, in getMessa"\
-        "ge\n    msg = msg % self.args\nTypeError: a float is required\nCall"\
-        " stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src"\
-        "/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr"\
-        "/lib/python3.5/threading.py\", line 882, in _bootstrap\n    self._b"\
-        "ootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line "\
-        "914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide-python"\
-        "-shell://140141280602520/2\", line 140, in run\nMessage: 'periodicT"\
-        "hread() azAvgVelocity %f'\nArguments: (<bound method MovingAverage."\
-        "computeAverage of <__main__.MovingAverage object at 0x7606b190>>,)"\
-        "\n--- Logging error ---\nTraceback (most recent call last):\n  File"\
-        " \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emit\n   "\
-        " msg = self.format(record)\n  File \"/usr/lib/python3.5/logging/__i"\
-        "nit__.py\", line 831, in format\n    return fmt.format(record)\n  F"\
-        "ile \"/usr/lib/python3.5/logging/__init__.py\", line 568, in format"\
-        "\n    record.message = record.getMessage()\n  File \"/usr/lib/pytho"\
-        "n3.5/logging/__init__.py\", line 331, in getMessage\n    msg = msg "\
-        "% self.args\nTypeError: a float is required\nCall stack:\n  File \""\
-        "/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbg"\
-        "utils.py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap"\
-        "_inner\n    self.run()\n  File \"x-wingide-python-shell://140141280"\
-        "602520/2\", line 137, in run\nMessage: 'periodicThread() azAvgVeloc"\
-        "ity %f'\nArguments: (<bound method MovingAverage.computeAverage of "\
-        "<__main__.MovingAverage object at 0x7606b130>>,)\n--- Logging error"\
-        " ---\nTraceback (most recent call last):\n  File \"/usr/lib/python3"\
-        ".5/logging/__init__.py\", line 981, in emit\n    msg = self.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 83"\
-        "1, in format\n    return fmt.format(record)\n  File \"/usr/lib/pyth"\
-        "on3.5/logging/__init__.py\", line 568, in format\n    record.messag"\
-        "e = record.getMessage()\n  File \"/usr/lib/python3.5/logging/__init"\
-        "__.py\", line 331, in getMessage\n    msg = msg % self.args\nTypeEr"\
-        "ror: a float is required\nCall stack:\n  File \"/home/dcohen/.wingp"\
-        "ro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 16"\
-        "33, in __call__\n  File \"/usr/lib/python3.5/threading.py\", line 8"\
-        "82, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 914, in _bootstrap_inner\n    self.ru"\
-        "n()\n  File \"x-wingide-python-shell://140141280602520/2\", line 14"\
-        "0, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments:"\
-        " (<bound method MovingAverage.computeAverage of <__main__.MovingAve"\
-        "rage object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (mo"\
-        "st recent call last):\n  File \"/usr/lib/python3.5/logging/__init__"\
-        ".py\", line 981, in emit\n    msg = self.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 831, in format\n    "\
-        "return fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__in"\
-        "it__.py\", line 568, in format\n    record.message = record.getMess"\
-        "age()\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331,"\
-        " in getMessage\n    msg = msg % self.args\nTypeError: a float is re"\
-        "quired\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1"\
-        "/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n"\
-        "  File \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap"\
-        "\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threadin"\
-        "g.py\", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-w"\
-        "ingide-python-shell://140141280602520/2\", line 137, in run\nMessag"\
-        "e: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound method M"\
-        "ovingAverage.computeAverage of <__main__.MovingAverage object at 0x"\
-        "7606b130>>,)\n--- Logging error ---\nTraceback (most recent call la"\
-        "st):\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, "\
-        "in emit\n    msg = self.format(record)\n  File \"/usr/lib/python3.5"\
-        "/logging/__init__.py\", line 831, in format\n    return fmt.format("\
-        "record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 56"\
-        "8, in format\n    record.message = record.getMessage()\n  File \"/u"\
-        "sr/lib/python3.5/logging/__init__.py\", line 331, in getMessage\n  "\
-        "  msg = msg % self.args\nTypeError: a float is required\nCall stack"\
-        ":\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug"\
-        "/tserver/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/p"\
-        "ython3.5/threading.py\", line 882, in _bootstrap\n    self._bootstr"\
-        "ap_inner()\n  File \"/usr/lib/python3.5/threading.py\", line 914, i"\
-        "n _bootstrap_inner\n    self.run()\n  File \"x-wingide-python-shell"\
-        "://140141280602520/2\", line 140, in run\nMessage: 'periodicThread("\
-        ") azAvgVelocity %f'\nArguments: (<bound method MovingAverage.comput"\
-        "eAverage of <__main__.MovingAverage object at 0x7606b190>>,)\n--- L"\
-        "ogging error ---\nTraceback (most recent call last):\n  File \"/usr"\
-        "/lib/python3.5/logging/__init__.py\", line 981, in emit\n    msg = "\
-        "self.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 831, in format\n    return fmt.format(record)\n  File \""\
-        "/usr/lib/python3.5/logging/__init__.py\", line 568, in format\n    "\
-        "record.message = record.getMessage()\n  File \"/usr/lib/python3.5/l"\
-        "ogging/__init__.py\", line 331, in getMessage\n    msg = msg % self"\
-        ".args\nTypeError: a float is required\nCall stack:\n  File \"/home/"\
-        "dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils."\
-        "py\", line 1633, in __call__\n  File \"/usr/lib/python3.5/threading"\
-        ".py\", line 882, in _bootstrap\n    self._bootstrap_inner()\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 914, in _bootstrap_inner"\
-        "\n    self.run()\n  File \"x-wingide-python-shell://140141280602520"\
-        "/2\", line 137, in run\nMessage: 'periodicThread() azAvgVelocity %f"\
-        "'\nArguments: (<bound method MovingAverage.computeAverage of <__mai"\
-        "n__.MovingAverage object at 0x7606b130>>,)\n--- Logging error ---\n"\
-        "Traceback (most recent call last):\n  File \"/usr/lib/python3.5/log"\
-        "ging/__init__.py\", line 981, in emit\n    msg = self.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 831, in "\
-        "format\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/"\
-        "logging/__init__.py\", line 568, in format\n    record.message = re"\
-        "cord.getMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py"\
-        "\", line 331, in getMessage\n    msg = msg % self.args\nTypeError: "\
-        "a float is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/r"\
-        "emote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, i"\
-        "n __call__\n  File \"/usr/lib/python3.5/threading.py\", line 882, i"\
-        "n _bootstrap\n    self._bootstrap_inner()\n  File \"/usr/lib/python"\
-        "3.5/threading.py\", line 914, in _bootstrap_inner\n    self.run()\n"\
-        "  File \"x-wingide-python-shell://140141280602520/2\", line 140, in"\
-        " run\nMessage: 'periodicThread() azAvgVelocity %f'\nArguments: (<bo"\
-        "und method MovingAverage.computeAverage of <__main__.MovingAverage "\
-        "object at 0x7606b190>>,)\n--- Logging error ---\nTraceback (most re"\
-        "cent call last):\n  File \"/usr/lib/python3.5/logging/__init__.py\""\
-        ", line 981, in emit\n    msg = self.format(record)\n  File \"/usr/l"\
-        "ib/python3.5/logging/__init__.py\", line 831, in format\n    return"\
-        " fmt.format(record)\n  File \"/usr/lib/python3.5/logging/__init__.p"\
-        "y\", line 568, in format\n    record.message = record.getMessage()"\
-        "\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 331, in g"\
-        "etMessage\n    msg = msg % self.args\nTypeError: a float is require"\
-        "d\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/"\
-        "dbg/src/debug/tserver/dbgutils.py\", line 1633, in __call__\n  File"\
-        " \"/usr/lib/python3.5/threading.py\", line 882, in _bootstrap\n    "\
-        "self._bootstrap_inner()\n  File \"/usr/lib/python3.5/threading.py\""\
-        ", line 914, in _bootstrap_inner\n    self.run()\n  File \"x-wingide"\
-        "-python-shell://140141280602520/2\", line 137, in run\nMessage: 'pe"\
-        "riodicThread() azAvgVelocity %f'\nArguments: (<bound method MovingA"\
-        "verage.computeAverage of <__main__.MovingAverage object at 0x7606b1"\
-        "30>>,)\n--- Logging error ---\nTraceback (most recent call last):\n"\
-        "  File \"/usr/lib/python3.5/logging/__init__.py\", line 981, in emi"\
-        "t\n    msg = self.format(record)\n  File \"/usr/lib/python3.5/loggi"\
-        "ng/__init__.py\", line 831, in format\n    return fmt.format(record"\
-        ")\n  File \"/usr/lib/python3.5/logging/__init__.py\", line 568, in "\
-        "format\n    record.message = record.getMessage()\n  File \"/usr/lib"\
-        "/python3.5/logging/__init__.py\", line 331, in getMessage\n    msg "\
-        "= msg % self.args\nTypeError: a float is required\nCall stack:\n  F"\
-        "ile \"/home/dcohen/.wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserv"\
-        "er/dbgutils.py\", line 1633, in __call__\n  File \"/usr/lib/python3"\
-        ".5/threading.py\", line 882, in _bootstrap\n    self._bootstrap_inn"\
-        "er()\n  File \"/usr/lib/python3.5/threading.py\", line 914, in _boo"\
-        "tstrap_inner\n    self.run()\n  File \"x-wingide-python-shell://140"\
-        "141280602520/2\", line 140, in run\nMessage: 'periodicThread() azAv"\
-        "gVelocity %f'\nArguments: (<bound method MovingAverage.computeAvera"\
-        "ge of <__main__.MovingAverage object at 0x7606b190>>,)\n--- Logging"\
-        " error ---\nTraceback (most recent call last):\n  File \"/usr/lib/p"\
-        "ython3.5/logging/__init__.py\", line 981, in emit\n    msg = self.f"\
-        "ormat(record)\n  File \"/usr/lib/python3.5/logging/__init__.py\", l"\
-        "ine 831, in format\n    return fmt.format(record)\n  File \"/usr/li"\
-        "b/python3.5/logging/__init__.py\", line 568, in format\n    record."\
-        "message = record.getMessage()\n  File \"/usr/lib/python3.5/logging/"\
-        "__init__.py\", line 331, in getMessage\n    msg = msg % self.args\n"\
-        "TypeError: a float is required\nCall stack:\n  File \"/home/dcohen/"\
-        ".wingpro7/remote-7.1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", l"\
-        "ine 1633, in __call__\n  File \"/usr/lib/python3.5/threading.py\", "\
-        "line 882, in _bootstrap\n    self._bootstrap_inner()\n  File \"/usr"\
-        "/lib/python3.5/threading.py\", line 914, in _bootstrap_inner\n    s"\
-        "elf.run()\n  File \"x-wingide-python-shell://140141280602520/2\", l"\
-        "ine 137, in run\nMessage: 'periodicThread() azAvgVelocity %f'\nArgu"\
-        "ments: (<bound method MovingAverage.computeAverage of <__main__.Mov"\
-        "ingAverage object at 0x7606b130>>,)\n--- Logging error ---\nTraceba"\
-        "ck (most recent call last):\n  File \"/usr/lib/python3.5/logging/__"\
-        "init__.py\", line 981, in emit\n    msg = self.format(record)\n  Fi"\
-        "le \"/usr/lib/python3.5/logging/__init__.py\", line 831, in format"\
-        "\n    return fmt.format(record)\n  File \"/usr/lib/python3.5/loggin"\
-        "g/__init__.py\", line 568, in format\n    record.message = record.g"\
-        "etMessage()\n  File \"/usr/lib/python3.5/logging/__init__.py\", lin"\
-        "e 331, in getMessage\n    msg = msg % self.args\nTypeError: a float"\
-        " is required\nCall stack:\n  File \"/home/dcohen/.wingpro7/remote-7"\
-        ".1.3.1/bin/dbg/src/debug/tserver/dbgutils.py\", line 1633, in __cal"\
-        "l__\n  File \"/usr/lib/python3.5/threading.py\", line 882, in _boot"\
-        "strap\n    self._bootstrap_inner()\n  File \"/usr/lib/python3.5/thr"\
-        "eading.py\", line 914, in _bootstrap_inner\n    self.run()\n  File "\
-        "\"x-wingide-python-shell://140141280602520/2\", line 140, in run\n"\
-        "Message: 'periodicThread() azAvgVelocity %f'\nArguments: (<bound me"\
-        "thod MovingAverage.computeAverage of <__main__.MovingAverage object"\
-        " at 0x7606b190>>,)\n--- Logging error ---\nq\n",
-        '1\n',
-        '12 1000\n',
-        '12 2000\n',
-        '13 2000\n',
-        '12 -8000\n',
-        '13 4000\n',
-        '12 3000\n',
-        '12 -4000\n',
+                       'history': {None: ['12 2000\n',
+        '13 -1000\n',
         '12 -6000\n',
-        '12 12000\n',
-        '12 4000\n',
-        '13 -4000\n',
-        '12 10000\n',
+        '13 -2000\n',
         '12 -10000\n',
+        '13 3000\n',
+        '12 -100\n',
+        '13 -3000\n',
+        '16\n',
+        '17\n',
+        '12 10\n',
+        '12 1000\n',
+        '12 5000\n',
+        '13 -4000\n',
+        '12 3000\n',
+        '5\n',
+        '6\n',
+        '13 4000\n',
+        '7\n',
+        '8\n',
+        '12 10000\n',
+        '13 10000\n',
+        '12 6000\n',
+        '9\n',
+        '10\n',
+        '12 12000\n',
+        '13 12000\n',
+        '13 8000\n',
+        '12 8000\n',
+        '0\n',
         'q\n']},
                        'launch-id': None,
-                       'sel-line': 28L,
-                       'sel-line-start': 344L,
-                       'selection_end': 344L,
-                       'selection_start': 344L,
+                       'sel-line': 48L,
+                       'sel-line-start': 465L,
+                       'selection_end': 465L,
+                       'selection_start': 465L,
                        'zoom': 0L}),
                      ('bookmarks',
                       'wide',
@@ -788,1017 +270,921 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                       1,
                       {})],
         'primary_view_state': {'editor_states': ({'bookmarks': ([[loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-        {'attrib-starts': [('periodicThread|0|',
-                            104),
-                           ('periodicThread|0|.run|0|',
-                            114)],
-         'code-line': '                        logging.debug("periodicThread'\
-                      '.run() azFailTiming = True")\n',
-         'first-line': 136L,
-         'folded-linenos': [29L,
-                            34L,
-                            42L,
-                            51L,
-                            55L,
-                            68L,
-                            82L,
-                            84L,
-                            92L,
-                            96L,
-                            99L,
-                            105L,
-                            175L,
-                            178L,
-                            182L,
+        {'attrib-starts': [('motionThread|0|',
+                            51),
+                           ('motionThread|0|.run|0|',
+                            64)],
+         'code-line': '                    elif self.azFailTiming == True:\n',
+         'first-line': 648L,
+         'folded-linenos': [30L,
+                            31L,
+                            36L,
+                            39L,
+                            43L,
+                            110L,
+                            113L,
+                            121L,
+                            176L,
+                            179L,
                             183L,
-                            219L,
-                            232L,
-                            261L,
-                            267L,
-                            279L,
-                            300L,
-                            318L,
-                            323L,
-                            329L,
+                            191L,
+                            200L,
+                            201L,
+                            236L,
+                            249L,
+                            278L,
+                            284L,
+                            296L,
+                            317L,
                             335L,
-                            341L,
-                            347L,
-                            353L,
-                            369L,
-                            384L,
-                            403L,
-                            414L,
-                            419L,
+                            340L,
+                            346L,
+                            352L,
+                            358L,
+                            364L,
+                            370L,
+                            406L,
                             425L,
-                            430L,
-                            435L,
-                            440L,
-                            445L,
-                            449L,
-                            454L,
-                            459L,
+                            436L,
+                            441L,
+                            447L,
+                            452L,
+                            457L,
                             462L,
-                            466L,
+                            467L,
                             473L,
-                            477L,
-                            482L,
-                            492L,
-                            502L,
-                            512L,
-                            522L,
-                            528L,
-                            539L,
-                            557L,
-                            591L,
-                            595L],
-         'sel-line': 154L,
-         'sel-line-start': 4750L,
-         'selection_end': 4812L,
-         'selection_start': 4810L,
+                            479L,
+                            485L,
+                            488L,
+                            493L,
+                            514L,
+                            524L,
+                            534L,
+                            544L,
+                            571L,
+                            588L,
+                            605L,
+                            623L,
+                            650L,
+                            656L],
+         'sel-line': 85L,
+         'sel-line-start': 2497L,
+         'selection_end': 2511L,
+         'selection_start': 2511L,
          'zoom': 0L},
-        1574385113.526268],
+        1574508584.196],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('elJam|0|',
-                             584)],
-          'code-line': '    variable.azFailTiming = False    \n',
-          'first-line': 477L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             68L,
-                             82L,
-                             84L,
-                             92L,
-                             96L,
-                             99L,
-                             105L,
-                             175L,
-                             178L,
-                             182L,
+         {'attrib-starts': [('watchHomingAxis|0|',
+                             386)],
+          'code-line': 'def watchHomingAxis(axis):\n',
+          'first-line': 358L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
                              183L,
-                             219L,
-                             232L,
-                             261L,
-                             267L,
-                             279L,
-                             300L,
-                             318L,
-                             323L,
-                             329L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
                              335L,
-                             341L,
-                             347L,
-                             353L,
-                             369L,
-                             384L,
-                             403L,
-                             414L,
-                             419L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
                              425L,
-                             430L,
-                             435L,
-                             440L,
-                             445L,
-                             449L,
-                             454L,
-                             459L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
+                             457L,
                              462L,
-                             466L,
+                             467L,
                              473L,
-                             477L,
-                             482L,
-                             492L,
-                             502L,
-                             512L,
-                             522L,
-                             528L,
-                             539L,
-                             557L,
-                             591L,
-                             595L],
-          'sel-line': 587L,
-          'sel-line-start': 17266L,
-          'selection_end': 17286L,
-          'selection_start': 17286L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
+                             544L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 386L,
+          'sel-line-start': 12336L,
+          'selection_end': 12355L,
+          'selection_start': 12340L,
           'zoom': 0L},
-         1574385125.294624],
-        [loc('ssh://pantilt_master//usr/lib/python3.5/threading.py'),
-         {'attrib-starts': [('Thread|0|',
-                             33),
-                            ('Thread|0|.start|0|',
-                             750)],
-          'code-line': '            raise RuntimeError("threads can only be '\
-                       'started once")\n',
-          'first-line': 813L,
-          'folded-linenos': [],
-          'sel-line': 839L,
-          'sel-line-start': 29241L,
-          'selection_end': 29241L,
-          'selection_start': 29241L,
-          'zoom': 0L},
-         1574385149.544275],
+         1574508609.433529],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('azJam|0|',
-                             578)],
-          'code-line': '    logging.debug("azJam() timeout")\n',
-          'first-line': 477L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             68L,
-                             82L,
-                             84L,
-                             92L,
-                             96L,
-                             99L,
-                             105L,
-                             175L,
-                             178L,
-                             182L,
+         {'attrib-starts': [('isAzCCWLimit|0|',
+                             524)],
+          'code-line': 'def isAzCCWLimit():\n',
+          'first-line': 500L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
                              183L,
-                             219L,
-                             232L,
-                             261L,
-                             267L,
-                             279L,
-                             300L,
-                             318L,
-                             323L,
-                             329L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
                              335L,
-                             341L,
-                             347L,
-                             353L,
-                             369L,
-                             384L,
-                             403L,
-                             414L,
-                             419L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
                              425L,
-                             430L,
-                             435L,
-                             440L,
-                             445L,
-                             449L,
-                             454L,
-                             459L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
+                             457L,
                              462L,
-                             466L,
+                             467L,
                              473L,
-                             477L,
-                             482L,
-                             492L,
-                             502L,
-                             512L,
-                             522L,
-                             528L,
-                             539L,
-                             557L,
-                             591L,
-                             595L],
-          'sel-line': 579L,
-          'sel-line-start': 17053L,
-          'selection_end': 17089L,
-          'selection_start': 17089L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
+                             544L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 524L,
+          'sel-line-start': 16272L,
+          'selection_end': 16288L,
+          'selection_start': 16276L,
           'zoom': 0L},
-         1574385183.344846],
-        [loc('ssh://pantilt_master//usr/lib/python3.5/threading.py'),
-         {'attrib-starts': [],
-          'code-line': '',
-          'first-line': 0L,
-          'folded-linenos': [],
-          'sel-line': 0L,
-          'sel-line-start': 0L,
-          'selection_end': 0L,
-          'selection_start': 0L,
-          'zoom': 0L},
-         1574385183.440285],
+         1574508623.960272],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('periodicThread|0|',
-                             109),
-                            ('periodicThread|0|.run|0|',
-                             119)],
-          'code-line': '            logging.debug("periodicThread() elVeloci'\
-                       'ty %s", variable.elVelocity)\n',
-          'first-line': 238L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             71L,
-                             87L,
-                             89L,
-                             97L,
-                             101L,
-                             104L,
+         {'attrib-starts': [('watchHomingAxis|0|',
+                             386)],
+          'code-line': '        if isElDownLimit() == True:\n',
+          'first-line': 649L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
                              110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
                              183L,
-                             186L,
-                             190L,
                              191L,
-                             227L,
-                             240L,
-                             269L,
-                             275L,
-                             287L,
-                             308L,
-                             326L,
-                             331L,
-                             337L,
-                             343L,
-                             349L,
-                             361L,
-                             377L,
-                             392L,
-                             411L,
-                             422L,
-                             427L,
-                             433L,
-                             438L,
-                             443L,
-                             448L,
-                             453L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
                              457L,
                              462L,
                              467L,
-                             470L,
-                             474L,
-                             481L,
+                             473L,
+                             479L,
                              485L,
-                             490L,
-                             500L,
-                             510L,
-                             520L,
-                             530L,
-                             536L,
-                             547L,
-                             565L,
-                             586L,
-                             592L,
-                             599L,
-                             603L],
-          'sel-line': 131L,
-          'sel-line-start': 3869L,
-          'selection_end': 3940L,
-          'selection_start': 3940L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
+                             544L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 395L,
+          'sel-line-start': 12659L,
+          'selection_end': 12685L,
+          'selection_start': 12685L,
           'zoom': 0L},
-         1574385917.831163],
+         1574508780.921903],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': 'log.close()\n',
-          'first-line': 17L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             71L,
-                             87L,
-                             89L,
-                             97L,
-                             101L,
-                             104L,
+         {'attrib-starts': [('watchHomingAxis|0|',
+                             386)],
+          'code-line': 'def watchHomingAxis(axis):\n',
+          'first-line': 655L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
                              110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
                              183L,
-                             186L,
-                             190L,
                              191L,
-                             227L,
-                             240L,
-                             269L,
-                             275L,
-                             308L,
-                             326L,
-                             331L,
-                             337L,
-                             343L,
-                             349L,
-                             361L,
-                             377L,
-                             392L,
-                             411L,
-                             422L,
-                             427L,
-                             433L,
-                             438L,
-                             443L,
-                             448L,
-                             453L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
                              457L,
                              462L,
                              467L,
-                             470L,
-                             474L,
-                             481L,
+                             473L,
+                             479L,
                              485L,
-                             490L,
-                             500L,
-                             510L,
-                             520L,
-                             530L,
-                             536L,
-                             547L,
-                             565L,
-                             586L,
-                             592L,
-                             599L],
-          'sel-line': 679L,
-          'sel-line-start': 19982L,
-          'selection_end': 19982L,
-          'selection_start': 19982L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
+                             544L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 386L,
+          'sel-line-start': 12336L,
+          'selection_end': 12355L,
+          'selection_start': 12340L,
           'zoom': 0L},
-         1574386293.106953],
+         1574508889.655804],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
          {'attrib-starts': [],
-          'code-line': '# pantilt_master.py\n',
-          'first-line': 0L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             71L,
-                             87L,
-                             89L,
-                             97L,
-                             101L,
-                             104L,
+          'code-line': '# Sets both encoder axes to zero\n',
+          'first-line': 512L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
                              110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
                              183L,
-                             186L,
-                             190L,
                              191L,
-                             227L,
-                             240L,
-                             269L,
-                             275L,
-                             308L,
-                             326L,
-                             331L,
-                             337L,
-                             343L,
-                             349L,
-                             361L,
-                             377L,
-                             392L,
-                             411L,
-                             422L,
-                             427L,
-                             433L,
-                             438L,
-                             443L,
-                             448L,
-                             453L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
                              457L,
                              462L,
                              467L,
-                             470L,
-                             474L,
-                             481L,
+                             473L,
+                             479L,
                              485L,
-                             490L,
-                             500L,
-                             510L,
-                             520L,
-                             530L,
-                             536L,
-                             547L,
-                             565L,
-                             586L,
-                             592L,
-                             599L],
-          'sel-line': 2L,
-          'sel-line-start': 24L,
-          'selection_end': 28L,
-          'selection_start': 27L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
+                             544L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 566L,
+          'sel-line-start': 17421L,
+          'selection_end': 17453L,
+          'selection_start': 17453L,
           'zoom': 0L},
-         1574386294.929013],
+         1574508961.931377],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('periodicThread|0|',
-                             88),
-                            ('periodicThread|0|.run|0|',
-                             98)],
-          'code-line': '            # Monitor the run status of the steppers'\
-                       ',\n',
-          'first-line': 102L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             55L,
-                             89L,
-                             162L,
-                             165L,
-                             169L,
-                             170L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
+         {'attrib-starts': [('motionThread|0|',
+                             51),
+                            ('motionThread|0|.run|0|',
+                             64)],
+          'code-line': '            #logging.debug("motionThread() elAvgVel '\
+                       '%s", self.elAvgVel)\n',
+          'first-line': 52L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
                              340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
                              406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
+                             425L,
                              436L,
                              441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
                              479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
                              544L,
-                             578L],
-          'sel-line': 131L,
-          'sel-line-start': 4242L,
-          'selection_end': 4270L,
-          'selection_start': 4270L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 74L,
+          'sel-line-start': 1904L,
+          'selection_end': 1917L,
+          'selection_start': 1917L,
           'zoom': 0L},
-         1574386654.21901],
-        [loc('ssh://pantilt_master//usr/lib/python3.5/threading.py'),
-         {'attrib-starts': [('Thread|0|',
-                             735),
-                            ('Thread|0|.start|0|',
-                             825)],
-          'code-line': '            raise RuntimeError("threads can only be '\
-                       'started once")\n',
-          'first-line': 813L,
-          'folded-linenos': [],
-          'sel-line': 839L,
-          'sel-line-start': 29241L,
-          'selection_end': 29241L,
-          'selection_start': 29241L,
-          'zoom': 0L},
-         1574386658.484103],
+         1574509189.454215],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('periodicThread|0|',
-                             88),
-                            ('periodicThread|0|.run|0|',
-                             98)],
-          'code-line': '                        az_fail_timer.run()\n',
-          'first-line': 355L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             89L,
-                             162L,
-                             165L,
-                             169L,
-                             170L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
+         {'attrib-starts': [('watchHomingAxis|0|',
+                             386)],
+          'code-line': 'def watchHomingAxis(axis):\n',
+          'first-line': 660L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
                              340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
                              406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
+                             425L,
                              436L,
                              441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
                              479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
                              544L,
-                             578L],
-          'sel-line': 139L,
-          'sel-line-start': 4633L,
-          'selection_end': 4657L,
-          'selection_start': 4657L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 386L,
+          'sel-line-start': 12338L,
+          'selection_end': 12357L,
+          'selection_start': 12342L,
           'zoom': 0L},
-         1574387337.697998],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [('Variables|0|',
-                             169)],
-          'code-line': 'class Variables():\n',
-          'first-line': 171L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             89L,
-                             162L,
-                             165L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
-                             340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
-                             406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
-                             436L,
-                             441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
-                             479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
-                             544L,
-                             578L],
-          'sel-line': 169L,
-          'sel-line-start': 6015L,
-          'selection_end': 6030L,
-          'selection_start': 6021L,
-          'zoom': 0L},
-         1574387360.548102],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': "    r = input('-> ')\n",
-          'first-line': 626L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             89L,
-                             162L,
-                             165L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
-                             340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
-                             406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
-                             436L,
-                             441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
-                             479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
-                             544L,
-                             578L],
-          'sel-line': 642L,
-          'sel-line-start': 19112L,
-          'selection_end': 19117L,
-          'selection_start': 19116L,
-          'zoom': 0L},
-         1574387374.065774],
+         1574509233.068541],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
          {'attrib-starts': [('homeElevation|0|',
-                             515)],
+                             560)],
           'code-line': 'def homeElevation():\n',
-          'first-line': 453L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             89L,
-                             162L,
-                             165L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
+          'first-line': 512L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
                              340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
                              406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
+                             425L,
                              436L,
                              441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
                              479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             534L,
                              544L,
-                             578L],
-          'sel-line': 515L,
-          'sel-line-start': 15595L,
-          'selection_end': 15612L,
-          'selection_start': 15599L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 560L,
+          'sel-line-start': 17268L,
+          'selection_end': 17285L,
+          'selection_start': 17272L,
           'zoom': 0L},
-         1574387377.035918],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': 'i2c_cmd = 0x01\n',
-          'first-line': 608L,
-          'folded-linenos': [29L,
-                             42L,
-                             51L,
-                             89L,
-                             162L,
-                             165L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
-                             340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
-                             406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
-                             436L,
-                             441L,
-                             446L,
-                             449L,
-                             453L,
-                             460L,
-                             464L,
-                             469L,
-                             479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
-                             544L,
-                             578L],
-          'sel-line': 21L,
-          'sel-line-start': 343L,
-          'selection_end': 350L,
-          'selection_start': 343L,
-          'zoom': 0L},
-         1574387410.539459],
+         1574509266.625635],
         [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
          {'attrib-starts': [('switchCase|0|',
-                             582)],
-          'code-line': '        "12":relMoveAz,       # requires distance\n',
-          'first-line': 575L,
-          'folded-linenos': [29L,
-                             34L,
-                             42L,
-                             51L,
-                             55L,
-                             71L,
-                             89L,
-                             162L,
-                             165L,
-                             169L,
-                             170L,
-                             206L,
-                             219L,
-                             248L,
-                             254L,
-                             266L,
-                             287L,
-                             305L,
-                             310L,
-                             316L,
-                             322L,
-                             328L,
-                             334L,
+                             660)],
+          'code-line': '        "8":printIsElDownLimit,\n',
+          'first-line': 656L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
                              340L,
-                             356L,
-                             371L,
-                             390L,
-                             401L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
                              406L,
-                             412L,
-                             417L,
-                             422L,
-                             427L,
-                             432L,
+                             425L,
                              436L,
                              441L,
-                             446L,
-                             449L,
-                             453L,
-                             469L,
-                             479L,
-                             489L,
-                             499L,
-                             509L,
-                             515L,
-                             526L,
-                             544L,
-                             578L],
-          'sel-line': 601L,
-          'sel-line-start': 17928L,
-          'selection_end': 17950L,
-          'selection_start': 17941L,
-          'zoom': 0L},
-         1574387898.75655],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': '\n',
-          'first-line': 66L,
-          'folded-linenos': [62L,
-                             67L],
-          'sel-line': 723L,
-          'sel-line-start': 21496L,
-          'selection_end': 21496L,
-          'selection_start': 21496L,
-          'zoom': 0L},
-         1574466952.516448],
-        [loc('ssh://pantilt_master//usr/lib/python3.5/threading.py'),
-         {'attrib-starts': [('Thread|0|',
-                             33)],
-          'code-line': '    @property\n',
-          'first-line': 1050L,
-          'folded-linenos': [],
-          'sel-line': 1073L,
-          'sel-line-start': 39967L,
-          'selection_end': 39967L,
-          'selection_start': 39967L,
-          'zoom': 0L},
-         1574466962.484957],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': 'variable = Variables()\n',
-          'first-line': 626L,
-          'folded-linenos': [99L,
-                             102L,
-                             110L,
-                             162L,
-                             165L,
-                             169L,
-                             177L,
-                             186L,
-                             219L,
-                             232L,
-                             261L,
-                             267L,
-                             300L,
-                             318L,
-                             323L,
-                             329L,
-                             335L,
-                             341L,
-                             347L,
-                             353L,
-                             369L,
-                             384L,
-                             403L,
-                             414L,
-                             419L,
-                             463L,
-                             466L,
-                             471L,
-                             479L,
-                             484L,
-                             490L,
-                             500L,
-                             510L,
-                             520L,
-                             530L,
-                             536L,
-                             547L,
-                             565L,
-                             598L],
-          'sel-line': 641L,
-          'sel-line-start': 19178L,
-          'selection_end': 19198L,
-          'selection_start': 19189L,
-          'zoom': 0L},
-         1574472778.66604],
-        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-         {'attrib-starts': [],
-          'code-line': 'variable = Variables()\n',
-          'first-line': 635L,
-          'folded-linenos': [99L,
-                             102L,
-                             110L,
-                             166L,
-                             169L,
-                             173L,
-                             181L,
-                             226L,
-                             239L,
-                             268L,
-                             274L,
-                             307L,
-                             325L,
-                             330L,
-                             336L,
-                             342L,
-                             348L,
-                             354L,
-                             360L,
-                             376L,
-                             391L,
-                             410L,
-                             421L,
-                             426L,
-                             470L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
                              473L,
-                             478L,
-                             486L,
-                             491L,
-                             497L,
-                             507L,
-                             517L,
-                             527L,
-                             537L,
-                             543L,
-                             554L,
-                             572L,
-                             605L],
-          'sel-line': 648L,
-          'sel-line-start': 19528L,
-          'selection_end': 19548L,
-          'selection_start': 19539L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             514L,
+                             524L,
+                             571L,
+                             588L,
+                             605L,
+                             623L,
+                             650L,
+                             656L],
+          'sel-line': 675L,
+          'sel-line-start': 20544L,
+          'selection_end': 20562L,
+          'selection_start': 20562L,
           'zoom': 0L},
-         1574473880.209466]],
-        20),
+         1574510901.187299],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [('homeElevation|0|',
+                             572)],
+          'code-line': '    variable.elHoming = True\n',
+          'first-line': 660L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             583L,
+                             600L,
+                             617L,
+                             635L,
+                             662L,
+                             668L],
+          'sel-line': 573L,
+          'sel-line-start': 17495L,
+          'selection_end': 17523L,
+          'selection_start': 17523L,
+          'zoom': 0L},
+         1574511746.827883],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [('periodicThread|0|',
+                             130)],
+          'code-line': 'class periodicThread (threading.Thread):\n',
+          'first-line': 147L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             583L,
+                             600L,
+                             617L,
+                             635L,
+                             662L,
+                             668L],
+          'sel-line': 130L,
+          'sel-line-start': 4441L,
+          'selection_end': 4461L,
+          'selection_start': 4447L,
+          'zoom': 0L},
+         1574511753.529944],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [('motionThread|0|',
+                             51),
+                            ('motionThread|0|.run|0|',
+                             64)],
+          'code-line': '            if variable.isAzRunning == True:    # az'\
+                       'imuth\n',
+          'first-line': 71L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             406L,
+                             425L,
+                             436L,
+                             441L,
+                             447L,
+                             452L,
+                             457L,
+                             462L,
+                             467L,
+                             473L,
+                             479L,
+                             485L,
+                             488L,
+                             493L,
+                             583L,
+                             600L,
+                             617L,
+                             635L,
+                             662L,
+                             668L],
+          'sel-line': 79L,
+          'sel-line-start': 2147L,
+          'selection_end': 2182L,
+          'selection_start': 2162L,
+          'zoom': 0L},
+         1574511785.005902],
+        [loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
+         {'attrib-starts': [('watchHomingAxis|0|',
+                             386)],
+          'code-line': '            variable.isElRunning = False\n',
+          'first-line': 340L,
+          'folded-linenos': [30L,
+                             31L,
+                             36L,
+                             39L,
+                             43L,
+                             110L,
+                             113L,
+                             121L,
+                             176L,
+                             179L,
+                             183L,
+                             191L,
+                             200L,
+                             201L,
+                             236L,
+                             249L,
+                             278L,
+                             284L,
+                             296L,
+                             317L,
+                             335L,
+                             340L,
+                             346L,
+                             352L,
+                             358L,
+                             364L,
+                             370L,
+                             408L,
+                             427L,
+                             438L,
+                             443L,
+                             449L,
+                             454L,
+                             459L,
+                             464L,
+                             469L,
+                             475L,
+                             481L,
+                             487L,
+                             490L,
+                             495L,
+                             585L,
+                             602L,
+                             619L,
+                             637L,
+                             664L,
+                             670L],
+          'sel-line': 399L,
+          'sel-line-start': 12812L,
+          'selection_end': 12837L,
+          'selection_start': 12837L,
+          'zoom': 0L},
+         1574511828.25216]],
+        14),
         'current-loc': loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
         'editor-state-list': [(loc('ssh://pantilt_master/Documents/devel/python/pantilt_master.py'),
-                               {'attrib-starts': [('Variables|0|',
-        202),
-        ('Variables|0|.__init__|0|',
-         203)],
-                                'code-line': '        self.elAvgVelocity = M'\
-        'ovingAverage(3)\n',
-                                'first-line': 302L,
+                               {'attrib-starts': [('motionThread|0|',
+        51)],
+                                'code-line': 'class motionThread(threading.T'\
+        'hread):\n',
+                                'first-line': 663L,
                                 'folded-linenos': [30L,
-        100L,
-        103L,
-        111L,
-        120L,
-        178L,
-        181L,
-        185L,
-        193L,
-        238L,
-        251L,
-        280L,
-        286L,
-        319L,
-        337L,
-        342L,
-        348L,
-        354L,
-        360L,
-        366L,
-        372L,
-        388L,
-        403L,
-        422L,
-        433L,
+        31L,
+        36L,
+        39L,
+        43L,
+        110L,
+        113L,
+        121L,
+        176L,
+        179L,
+        183L,
+        191L,
+        200L,
+        201L,
+        236L,
+        249L,
+        278L,
+        284L,
+        296L,
+        317L,
+        335L,
+        340L,
+        346L,
+        352L,
+        358L,
+        364L,
+        370L,
+        408L,
+        427L,
         438L,
-        482L,
-        485L,
+        443L,
+        449L,
+        454L,
+        459L,
+        464L,
+        469L,
+        475L,
+        481L,
+        487L,
         490L,
-        498L,
-        503L,
-        509L,
-        519L,
-        529L,
-        539L,
-        549L,
-        555L,
-        566L,
-        584L,
-        617L],
-                                'sel-line': 224L,
-                                'sel-line-start': 7873L,
-                                'selection_end': 7917L,
-                                'selection_start': 7917L,
+        495L,
+        585L,
+        602L,
+        619L,
+        637L,
+        664L,
+        670L],
+                                'sel-line': 51L,
+                                'sel-line-start': 1117L,
+                                'selection_end': 1135L,
+                                'selection_start': 1123L,
                                 'zoom': 0L})],
         'has-focus': False,
         'locked': False},
@@ -1810,7 +1196,7 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
         'tab_location': 'top',
         'traversal_pos': ((1,
                            5),
-                          1574475557.095913),
+                          1574511869.29799),
         'user_data': {}},
                  'saved_notebook_display': None,
                  'split_percents': {0: 0.5},
@@ -1893,7 +1279,8 @@ proj.vcs-system-config = ('prefs',
                                    'versioncontrol.svn.executable': u'svn',
                                    'versioncontrol.svn.extra-global-args': '',
                                    'versioncontrol.svn.svnadmin-executable': u'svnadmin'}})
-search.search-history = [u'az_fail_timer',
+search.search-history = [u'watchHomingAxis',
+                         u'az_fail_timer',
                          u'Repeat',
                          u'logging',
                          u'cmd="0" ',
@@ -1903,7 +1290,6 @@ search.search-history = [u'az_fail_timer',
                          u'log.',
                          u'close',
                          u'print(',
-                         u'watchHomingAxis',
                          u'home']
 testing.stored-results = (1,
                           [],

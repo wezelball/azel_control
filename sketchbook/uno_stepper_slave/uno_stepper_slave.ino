@@ -414,6 +414,7 @@ void processCommand(){
       break;
     case 11:    // elevation DOWN limit
       answer = "_______" + String(getLimit(1,1));
+      break;
     case 12:    // set azimuth speed
       setSpeed(0, param);
       command = 0;
