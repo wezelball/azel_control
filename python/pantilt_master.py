@@ -55,7 +55,7 @@ class motionThread(threading.Thread):
         self.threadID = threadID
         self.name = name
         self.running = True
-        self.delay = 1.0
+        self.delay = 1.5
         self.azFailTiming = False
         self.elFailTiming = False
         self.azAvgVel = 0.0
@@ -79,7 +79,7 @@ class motionThread(threading.Thread):
             # This will used to invoke jam detection later
             if variable.isAzRunning == True:    # azimuth
                 # Look to see if stopped
-                if abs(variable.azAvgVelocity.computeAverage()) < 1.0:
+                if abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == True:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
                         logging.debug("periodicThread.run() azFailTiming = True")
@@ -95,7 +95,7 @@ class motionThread(threading.Thread):
                 
             if variable.isElRunning == True:    # elevation
                 # Look to see if stopped
-                if abs(variable.elAvgVelocity.computeAverage()) < 1.0:
+                if abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == True:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
                         logging.debug("periodicThread.run() elFailTiming = True")
@@ -475,15 +475,18 @@ def stopAllSlew():
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
-    variable.isAzRunning = True
     logging.debug("relMoveAz(%s)", distance)
-    print (sendStepperCommand(cmd)) 
+    print (sendStepperCommand(cmd))
+    time.sleep(0.5)
+    variable.isAzRunning = True
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
-    variable.isElRunning = True
+    
     logging.debug("relMoveEl(%s)", distance)
     print (sendStepperCommand(cmd))
+    time.sleep(0.5)
+    variable.isElRunning = True
 
 def printEncoders():
     print(getEncoders())
@@ -719,7 +722,7 @@ variable = Variables()
 commThread = periodicThread(1, "Thread-1")
 commThread.start()
 
-motionCheckThread = motionThread(1, "m_thread")
+motionCheckThread = motionThread(1.5, "m_thread")
 motionCheckThread.start()
 
 # Set initial values - motor speeds, etc
