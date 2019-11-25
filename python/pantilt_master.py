@@ -120,7 +120,8 @@ class motionThread(threading.Thread):
                 return id
     
     def raise_exception(self): 
-        thread_id = self.get_id() 
+        thread_id = self.get_id()
+        # i keep getting exceptions here when leaving the program
         res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, ctypes.py_object(SystemExit)) 
         if res > 1: 
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0) 
@@ -426,10 +427,11 @@ def stepperPulsesToDegrees(axis, pulses):
 # axis 0 = azimuth
 # axis 1 = elevation
 def stepperDegreesToPulses(axis, degrees):
+    pulses = 0
     if axis == 0:
-        pulses = degrees * 401.250
+        pulses = float(degrees) * 401.250
     elif axis == 1:
-        pulses = degrees * 769.166
+        pulses = float(degrees) * 769.166
         
     return int(pulses)
 
@@ -448,22 +450,18 @@ def encoderDegreesToPulses(degrees):
 
 # ****************** Command functions ***********************
 def slewNorth():
-    # should replace this with relMoveEl(distance)
     logging.debug("slewNorth()")
     relMoveEl(8000)
 
 def slewEast():
-    # should replace this with relMoveAz(distance)
     logging.debug("slewEast()")
     relMoveAz(8000)
 
 def slewWest():
-    # should replace this with relMoveAz(distance)
     logging.debug("slewWest()")
     relMoveAz(-8000)
 
 def slewSouth():
-    # should replace this with relMoveEl(distance)
     logging.debug("slewSouth()")
     relMoveEl(-8000)
 
@@ -516,7 +514,17 @@ def quickStopEl():
     variable.isElRunning = False
     variable.elHoming = False
 
-# returns 0 if limit made
+# Move the axis the number of degrees specified
+def moveAzStepperDegrees(degrees):
+    logging.debug("moveAzStepperDegrees() %s", degrees)
+    relMoveAz(stepperDegreesToPulses(0, degrees))
+
+# Move the axis the number of degrees specified
+def moveElStepperDegrees(degrees):
+    logging.debug("moveElStepperDegrees() %s", degrees)
+    relMoveEl(stepperDegreesToPulses(1, degrees))
+
+# returns True if limit made
 def isAzCWLimit():
     variable.azCWLimit = sendStepperCommand("8:0")
     if variable.azCWLimit.find('0') != -1:
@@ -529,7 +537,7 @@ def isAzCWLimit():
 def printIsAzCWLimit():
     print(isAzCWLimit())
 
-# returns 0 if limit made	
+# returns True if limit made	
 def isAzCCWLimit():
     variable.azCCWLimit = sendStepperCommand("9:0")
     if variable.azCCWLimit.find('0') != -1:
@@ -542,7 +550,7 @@ def isAzCCWLimit():
 def printIsAzCCWLimit():
     print(isAzCCWLimit())
 
-# returns 0 if limit made
+# returns True if limit made
 def isElUpLimit():
     variable.elUpLimit = sendStepperCommand("10:0")
     if variable.elUpLimit.find('0') != -1:
@@ -555,7 +563,7 @@ def isElUpLimit():
 def printIsElUpLimit():
     print(isElUpLimit())
 
-# returns 0 if limit made
+# returns True if limit made
 def isElDownLimit():
     variable.elDownLimit = sendStepperCommand("11:0")
     if variable.elDownLimit.find('0') != -1:
@@ -700,6 +708,8 @@ def switchCase(case):
         "15":isRunning,       # requires axis, 0=az, 1=el
         "16":zeroAzEncoder,
         "17":zeroElEncoder,
+        "18":moveAzStepperDegrees,  # requires axis, 0=az, 1=el
+        "19":moveElStepperDegrees,  # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
 # loop to send message
@@ -728,9 +738,6 @@ motionCheckThread.start()
 # Set initial values - motor speeds, etc
 setInitialValues()
 
-# Start the azimuth axis to reset the isRunning flag
-relMoveAz(10)
-
 
 while not exit:
 
@@ -755,5 +762,3 @@ motionCheckThread.raise_exception()
 
 time.sleep(1.0)
 log.close()
-
-
