@@ -25,6 +25,11 @@ i2c_cmd = 0x01
 # Start a message queue
 messageQ = []
 
+# i2c comms error flags
+encoderIOError = False
+stepperIOError = False
+
+
 # *********************** BEGIN CLASSES ******************************
 
 # Moving average class
@@ -82,7 +87,7 @@ class motionThread(threading.Thread):
                 if abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == True:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
-                        logging.debug("periodicThread.run() azFailTiming = True")
+                        logging.debug("motionThread.run() azFailTiming = True")
                     elif self.azFailTiming == True:
                         self.azFailTiming == False
                         azJam()
@@ -90,7 +95,7 @@ class motionThread(threading.Thread):
                 elif abs(variable.azAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
                     if self.azFailTiming == True:
                         self.azFailTiming = False
-                        logging.debug("periodicThread.run() azFailTiming = False")
+                        logging.debug("motionThread.run() azFailTiming = False")
 
                 
             if variable.isElRunning == True:    # elevation
@@ -98,7 +103,7 @@ class motionThread(threading.Thread):
                 if abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == True:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
-                        logging.debug("periodicThread.run() elFailTiming = True")
+                        logging.debug("motionThread.run() elFailTiming = True")
                     elif self.elFailTiming == True:
                         self.elFailTiming = False
                         elJam()
@@ -106,7 +111,7 @@ class motionThread(threading.Thread):
                 elif abs(variable.elAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
-                        logging.debug("periodicThread.run() elFailTiming = False")    
+                        logging.debug("motionThread.run() elFailTiming = False")    
         
     def stop(self):
         self.running = False
@@ -141,10 +146,23 @@ class periodicThread (threading.Thread):
         self.elAvgVel = 0.0
 
     def run(self):
+        global encoderIOError
+        global stepperIOError
+        
         while(self.running):
             time.sleep(self.delay)
-            # Get position from encoders
-            variable.azPos, variable.elPos = getEncoders()
+            
+            # Get position from encoders, but set flag if error
+            try:
+                variable.azPos, variable.elPos = getEncoders()
+            except ValueError:
+                encoderIOError = True
+            
+            # Get positions from steppers
+            if stepperIOError == False:    # don't try to update if there's an IOError
+                variable.azStepperPos = getStepperPosn(0)
+                variable.azStepperPos = getStepperPosn(1)
+            
             # Calculate velocities
             variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
             variable.azAvgVelocity.addValue(variable.azVelocity)
@@ -156,11 +174,14 @@ class periodicThread (threading.Thread):
             self.elAvgVel = variable.elAvgVelocity.computeAverage()
             
             # Save encoder position to last position
-            self.lastAz,self.lastEl = getEncoders()
+            try:
+                self.lastAz,self.lastEl = getEncoders()
+            except ValueError:
+                encoderIOError = True            
             
             # Update the process logfile
-            log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + \
-                      ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
+            log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
+                      + str(variable.azStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
@@ -174,7 +195,8 @@ class periodicThread (threading.Thread):
             
             if variable.elHoming == True:
                 watchHomingAxis(1)
-
+                
+                
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
 
@@ -222,6 +244,8 @@ class Variables():
         self.elVelocity = 0
         self.azAvgVelocity = MovingAverage(3)
         self.elAvgVelocity = MovingAverage(3)
+        self.azStepperPos = getStepperPosn(0)
+        self.elStepperPos = getStepperPosn(1)
 
         self.azPos = 0
         self.elPos = 0
@@ -230,8 +254,8 @@ class Variables():
         self.azHomed = False
         self.azHoming = False
         self.elHomed = False
-        self.elHoming = False
-
+        self.elHoming = False 
+        
 # ************************* END CLASSES ******************************
 
 # Sets inital values
@@ -249,6 +273,9 @@ def setInitialValues():
 # Sends the message over the i2c bus, using a 
 # prioritized messageQ
 def sendMessage(priority, message, i2c_address):
+    global encoderIOError
+    global stepperIOError
+    
     messageQ.append((priority, message))
     messageQ.sort(reverse = True)
 
@@ -272,8 +299,21 @@ def sendMessage(priority, message, i2c_address):
 
             reply = ConvertBytesToString(replyBytes)
         except IOError:
-            reply = "Error"
-            logging.warn("sendMessage() - IOError")
+            if i2c_address == encoders_i2c_address:
+                encoderIOError = True
+                reply = ""
+                logging.warn("sendMessage() - encoderIOError")
+                
+            elif i2c_address == steppers_i2c_address:
+                stepperIOError = True
+                reply = ""
+                logging.warn("sendMessage() - stepperIOError") 
+                
+        else:   # Reset error flags if there was a good read
+            if i2c_address == encoders_i2c_address:
+                encoderIOError = False
+            elif i2c_address == steppers_i2c_address:
+                stepperIOError = False
 
         return reply
 
@@ -306,7 +346,8 @@ def getEncoders():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            encPosList = variable.azPos, variable.elPos
+            #encPosList = variable.azPos, variable.elPos
+            logging.warn("getEncoders() - IOError")
             
     #logging.debug("getEncoders() returned %s", encPosList)
     
@@ -317,6 +358,8 @@ def getEncoders():
 # axis 0 = azimuth
 # axis 1 = elevation
 def getStepperPosn(axis):
+    global stepperIOError
+    
     cmd = "18" + ':' + str(axis)
     reply  = sendStepperCommand(cmd)
     
@@ -327,11 +370,12 @@ def getStepperPosn(axis):
             result += i
     
     # for debugging
-    print ("result: %s" %result)
     logging.debug("getStepperPosn() returned %s", result)
     
-    return int(result)
+    if stepperIOError == False:
+        return int(result)
     
+    #return int(result)
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
@@ -438,15 +482,15 @@ def stepperDegreesToPulses(axis, degrees):
 # Given encoder pulses, return degree equivalent
 # The encoder gear relationships on both axes
 # are identical
-def encoderPulsesToDegrees(pulses):
+def encoderCountsToDegrees(pulses):
     degreesPerPulse = 0.092308
     degrees = pulses * degreesPerPulse
     return degrees
 
-def encoderDegreesToPulses(degrees):
+def encoderDegreesToCounts(degrees):
     pulsesPerDegree = 10.83333333
     pulses = degrees * pulsesPerDegree
-    return pulses
+    return int(pulses)
 
 # ****************** Command functions ***********************
 def slewNorth():
@@ -576,6 +620,13 @@ def isElDownLimit():
 def printIsElDownLimit():
     print(isElDownLimit())
 
+
+# 0 = azimuth
+# 1 = elevation
+def printStepperPosition(axis):
+    print (getStepperPosn(axis))
+
+
 # For now, let's home west
 def homeAzimuth():
     variable.azHoming = True
@@ -702,63 +753,66 @@ def switchCase(case):
         "9":homeAzimuth,
         "10":homeElevation,
         "11":zeroEncoders,
-        "12":relMoveAz,       # requires distance
-        "13":relMoveEl,       # requires distance
-        "14":getStepperPosn,  # requires axis, 0=az, 1=el
-        "15":isRunning,       # requires axis, 0=az, 1=el
+        "12":relMoveAz,             # requires distance
+        "13":relMoveEl,             # requires distance
+        "14":printStepperPosition,  # requires axis, 0=az, 1=el
+        "15":isRunning,             # requires axis, 0=az, 1=el
         "16":zeroAzEncoder,
         "17":zeroElEncoder,
         "18":moveAzStepperDegrees,  # requires axis, 0=az, 1=el
         "19":moveElStepperDegrees,  # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
-# loop to send message
-exit = False
 
-# Process logfile for live process parameters
-logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
-log = open(logfile, 'w')
-# Write the header
-log.write("Time,azEncoder, elEncoder" + '\n')
+if __name__ == "__main__":
 
-# This is the python logging module
-logging.basicConfig(filename='debug.log', filemode='w', \
+    # loop to send message
+    exit = False
+
+    # Process logfile for live process parameters
+    logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
+    log = open(logfile, 'w')
+    # Write the header
+    log.write("Time,azEncoder, elEncoder, azStepper, elStepper, azVel, elVel" + '\n')
+
+    # This is the python logging module
+    logging.basicConfig(filename='debug.log', filemode='w', \
                     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
-# Instantiate global variables
-variable = Variables()
 
-# Start the comms thread after initialization
-commThread = periodicThread(1, "Thread-1")
-commThread.start()
+    # Instantiate global variables
+    variable = Variables()    
 
-motionCheckThread = motionThread(1.5, "m_thread")
-motionCheckThread.start()
+    # Start the comms thread after initialization
+    commThread = periodicThread(1, "Thread-1")
+    commThread.start()
 
-# Set initial values - motor speeds, etc
-setInitialValues()
+    motionCheckThread = motionThread(1.5, "m_thread")
+    motionCheckThread.start()
 
+    # Set initial values - motor speeds, etc
+    setInitialValues()    
 
-while not exit:
+    while not exit:
 
-    # Get the user command
-    r = input('-> ')
-    cmdList = r.split()
+        # Get the user command
+        r = input('-> ')
+        cmdList = r.split()
 
-    # Pass the command to the switch construct
-    if len(cmdList) == 1:           # command with no parms
-        switchCase(cmdList[0])()
-    elif len(cmdList) == 2:         # command with one parm
-        switchCase(cmdList[0])(cmdList[1])
+        # Pass the command to the switch construct
+        if len(cmdList) == 1:           # command with no parms
+            switchCase(cmdList[0])()
+        elif len(cmdList) == 2:         # command with one parm
+            switchCase(cmdList[0])(cmdList[1])
 
-    if cmdList[0] == 'q':
-        exit = True
+        if cmdList[0] == 'q':
+            exit = True
 
-# Exit program here
+            # Exit program here
 
-# Kill threads
-commThread.raise_exception()
-motionCheckThread.raise_exception()
+            # Kill threads
+            commThread.raise_exception()
+            motionCheckThread.raise_exception()
 
-time.sleep(1.0)
-log.close()
+            time.sleep(1.0)
+            log.close()
