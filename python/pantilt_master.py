@@ -118,8 +118,8 @@ class motionThread(threading.Thread):
         
     def get_id(self): 
         # returns id of the respective thread 
-        if hasattr(self, 'threadID'): 
-            return self.threadID 
+        if hasattr(self, '_thread_id'): 
+            return self._thread_id 
         for id, thread in threading._active.items(): 
             if thread is self: 
                 return id
@@ -370,12 +370,15 @@ def getStepperPosn(axis):
             result += i
     
     # for debugging
-    logging.debug("getStepperPosn() returned %s", result)
+    #logging.debug("getStepperPosn() returned %s", result)
     
     if stepperIOError == False:
-        return int(result)
+        try:
+            return int(result)
+        except ValueError:
+            stepperIOError = True
+            return 0
     
-    #return int(result)
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
