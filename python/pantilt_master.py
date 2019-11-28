@@ -260,12 +260,12 @@ class Variables():
 
 # Sets inital values
 def setInitialValues():
-    setAzSpeed(500)
+    setAzSpeed(250)
     setAzMaxSpeed(500)
-    time.sleep(0.25)
+    time.sleep(01.25)
     setAzAccel(500)
     time.sleep(0.25)
-    setElSpeed(500)
+    setElSpeed(250)
     setElMaxSpeed(500)
     time.sleep(0.25)
     setElAccel(500)
@@ -527,11 +527,23 @@ def relMoveAz(distance):
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
-    
     logging.debug("relMoveEl(%s)", distance)
     print (sendStepperCommand(cmd))
     time.sleep(0.5)
     variable.isElRunning = True
+
+# Run at constant speed
+# axis 0 = azimuth
+# axis 1 = elevation
+def runSpeed(axis):
+    cmd = '20:' + str(axis)
+    logging.debug("runSpeed() axis: %s", axis)
+    sendStepperCommand(cmd)
+    time.sleep(0.5)
+    if axis == 0:
+        variable.isAzRunning = True
+    elif axis == 1:
+        variable.isElRunning = True
 
 def printEncoders():
     print(getEncoders())
@@ -764,6 +776,7 @@ def switchCase(case):
         "17":zeroElEncoder,
         "18":moveAzStepperDegrees,  # requires axis, 0=az, 1=el
         "19":moveElStepperDegrees,  # requires axis, 0=az, 1=el
+        "20":runSpeed,              # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
 

@@ -455,8 +455,6 @@ void processCommand(){
       memset(str, '\0', sizeof(str));
       ltoa(getCurPosition(param), str, 10);
       answer = str;
-      //Serial.print("answer: ");
-      //Serial.println(answer);
       command = 0;
       param = 0;
       break;
@@ -474,6 +472,12 @@ void processCommand(){
           answer = "0";
         }
       }
+      command = 0;
+      param = 0;
+      break;
+    case 20:    // run axis at constant speed
+      setSpeed(param, -250);
+      runSpeed(param);
       command = 0;
       param = 0;
       break;
@@ -515,7 +519,7 @@ void setup() {
 void loop() {
 
 
-  // ******************************* Motion ***********************************
+  // *************************** Start Motion ***********************************
   
   // Relative move - az
   if (movingX && (abs(stepperX.distanceToGo())) > 0) {
@@ -537,7 +541,24 @@ void loop() {
     //stepperY.stop();
   }
 
-  // ******************************* Motion ***********************************
+  // Slew (constant) move
+  if (slewingX) {         // azimuth
+    stepperX.runSpeed();
+    stepperXRun = true;
+    
+  } else  {
+    stepperXRun = false;
+  }
+
+  if (slewingY) {         // elevation
+    stepperY.runSpeed();
+    stepperYRun = true;
+    
+  } else  {
+    stepperYRun = false;
+  }
+
+  // *************************** End Motion ***********************************
 
   // ************************* Check hard limits ******************************
   if ((getLimit(0,0) == 0) && azMovingCW) {           // az max CW
