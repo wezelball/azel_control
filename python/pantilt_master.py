@@ -532,7 +532,7 @@ def relMoveEl(distance):
     time.sleep(0.5)
     variable.isElRunning = True
 
-# Run at constant speed
+# Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
 # axis 1 = elevation
 def runSpeed(axis):
@@ -776,7 +776,9 @@ def switchCase(case):
         "17":zeroElEncoder,
         "18":moveAzStepperDegrees,  # requires axis, 0=az, 1=el
         "19":moveElStepperDegrees,  # requires axis, 0=az, 1=el
-        "20":runSpeed,              # requires axis, 0=az, 1=el
+        "20":setAzSpeed,            # requires speed
+        "21":setElSpeed,            # requires speed
+        "22":runSpeed,              # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
 

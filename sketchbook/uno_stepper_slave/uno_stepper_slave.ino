@@ -153,7 +153,7 @@ void setSpeed(int axis, int speed)  {
   if (axis == 0)
     stepperX.setSpeed((float)speed);
   else if (axis == 1) 
-    stepperX.setSpeed((float)speed);
+    stepperY.setSpeed((float)speed);
 }
 
 void runSpeed(int axis)  {     // must add hard limit checks 
@@ -476,7 +476,6 @@ void processCommand(){
       param = 0;
       break;
     case 20:    // run axis at constant speed
-      setSpeed(param, -250);
       runSpeed(param);
       command = 0;
       param = 0;
