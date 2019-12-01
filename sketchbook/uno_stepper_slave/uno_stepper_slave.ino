@@ -56,10 +56,12 @@ bool movingY = false;       // elevation axis is moving
 bool stoppingX = false;     // azimuth axis is deceling to stop
 bool stoppingY = false;     // elevation axis is deceling to stop
 
-bool slewingX = false;      // TODO: get rid of this if possible, too specific
-bool slewingY = false;      // TODO: get rid of this if possible, too specific
-bool stoppingXSlew = false; // TODO: get rid of this if possible, too specific 
-bool stoppingYSlew = false; // TODO: get rid of this if possible, too specific 
+bool slewingX = false;      // Azimuth is slewing constant speed
+bool slewingY = false;      // Eelvation is slewing constant speed
+int azSlewSpeed = 0;        // Need to keep track of speed for limit checking
+int elSlewSpeed = 0;        // Need to keep track of speed for limit checking
+bool stoppingXSlew = false; // Explain this
+bool stoppingYSlew = false;
 
 bool stepperXRun = false; // flag is passed to the Timer1 ISR
 bool stepperYRun = false; // flag is passed to the Timer1 ISR
@@ -103,6 +105,7 @@ long parseParameter(String cmd) {
 // *********************** BEGIN STEPPER MOTION COMMANDS *****************************
 
 // Move relative
+// **** Need to fix this code as limit checks already done in loop() ****
 void relativeMove(int axis, long steps)  {
   if (axis == 0)          // azimuth axis
   { 
@@ -150,17 +153,52 @@ void setMaxSpeed(int axis, int speed)  {
 
 // Sets desired speed for runSpeed()
 void setSpeed(int axis, int speed)  {
-  if (axis == 0)
+  if (axis == 0) {       // azimuth
     stepperX.setSpeed((float)speed);
-  else if (axis == 1) 
+    azSlewSpeed = speed;
+  }
+  else if (axis == 1) {   // elevation 
     stepperY.setSpeed((float)speed);
+    elSlewSpeed = speed;
+  }
 }
-
 void runSpeed(int axis)  {     // must add hard limit checks 
-  if (axis == 0)
+  if (axis == 0) {
+    // Starts motion in loop()
     slewingX = true;
-  else if (axis == 1)
+    // Setting up flags for limit checking
+    if (azSlewSpeed > 0)  {
+      azMovingCW = true;
+      azMovingCCW = false;
+    } else if (azSlewSpeed < 0) {
+      azMovingCW = false;
+      azMovingCCW = true;
+    }
+  
+    // Don't run the motor against a hard stop
+    if ((azMovingCW && !azCWLimit) || (azMovingCCW && !azCCWLimit)) {
+      stepperX.enableOutputs();
+    }
+  
+  }
+      
+  else if (axis == 1) {
+    // Starts motion in loop()
     slewingY = true;
+    // Setting up flags for limit checking
+    if (elSlewSpeed > 0)  {
+      elMovingUp = true;
+      elMovingDown = false;
+    } else if (elSlewSpeed < 0) {
+      elMovingUp = false;
+      elMovingDown = true;
+    }
+
+    // Don't run the motor against a hard stop
+    if ((elMovingDown && !elDownLimit) || (elMovingUp && !elUpLimit)) {
+      stepperY.enableOutputs();
+    }
+  }
 }
 
 // Stops with deceleration ramp
