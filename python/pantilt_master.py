@@ -353,6 +353,14 @@ def getEncoders():
     
     return tuple(encPosList)
 
+def getEncodersDegrees():
+    # Assign raw counts to tuple
+    encodersCounts = getEncoders()
+    azEncoderDegrees = encoderCountsToDegrees(encodersCounts[0])
+    elEncoderDegrees = encoderCountsToDegrees(encodersCounts[1])
+    
+    encoderDegrees = (azEncoderDegrees, elEncoderDegrees)
+    return encoderDegrees    
 
 # Gets he position of the stepper defined by axis
 # axis 0 = azimuth
@@ -545,8 +553,11 @@ def runSpeed(axis):
     elif axis == 1:
         variable.isElRunning = True
 
-def printEncoders():
+def printEncodersCounts():
     print(getEncoders())
+
+def printEncodersDegrees():
+    print(getEncodersDegrees())
 
 def stopAz():
     logging.debug("stopAz()")
@@ -638,7 +649,7 @@ def printIsElDownLimit():
 
 # 0 = azimuth
 # 1 = elevation
-def printStepperPosition(axis):
+def printStepPosnSteps(axis):
     print (getStepperPosn(axis))
 
 
@@ -756,7 +767,7 @@ def switchCase(case):
         ":Mw#":slewWest,
         ":Ms#":slewSouth,
         ":Q#":stopAllSlew,
-        "0":printEncoders,
+        "0":printEncodersCounts,
         "1":stopAz,
         "2":stopEl,
         "3":quickStopAz,
@@ -770,7 +781,7 @@ def switchCase(case):
         "11":zeroEncoders,
         "12":relMoveAz,             # requires distance
         "13":relMoveEl,             # requires distance
-        "14":printStepperPosition,  # requires axis, 0=az, 1=el
+        "14":printStepPosnSteps,  # requires axis, 0=az, 1=el
         "15":isRunning,             # requires axis, 0=az, 1=el
         "16":zeroAzEncoder,
         "17":zeroElEncoder,
@@ -779,6 +790,7 @@ def switchCase(case):
         "20":setAzSpeed,            # requires speed
         "21":setElSpeed,            # requires speed
         "22":runSpeed,              # requires axis, 0=az, 1=el
+        "23":printEncodersDegrees,
     }.get(case, case_default)
 
 
