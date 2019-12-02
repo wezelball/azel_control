@@ -161,7 +161,7 @@ class periodicThread (threading.Thread):
             # Get positions from steppers
             if stepperIOError == False:    # don't try to update if there's an IOError
                 variable.azStepperPos = getStepperPosn(0)
-                variable.azStepperPos = getStepperPosn(1)
+                variable.elStepperPos = getStepperPosn(1)
             
             # Calculate velocities
             variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
@@ -181,7 +181,7 @@ class periodicThread (threading.Thread):
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
-                      + str(variable.azStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
+                      + str(variable.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
 
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
@@ -781,7 +781,7 @@ def switchCase(case):
         "11":zeroEncoders,
         "12":relMoveAz,             # requires distance
         "13":relMoveEl,             # requires distance
-        "14":printStepPosnSteps,  # requires axis, 0=az, 1=el
+        "14":printStepPosnSteps,    # requires axis, 0=az, 1=el
         "15":isRunning,             # requires axis, 0=az, 1=el
         "16":zeroAzEncoder,
         "17":zeroElEncoder,
