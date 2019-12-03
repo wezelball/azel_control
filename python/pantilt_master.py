@@ -358,8 +358,8 @@ def getEncoders():
 def getEncodersDegrees():
     # Assign raw counts to tuple
     encodersCounts = getEncoders()
-    azEncoderDegrees = encoderCountsToDegrees(encodersCounts[0])
-    elEncoderDegrees = encoderCountsToDegrees(encodersCounts[1])
+    azEncoderDegrees = encoderCountsToDegrees(0, encodersCounts[0])
+    elEncoderDegrees = encoderCountsToDegrees(1, encodersCounts[1])
     
     encoderDegrees = (azEncoderDegrees, elEncoderDegrees)
     return encoderDegrees    
@@ -495,10 +495,13 @@ def stepperDegreesToPulses(axis, degrees):
     return int(pulses)
 
 # Given encoder pulses, return degree equivalent
-# The encoder gear relationships on both axes
-# are identical
-def encoderCountsToDegrees(pulses):
-    degreesPerPulse = 0.092308
+# Values were determined experimentally
+def encoderCountsToDegrees(axis, pulses):
+    if axis == 0:
+        degreesPerPulse = 0.025356
+    elif axis == 1:
+        degreesPerPulse = 0.024473
+    
     degrees = pulses * degreesPerPulse
     return degrees
 
