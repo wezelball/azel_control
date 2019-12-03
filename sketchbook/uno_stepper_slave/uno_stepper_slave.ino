@@ -518,6 +518,11 @@ void processCommand(){
       command = 0;
       param = 0;
       break;
+    case 21:    // zero stepper position for axis
+      setCurPosition(param, 0L);
+      command = 0;
+      param = 0;
+      break;
     default:
       command = 0;
       param = 0;

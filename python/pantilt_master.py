@@ -159,9 +159,9 @@ class periodicThread (threading.Thread):
                 encoderIOError = True
             
             # Get positions from steppers
-            if stepperIOError == False:    # don't try to update if there's an IOError
-                variable.azStepperPos = getStepperPosn(0)
-                variable.elStepperPos = getStepperPosn(1)
+            #if stepperIOError == False:    # don't try to update if there's an IOError
+            #    variable.azStepperPos = getStepperPosn(0)
+            #    variable.elStepperPos = getStepperPosn(1)
             
             # Calculate velocities
             variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
@@ -180,8 +180,10 @@ class periodicThread (threading.Thread):
                 encoderIOError = True            
             
             # Update the process logfile
-            log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
-                      + str(variable.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
+            #log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
+            #          + str(variable.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
+            log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ','  \
+                      +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')            
 
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
@@ -448,6 +450,7 @@ def watchHomingAxis(axis):
             variable.azHomed = True
             variable.isAzRunning = False
             zeroAzEncoder()
+            zeroSteppers(0)
             logging.debug("watchHomingAxis() azimuth homed")
     elif axis == 1:
         if isElDownLimit() == True:
@@ -455,6 +458,7 @@ def watchHomingAxis(axis):
             variable.elHomed = True
             variable.isElRunning = False
             zeroElEncoder()
+            zeroSteppers(1)
             logging.debug("watchHomingAxis() elevation homed")
             
 # Given stepper pulses, return degrees
@@ -722,6 +726,11 @@ def zeroElEncoder():
     
     return tuple(encPosList)
 
+def zeroSteppers(axis):
+    cmd = '21:' + str(axis)
+    logging.debug("zeroSteppers() axis: %s", axis)
+    sendStepperCommand(cmd)    
+
 # Is the stepper axis running?
 def isRunning(axis):
     cmd = "19" + ':' + str(axis)
@@ -790,7 +799,8 @@ def switchCase(case):
         "20":setAzSpeed,            # requires speed
         "21":setElSpeed,            # requires speed
         "22":runSpeed,              # requires axis, 0=az, 1=el
-        "23":printEncodersDegrees,
+        "23":printEncodersDegrees,  # returns a tuple
+        "24":zeroSteppers,          # requires axis, 0=az, 1=el
     }.get(case, case_default)
 
 
@@ -803,7 +813,8 @@ if __name__ == "__main__":
     logfile = "log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"
     log = open(logfile, 'w')
     # Write the header
-    log.write("Time,azEncoder, elEncoder, azStepper, elStepper, azVel, elVel" + '\n')
+    #log.write("Time,azEncoder, elEncoder, azStepper, elStepper, azVel, elVel" + '\n')
+    log.write("Time,azEncoder, elEncoder, azVel, elVel" + '\n')
 
     # This is the python logging module
     logging.basicConfig(filename='debug.log', filemode='w', \
