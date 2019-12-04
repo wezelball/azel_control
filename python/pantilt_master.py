@@ -147,10 +147,7 @@ class periodicThread (threading.Thread):
         self.azAvgVel = 0.0
         self.elAvgVel = 0.0
 
-    def run(self):
-        #global encoderIOError
-        #global stepperIOError
-        
+    def run(self):      
         while(self.running):
             time.sleep(self.delay)
             
@@ -161,6 +158,7 @@ class periodicThread (threading.Thread):
                 config.encoderIOError = True
             
             # Get positions from steppers
+            # This causes the stepper to stutter each time the motion thread is run
             #if stepperIOError == False:    # don't try to update if there's an IOError
             #    variable.azStepperPos = getStepperPosn(0)
             #    variable.elStepperPos = getStepperPosn(1)
@@ -227,19 +225,13 @@ class periodicThread (threading.Thread):
 
 class Variables():
     def __init__(self):
-        # initialize limit switches
-        self.azCWLimit = False
-        self.azCCWLimit = False
-        self.elUpLimit = False
-        self.elDownLimit = False
-
         # Process variables
-        self.azHomingSpeed = 500;
-        self.elHomingSpeed = 500;
-        self.azSlewSpeed = 500;
-        self.elSlewSpeed = 500;
-        self.azAccel = 500;
-        self.elAccel = 500;
+        #self.azHomingSpeed = 500;
+        #self.elHomingSpeed = 500;
+        #self.azSlewSpeed = 500;
+        #self.elSlewSpeed = 500;
+        #self.azAccel = 500;
+        #self.elAccel = 500;
         #self.isAzRunning = False;
         #self.isElRunning = False;
 
@@ -277,9 +269,6 @@ def setInitialValues():
 # Sends the message over the i2c bus, using a 
 # prioritized messageQ
 def sendMessage(priority, message, i2c_address):
-    #global encoderIOError
-    #global stepperIOError
-    
     messageQ.append((priority, message))
     messageQ.sort(reverse = True)
 
@@ -369,9 +358,7 @@ def getEncodersDegrees():
 # Gets he position of the stepper defined by axis
 # axis 0 = azimuth
 # axis 1 = elevation
-def getStepperPosn(axis):
-    #global stepperIOError
-    
+def getStepperPosn(axis):    
     cmd = "18" + ':' + str(axis)
     reply  = sendStepperCommand(cmd)
     
@@ -605,12 +592,10 @@ def moveElStepperDegrees(degrees):
 
 # returns True if limit made
 def isAzCWLimit():
-    variable.azCWLimit = sendStepperCommand("8:0")
-    if variable.azCWLimit.find('0') != -1:
-        #print ("True")
+    azCWLimit = sendStepperCommand("8:0")
+    if azCWLimit.find('0') != -1:
         return True
-    elif variable.azCWLimit.find('1') != -1:
-        #print ("False")
+    elif azCWLimit.find('1') != -1:
         return False
 
 def printIsAzCWLimit():
@@ -618,12 +603,10 @@ def printIsAzCWLimit():
 
 # returns True if limit made	
 def isAzCCWLimit():
-    variable.azCCWLimit = sendStepperCommand("9:0")
-    if variable.azCCWLimit.find('0') != -1:
-        #print ("True")
+    azCCWLimit = sendStepperCommand("9:0")
+    if azCCWLimit.find('0') != -1:
         return True
-    elif variable.azCCWLimit.find('1') != -1:
-        #print ("False")
+    elif azCCWLimit.find('1') != -1:
         return False
 
 def printIsAzCCWLimit():
@@ -631,12 +614,10 @@ def printIsAzCCWLimit():
 
 # returns True if limit made
 def isElUpLimit():
-    variable.elUpLimit = sendStepperCommand("10:0")
-    if variable.elUpLimit.find('0') != -1:
-        #print ("True")
+    elUpLimit = sendStepperCommand("10:0")
+    if elUpLimit.find('0') != -1:
         return True
-    elif variable.elUpLimit.find('1') != -1:
-        #print ("False")
+    elif elUpLimit.find('1') != -1:
         return False
 
 def printIsElUpLimit():
@@ -644,12 +625,10 @@ def printIsElUpLimit():
 
 # returns True if limit made
 def isElDownLimit():
-    variable.elDownLimit = sendStepperCommand("11:0")
-    if variable.elDownLimit.find('0') != -1:
-        #print ("True")
+    elDownLimit = sendStepperCommand("11:0")
+    if elDownLimit.find('0') != -1:
         return True
-    elif variable.elDownLimit.find('1') != -1:
-        #print ("False")
+    elif elDownLimit.find('1') != -1:
         return False
 
 def printIsElDownLimit():
@@ -683,7 +662,7 @@ def homeElevation():
 def zeroEncoders():
     encPosList = []
     cmd = '1'
-    reply = sendMessage(1, cmd, encoders_i2c_address)
+    reply = sendMessage(1, cmd, config.ENCODERS_I2C_ADDR)
     encByteList = reply.split(':')
     for i in encByteList:
         try:
@@ -827,6 +806,7 @@ if __name__ == "__main__":
 
 
     # Instantiate global variables
+    # This will be deprecated soon
     variable = Variables()    
 
     # Start the comms thread after initialization

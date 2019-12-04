@@ -1,4 +1,4 @@
-# Global values
+# Global variables
 # Yeah, that's right, global frickin' variables
 # Sorry if you don't like it
 
