@@ -153,7 +153,7 @@ class periodicThread (threading.Thread):
             
             # Get position from encoders, but set flag if error
             try:
-                variable.azPos, variable.elPos = getEncoders()
+                config.azMountPosn, config.elMountPosn = getEncoders()
             except ValueError:
                 config.encoderIOError = True
             
@@ -164,9 +164,9 @@ class periodicThread (threading.Thread):
             #    variable.elStepperPos = getStepperPosn(1)
             
             # Calculate velocities
-            variable.azVelocity = (variable.azPos - self.lastAz)/self.delay
+            variable.azVelocity = (config.azMountPosn - self.lastAz)/self.delay
             variable.azAvgVelocity.addValue(variable.azVelocity)
-            variable.elVelocity = (variable.elPos - self.lastEl)/self.delay
+            variable.elVelocity = (config.elMountPosn - self.lastEl)/self.delay
             variable.elAvgVelocity.addValue(variable.elVelocity)
             
             # Compute average velocities
@@ -180,9 +180,9 @@ class periodicThread (threading.Thread):
                 config.encoderIOError = True            
             
             # Update the process logfile
-            #log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
+            #log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ',' + str(variable.azStepperPos) + ',' \
             #          + str(variable.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
-            log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ','  \
+            log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
                       +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')            
 
             # Logging
@@ -243,8 +243,8 @@ class Variables():
         self.azStepperPos = getStepperPosn(0)
         self.elStepperPos = getStepperPosn(1)
 
-        self.azPos = 0
-        self.elPos = 0
+        #self.azPos = 0
+        #self.elPos = 0
 
         # homing flags
         #self.azHomed = False
@@ -339,7 +339,7 @@ def getEncoders():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            #encPosList = variable.azPos, variable.elPos
+            #encPosList = config.azMountPosn, config.elMountPosn
             logging.warn("getEncoders() - IOError")
             
     #logging.debug("getEncoders() returned %s", encPosList)
@@ -670,7 +670,7 @@ def zeroEncoders():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            encPosList = variable.azPos, variable.elPos
+            encPosList = config.azMountPosn, config.elMountPosn
 
     logging.debug("zeroEncoders() returned %s", encPosList)
     
@@ -687,7 +687,7 @@ def zeroAzEncoder():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            encPosList = variable.azPos, variable.elPos
+            encPosList = config.azMountPosn, config.elMountPosn
 
     logging.debug("zeroAzEncoder() returned %s", encPosList)
     
@@ -704,7 +704,7 @@ def zeroElEncoder():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            encPosList = variable.azPos, variable.elPos
+            encPosList = config.azMountPosn, config.elMountPosn
 
     logging.debug("zeroAzEncoder() returned %s", encPosList)
     
