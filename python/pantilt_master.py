@@ -13,21 +13,23 @@ import threading
 import ctypes
 from threading import Thread, Event, Timer
 import logging
+# This is where I will keep global data
+import config
 
 # Set up the i2c bus
 bus = smbus.SMBus(1)
 
 # I2C address of Arduino Slaves
-steppers_i2c_address = 0x04
-encoders_i2c_address = 0x05
-i2c_cmd = 0x01
+#steppers_i2c_address = 0x04
+#encoders_i2c_address = 0x05
+#i2c_cmd = 0x01
 
 # Start a message queue
 messageQ = []
 
 # i2c comms error flags
-encoderIOError = False
-stepperIOError = False
+#encoderIOError = False
+#stepperIOError = False
 
 
 # *********************** BEGIN CLASSES ******************************
@@ -82,7 +84,7 @@ class motionThread(threading.Thread):
             # Monitor the run status of the steppers,
             # updating the process varaibles
             # This will used to invoke jam detection later
-            if variable.isAzRunning == True:    # azimuth
+            if config.isAzRunning == True:    # azimuth
                 # Look to see if stopped
                 if abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == True:
                     if self.azFailTiming == False:
@@ -98,7 +100,7 @@ class motionThread(threading.Thread):
                         logging.debug("motionThread.run() azFailTiming = False")
 
                 
-            if variable.isElRunning == True:    # elevation
+            if config.isElRunning == True:    # elevation
                 # Look to see if stopped
                 if abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == True:
                     if self.elFailTiming == False:
@@ -146,8 +148,8 @@ class periodicThread (threading.Thread):
         self.elAvgVel = 0.0
 
     def run(self):
-        global encoderIOError
-        global stepperIOError
+        #global encoderIOError
+        #global stepperIOError
         
         while(self.running):
             time.sleep(self.delay)
@@ -156,7 +158,7 @@ class periodicThread (threading.Thread):
             try:
                 variable.azPos, variable.elPos = getEncoders()
             except ValueError:
-                encoderIOError = True
+                config.encoderIOError = True
             
             # Get positions from steppers
             #if stepperIOError == False:    # don't try to update if there's an IOError
@@ -177,7 +179,7 @@ class periodicThread (threading.Thread):
             try:
                 self.lastAz,self.lastEl = getEncoders()
             except ValueError:
-                encoderIOError = True            
+                config.encoderIOError = True            
             
             # Update the process logfile
             #log.write(time.strftime('%H:%M:%S') + ',' +  str(variable.azPos) + ',' + str(variable.elPos) + ',' + str(variable.azStepperPos) + ',' \
@@ -192,10 +194,10 @@ class periodicThread (threading.Thread):
             #logging.debug("periodicThread() elAvgVel %s", self.elAvgVel)            
 
             # Watch homing axes if homing
-            if variable.azHoming == True:
+            if config.azHoming == True:
                 watchHomingAxis(0)
             
-            if variable.elHoming == True:
+            if config.elHoming == True:
                 watchHomingAxis(1)
                 
                 
@@ -238,8 +240,8 @@ class Variables():
         self.elSlewSpeed = 500;
         self.azAccel = 500;
         self.elAccel = 500;
-        self.isAzRunning = False;
-        self.isElRunning = False;
+        #self.isAzRunning = False;
+        #self.isElRunning = False;
 
         # Real-time values
         self.azVelocity = 0
@@ -253,10 +255,10 @@ class Variables():
         self.elPos = 0
 
         # homing flags
-        self.azHomed = False
-        self.azHoming = False
-        self.elHomed = False
-        self.elHoming = False 
+        #self.azHomed = False
+        #self.azHoming = False
+        #self.elHomed = False
+        #self.elHoming = False 
         
 # ************************* END CLASSES ******************************
 
@@ -275,8 +277,8 @@ def setInitialValues():
 # Sends the message over the i2c bus, using a 
 # prioritized messageQ
 def sendMessage(priority, message, i2c_address):
-    global encoderIOError
-    global stepperIOError
+    #global encoderIOError
+    #global stepperIOError
     
     messageQ.append((priority, message))
     messageQ.sort(reverse = True)
@@ -292,30 +294,30 @@ def sendMessage(priority, message, i2c_address):
         replyBytes = ""
         #logging.debug("sendMessage() raw: %s", bytesToSend)
         try:
-            bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend)
+            bus.write_i2c_block_data(i2c_address, config.I2C_CMD, bytesToSend)
 
-            if i2c_address == steppers_i2c_address:
-                replyBytes = bus.read_i2c_block_data(steppers_i2c_address, 0, 8)
+            if i2c_address == config.STEPPERS_I2C_ADDR:
+                replyBytes = bus.read_i2c_block_data(config.STEPPERS_I2C_ADDR, 0, 8)
             else:
-                replyBytes = bus.read_i2c_block_data(encoders_i2c_address, 0, 16)
+                replyBytes = bus.read_i2c_block_data(config.ENCODERS_I2C_ADDR, 0, 16)
 
             reply = ConvertBytesToString(replyBytes)
         except IOError:
-            if i2c_address == encoders_i2c_address:
-                encoderIOError = True
+            if i2c_address == config.ENCODERS_I2C_ADDR:
+                config.encoderIOError = True
                 reply = ""
                 logging.warn("sendMessage() - encoderIOError")
                 
-            elif i2c_address == steppers_i2c_address:
-                stepperIOError = True
+            elif i2c_address == config.STEPPERS_I2C_ADDR:
+                config.stepperIOError = True
                 reply = ""
-                logging.warn("sendMessage() - stepperIOError") 
+                logging.warn("sendMessage() - config.stepperIOError") 
                 
         else:   # Reset error flags if there was a good read
-            if i2c_address == encoders_i2c_address:
-                encoderIOError = False
-            elif i2c_address == steppers_i2c_address:
-                stepperIOError = False
+            if i2c_address == config.ENCODERS_I2C_ADDR:
+                config.encoderIOError = False
+            elif i2c_address == config.STEPPERS_I2C_ADDR:
+                config.stepperIOError = False
 
         return reply
 
@@ -340,7 +342,7 @@ def ConvertBytesToString(src):
 def getEncoders():
     encPosList = []
     cmd = '0'	# send one byte
-    reply = sendMessage(1, cmd, encoders_i2c_address)
+    reply = sendMessage(1, cmd, config.ENCODERS_I2C_ADDR)
     encByteList = reply.split(':')
     for i in encByteList:
         try:
@@ -368,7 +370,7 @@ def getEncodersDegrees():
 # axis 0 = azimuth
 # axis 1 = elevation
 def getStepperPosn(axis):
-    global stepperIOError
+    #global stepperIOError
     
     cmd = "18" + ':' + str(axis)
     reply  = sendStepperCommand(cmd)
@@ -382,17 +384,17 @@ def getStepperPosn(axis):
     # for debugging
     #logging.debug("getStepperPosn() returned %s", result)
     
-    if stepperIOError == False:
+    if config.stepperIOError == False:
         try:
             return int(result)
         except ValueError:
-            stepperIOError = True
+            config.stepperIOError = True
             return 0
     
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
-    reply = sendMessage(1, cmd, steppers_i2c_address)
+    reply = sendMessage(1, cmd, config.STEPPERS_I2C_ADDR)
     return reply
 
 # Process functions
@@ -446,17 +448,17 @@ def watchHomingAxis(axis):
     logging.debug("watchHomingAxis() homing axis %s", axis)
     if axis == 0:
         if isAzCCWLimit() == True:
-            variable.azHoming = False
-            variable.azHomed = True
-            variable.isAzRunning = False
+            config.azHoming = False
+            config.azHomed = True
+            config.isAzRunning = False
             zeroAzEncoder()
             zeroSteppers(0)
             logging.debug("watchHomingAxis() azimuth homed")
     elif axis == 1:
         if isElDownLimit() == True:
-            variable.elHoming = False
-            variable.elHomed = True
-            variable.isElRunning = False
+            config.elHoming = False
+            config.elHomed = True
+            config.isElRunning = False
             zeroElEncoder()
             zeroSteppers(1)
             logging.debug("watchHomingAxis() elevation homed")
@@ -530,22 +532,22 @@ def slewSouth():
 def stopAllSlew():
     logging.debug("stopAllSlew()")
     print(sendStepperCommand("3:0"))
-    variable.isAzRunning = False
-    variable.isElRunning = False
+    config.isAzRunning = False
+    config.isElRunning = False
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
     logging.debug("relMoveAz(%s)", distance)
     print (sendStepperCommand(cmd))
     time.sleep(0.5)
-    variable.isAzRunning = True
+    config.isAzRunning = True
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
     logging.debug("relMoveEl(%s)", distance)
     print (sendStepperCommand(cmd))
     time.sleep(0.5)
-    variable.isElRunning = True
+    config.isElRunning = True
 
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
@@ -556,9 +558,9 @@ def runSpeed(axis):
     sendStepperCommand(cmd)
     time.sleep(0.5)
     if axis == 0:
-        variable.isAzRunning = True
+        config.isAzRunning = True
     elif axis == 1:
-        variable.isElRunning = True
+        config.isElRunning = True
 
 def printEncodersCounts():
     print(getEncoders())
@@ -569,12 +571,12 @@ def printEncodersDegrees():
 def stopAz():
     logging.debug("stopAz()")
     print(sendStepperCommand("4:0"))
-    variable.isAzRunning = False
+    config.isAzRunning = False
 
 def stopEl():
     logging.debug("stopEl()")
     print(sendStepperCommand("5:0"))
-    variable.isElRunning = False
+    config.isElRunning = False
 
 # There is a bug when quickStop functions are called
 # and a later move is performed, it starts
@@ -582,14 +584,14 @@ def stopEl():
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
-    variable.isAzRunning = False
-    variable.azHoming = False
+    config.isAzRunning = False
+    config.azHoming = False
 
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
-    variable.isElRunning = False
-    variable.elHoming = False
+    config.isElRunning = False
+    config.elHoming = False
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -662,13 +664,13 @@ def printStepPosnSteps(axis):
 
 # For now, let's home west
 def homeAzimuth():
-    variable.azHoming = True
+    config.azHoming = True
     logging.debug("homeAzimuth() executed")
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
-    variable.elHoming = True
+    config.elHoming = True
     logging.debug("homeElevation() executed")
     # slew south a long friggin way
     relMoveEl(-40000)
@@ -698,7 +700,7 @@ def zeroEncoders():
 def zeroAzEncoder():
     encPosList = []
     cmd = '2'
-    reply = sendMessage(1, cmd, encoders_i2c_address)
+    reply = sendMessage(1, cmd, config.ENCODERS_I2C_ADDR)
     encByteList = reply.split(':')
     for i in encByteList:
         try:
@@ -715,7 +717,7 @@ def zeroAzEncoder():
 def zeroElEncoder():
     encPosList = []
     cmd = '3'
-    reply = sendMessage(1, cmd, encoders_i2c_address)
+    reply = sendMessage(1, cmd, config.ENCODERS_I2C_ADDR)
     encByteList = reply.split(':')
     for i in encByteList:
         try:
