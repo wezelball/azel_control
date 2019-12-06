@@ -554,6 +554,9 @@ void setup() {
   pinMode(elLimitDown, INPUT_PULLUP);
   
   // Setup stepper enable pins
+  // Each stepper should have its own enable pin so that
+  // I can fastStop each axis individually. Right now both
+  // stop at the same time
   stepperX.setEnablePin(7);   // using an enable pin
   stepperY.setEnablePin(7);
 }

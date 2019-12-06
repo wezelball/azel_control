@@ -58,6 +58,16 @@ class App(threading.Thread):
         butJogS = tk.Button(self.root, text="Jog South", command=slewSouth)
         butJogE = tk.Button(self.root, text="Jog East", command=slewEast)
         butJogW = tk.Button(self.root, text="Jog West", command=slewWest)
+        butStopAz = tk.Button(self.root, text="Stop Az", command=stopAz)
+        butStopEl = tk.Button(self.root, text="Stop El", command=stopEl)
+        butStopAll = tk.Button(self.root, text="Stop All", command=stopAllSlew)
+        butQStopAz = tk.Button(self.root, text="QStop Az", command=quickStopAz)
+        butQStopEl = tk.Button(self.root, text="QStop El", command=quickStopEl)
+        butHomeAz = tk.Button(self.root, text="Home Az", command=homeAzimuth)
+        butHomeEl = tk.Button(self.root, text="Home El", command=homeElevation)
+        butZeroAz = tk.Button(self.root, text="Zero AZ Enc", command=zeroAzEncoder)
+        butZeroEl = tk.Button(self.root, text="Zero El Enc", command=zeroElEncoder)
+        butZeroEnc = tk.Button(self.root, text="Zero All Enc", command=zeroEncoders)
         butQuit = tk.Button(self.root, text="Quit", command=self.die)
         
         # Place widgets
@@ -67,6 +77,17 @@ class App(threading.Thread):
         butJogS.pack()
         butJogE.pack()
         butJogW.pack()
+        butStopAz.pack()
+        butStopEl.pack()
+        butStopAll.pack()
+        butQStopAz.pack()
+        butQStopEl.pack()
+        butHomeAz.pack()
+        butHomeEl.pack()
+        butZeroAz.pack()
+        butZeroEl.pack()
+        butZeroEnc.pack()
+        
         butQuit.pack()
 
         self.root.mainloop()
@@ -613,15 +634,18 @@ def stopEl():
     print(sendStepperCommand("5:0"))
     config.isElRunning = False
 
-# There is a bug when quickStop functions are called
-# and a later move is performed, it starts
-# at full speed with no accel
+# quickStop functions stop both axes at the same time
+# because the both stepper enable pins are tied to the
+# same output
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
     config.isAzRunning = False
     config.azHoming = False
 
+# quickStop functions stop both axes at the same time
+# because the both stepper enable pins are tied to the
+# same output
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
@@ -882,6 +906,8 @@ if __name__ == "__main__":
             switchCase(cmdList[0])()
         elif len(cmdList) == 2:         # command with one parm
             switchCase(cmdList[0])(cmdList[1])
+        elif len(cmdList) == 0:
+            cmdList.append('')
 
         if cmdList[0] == 'q':
             exit = True
