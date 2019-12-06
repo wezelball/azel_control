@@ -12,7 +12,9 @@ import datetime
 import threading
 import ctypes
 from threading import Thread, Event, Timer
+# I love python logging
 import logging
+import tkinter as tk
 # This is where I will keep global data
 import config
 
@@ -33,6 +35,50 @@ messageQ = []
 
 
 # *********************** BEGIN CLASSES ******************************
+
+# Tk GUI
+class App(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self.start()
+
+    def callback(self):
+        self.root.quit()
+
+    def run(self):
+        self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self.callback)
+
+        # Define widgets
+        self.labAzEnc = tk.Label(self.root, text=config.azMountPosn)
+        self.labElEnc = tk.Label(self.root, text=config.elMountPosn)
+        butJogN = tk.Button(self.root, text="Jog North", command=slewNorth)
+        butJogS = tk.Button(self.root, text="Jog South", command=slewSouth)
+        butJogE = tk.Button(self.root, text="Jog East", command=slewEast)
+        butJogW = tk.Button(self.root, text="Jog West", command=slewWest)
+        butQuit = tk.Button(self.root, text="Quit", command=self.die)
+        
+        # Place widgets
+        self.labAzEnc.pack()
+        self.labElEnc.pack()
+        butJogN.pack()
+        butJogS.pack()
+        butJogE.pack()
+        butJogW.pack()
+        butQuit.pack()
+
+        self.root.mainloop()
+
+    def die(self):
+        # kills the window, but not the main application
+        self.root.destroy()
+
+    def updateEncoders(self):
+        self.labAzEnc.config(text=config.azMountPosn)
+        self.labElEnc.config(text=config.elMountPosn)
+
 
 # Moving average class
 class MovingAverage():
@@ -154,6 +200,8 @@ class periodicThread (threading.Thread):
             # Get position from encoders, but set flag if error
             try:
                 config.azMountPosn, config.elMountPosn = getEncoders()
+                # Update the gui encoder label
+                gui.updateEncoders()                 
             except ValueError:
                 config.encoderIOError = True
             
@@ -343,7 +391,7 @@ def getEncoders():
             logging.warn("getEncoders() - IOError")
             
     #logging.debug("getEncoders() returned %s", encPosList)
-    
+   
     return tuple(encPosList)
 
 def getEncodersDegrees():
@@ -809,6 +857,10 @@ if __name__ == "__main__":
     # This will be deprecated soon
     variable = Variables()    
 
+    # Start the Tk GUI
+    gui = App()
+    #gui.daemon = True
+
     # Start the comms thread after initialization
     commThread = periodicThread(1, "Thread-1")
     commThread.start()
@@ -837,8 +889,8 @@ if __name__ == "__main__":
             # Exit program here
 
             # Kill threads
+            # kills the main application, but not the gui window
             commThread.raise_exception()
             motionCheckThread.raise_exception()
-
             time.sleep(1.0)
             log.close()
