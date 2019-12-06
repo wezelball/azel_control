@@ -70,6 +70,7 @@ class App(threading.Thread):
         butZeroAz = tk.Button(self.root, text="Zero AZ Enc", command=zeroAzEncoder)
         butZeroEl = tk.Button(self.root, text="Zero El Enc", command=zeroElEncoder)
         butZeroEnc = tk.Button(self.root, text="Zero All Enc", command=zeroEncoders)
+        butQuit = tk.Button(self.root, text="Quit", command=self.die)
         # Relative moves frames and widgets
         fraRelAz = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
         butRelAz = tk.Button(fraRelAz, text="Rel Move Az", command=lambda: relMoveAz(entRelAz.get()))
@@ -77,10 +78,16 @@ class App(threading.Thread):
         
         fraRelEl = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
         butRelEl = tk.Button(fraRelEl, text="Rel Move El", command=lambda: relMoveEl(entRelEl.get()))
-        entRelEl = tk.Entry(fraRelEl)        
-
+        entRelEl = tk.Entry(fraRelEl)
         
-        butQuit = tk.Button(self.root, text="Quit", command=self.die)
+        # Moves steppers by degrees
+        fraStepAz = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butStepAz = tk.Button(fraStepAz, text="Move Az Deg", command=lambda: moveAzStepperDegrees(entStepAz.get()))
+        entStepAz = tk.Entry(fraStepAz)        
+        
+        fraStepEl = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butStepEl = tk.Button(fraStepEl, text="Move El Deg", command=lambda: moveElStepperDegrees(entStepEl.get()))
+        entStepEl = tk.Entry(fraStepEl)        
         
         # Place widgets
         #self.root.pack(fill=tk.BOTH, expand=True)        
@@ -102,6 +109,7 @@ class App(threading.Thread):
         butZeroAz.pack()
         butZeroEl.pack()
         butZeroEnc.pack()
+        butQuit.pack()
         
         fraRelAz.pack()
         butRelAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
@@ -111,7 +119,13 @@ class App(threading.Thread):
         butRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         entRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        butQuit.pack(side = tk.BOTTOM, expand = True, fill = tk.BOTH)
+        fraStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        butStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        fraStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        butStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
 
         self.root.mainloop()
 
@@ -130,7 +144,7 @@ class MovingAverage():
         self.windowsize = windowsize
         self._setWindowSize(windowsize)
         self.accumValue = 0.0
-        
+        1.0
     def _setWindowSize(self, size):
         self.window = [0.0 for i in range(self.windowsize)]
         
