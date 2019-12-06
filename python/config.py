@@ -22,9 +22,14 @@ elHomed = False
 elHoming = False
 
 # Axis positions
-# The physical position of the mount, referenced to home limits
+# The physical position of the mount in encoder counts, referenced to home limits
 azMountPosn = 0
 elMountPosn = 0
+
+# Stepper positions
+azStepperPosn = 0
+elStepperPosn = 0
+
 # The geographical position of the mount, referenced to true North and horizon
-azGeoPosn = 0
-elGeoPosn = 0
+#azGeoPosn = 0
+#elGeoPosn = 0

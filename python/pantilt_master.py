@@ -53,9 +53,22 @@ class App(threading.Thread):
 
         
         # Define widgets
+        
+        # Encoders
         fraEnc = tk.Frame(self.root, borderwidth=1)     # pack the encoders here
-        self.labAzEnc = tk.Label(fraEnc, text=config.azMountPosn)       # self reference makes this publicly acessible
-        self.labElEnc = tk.Label(fraEnc, text=config.elMountPosn)       # self reference makes this publicly acessible
+        labEncAz = tk.Label(fraEnc, text="Az Encoder:")
+        self.labAzEnc = tk.Label(fraEnc, text=config.azMountPosn)       # 'self' reference makes this publicly acessible
+        labEncEl = tk.Label(fraEnc, text="El Encoder:")
+        self.labElEnc = tk.Label(fraEnc, text=config.elMountPosn)       # 'self' reference makes this publicly acessible
+        
+        # Stepper positions
+        fraStep = tk.Frame(self.root, borderwidth=1)     # pack the encoders here
+        labStepAz = tk.Label(fraStep, text="Az Stepper:")
+        self.labStepAzValue = tk.Label(fraStep, text=config.azStepperPosn)       # 'self' reference makes this publicly acessible
+        labStepEl = tk.Label(fraStep, text="El Stepper:")
+        self.labStepElValue = tk.Label(fraStep, text=config.elStepperPosn)       # 'self' reference makes this publicly acessible        
+        
+        # Movement buttons (no arguments )
         butJogN = tk.Button(self.root, text="Jog North", command=slewNorth)
         butJogS = tk.Button(self.root, text="Jog South", command=slewSouth)
         butJogE = tk.Button(self.root, text="Jog East", command=slewEast)
@@ -71,6 +84,7 @@ class App(threading.Thread):
         butZeroEl = tk.Button(self.root, text="Zero El Enc", command=zeroElEncoder)
         butZeroEnc = tk.Button(self.root, text="Zero All Enc", command=zeroEncoders)
         butQuit = tk.Button(self.root, text="Quit", command=self.die)
+        
         # Relative moves frames and widgets
         fraRelAz = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
         butRelAz = tk.Button(fraRelAz, text="Rel Move Az", command=lambda: relMoveAz(entRelAz.get()))
@@ -89,12 +103,34 @@ class App(threading.Thread):
         butStepEl = tk.Button(fraStepEl, text="Move El Deg", command=lambda: moveElStepperDegrees(entStepEl.get()))
         entStepEl = tk.Entry(fraStepEl)        
         
-        # Place widgets
-        #self.root.pack(fill=tk.BOTH, expand=True)        
+        # Slew speeds
+        fraSpdAz = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butSetSpdAz = tk.Button(fraSpdAz, text="Slew Az Spd", command=lambda: setAzSpeed(entSetSpdAz.get()))
+        entSetSpdAz = tk.Entry(fraSpdAz)
+        butSlewAz = tk.Button(fraSpdAz, text="Slew Az", command=lambda: runSpeed(0))
         
-        fraEnc.pack()   # for the encoders
+        fraSpdEl = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butSetSpdEl = tk.Button(fraSpdEl, text="Slew El Spd", command=lambda: setElSpeed(entSetSpdEl.get()))
+        entSetSpdEl = tk.Entry(fraSpdEl)
+        butSlewEl = tk.Button(fraSpdEl, text="Slew El", command=lambda: runSpeed(1))
+        
+        # Place widgets
+        
+        # Encoder positions
+        fraEnc.pack()
+        labEncAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         self.labAzEnc.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        labEncEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         self.labElEnc.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        # Stepper positions
+        fraStep.pack()
+        labStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        self.labStepAzValue.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        labStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        self.labStepElValue.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        # Motion commands
         butJogN.pack()
         butJogS.pack()
         butJogE.pack()
@@ -115,18 +151,29 @@ class App(threading.Thread):
         butRelAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         entRelAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        fraRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        fraRelEl.pack()
         butRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         entRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        fraStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        fraStepAz.pack()
         butStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         entStepAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         
-        fraStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        fraStepEl.pack()
         butStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         entStepEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
 
+        fraSpdAz.pack()
+        butSetSpdAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entSetSpdAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        butSlewAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        fraSpdEl.pack()
+        butSetSpdEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entSetSpdEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        butSlewEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        # Run the Tk event loop
         self.root.mainloop()
 
     def die(self):
@@ -136,6 +183,10 @@ class App(threading.Thread):
     def updateEncoders(self):
         self.labAzEnc.config(text=config.azMountPosn)
         self.labElEnc.config(text=config.elMountPosn)
+
+    def updateSteppers(self):
+        self.labStepAzValue.config(text=config.azStepperPosn)
+        self.labStepElValue.config(text=config.elStepperPosn)        
 
 
 # Moving average class
@@ -202,6 +253,13 @@ class motionThread(threading.Thread):
                     if self.azFailTiming == True:
                         self.azFailTiming = False
                         logging.debug("motionThread.run() azFailTiming = False")
+                        
+                elif abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == False:
+                    config.isAzRunning = False
+                
+            else:
+                config.azStepperPosn = getStepperPosn(0)
+                gui.updateSteppers()
 
                 
             if config.isElRunning == True:    # elevation
@@ -217,7 +275,14 @@ class motionThread(threading.Thread):
                 elif abs(variable.elAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
-                        logging.debug("motionThread.run() elFailTiming = False")    
+                        logging.debug("motionThread.run() elFailTiming = False")
+                        
+                elif abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == False:
+                    config.isElRunning = False                
+
+            else:
+                config.elStepperPosn = getStepperPosn(1)
+                gui.updateSteppers()
         
     def stop(self):
         self.running = False
@@ -263,19 +328,16 @@ class periodicThread (threading.Thread):
             except ValueError:
                 config.encoderIOError = True
             
-            # Get positions from steppers
-            # This causes the stepper to stutter each time the motion thread is run
-            #if stepperIOError == False:    # don't try to update if there's an IOError
-            #    variable.azStepperPos = getStepperPosn(0)
-            #    variable.elStepperPos = getStepperPosn(1)
             
             # Calculate velocities
+            # the variable.xxx values can be converted to locals
             variable.azVelocity = (config.azMountPosn - self.lastAz)/self.delay
             variable.azAvgVelocity.addValue(variable.azVelocity)
             variable.elVelocity = (config.elMountPosn - self.lastEl)/self.delay
             variable.elAvgVelocity.addValue(variable.elVelocity)
             
             # Compute average velocities
+            # the variable.xxx values can be converted to locals
             self.azAvgVel = variable.azAvgVelocity.computeAverage()
             self.elAvgVel = variable.elAvgVelocity.computeAverage()
             
@@ -286,8 +348,8 @@ class periodicThread (threading.Thread):
                 config.encoderIOError = True            
             
             # Update the process logfile
-            #log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ',' + str(variable.azStepperPos) + ',' \
-            #          + str(variable.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
+            #log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ',' + str(config.azStepperPos) + ',' \
+            #          + str(config.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
                       +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')            
 
@@ -346,8 +408,8 @@ class Variables():
         self.elVelocity = 0
         self.azAvgVelocity = MovingAverage(3)
         self.elAvgVelocity = MovingAverage(3)
-        self.azStepperPos = getStepperPosn(0)
-        self.elStepperPos = getStepperPosn(1)
+        #self.azStepperPos = getStepperPosn(0)
+        #self.elStepperPos = getStepperPosn(1)
 
         #self.azPos = 0
         #self.elPos = 0
