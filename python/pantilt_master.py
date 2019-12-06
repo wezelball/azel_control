@@ -51,9 +51,11 @@ class App(threading.Thread):
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
 
+        
         # Define widgets
-        self.labAzEnc = tk.Label(self.root, text=config.azMountPosn)
-        self.labElEnc = tk.Label(self.root, text=config.elMountPosn)
+        fraEnc = tk.Frame(self.root, borderwidth=1)     # pack the encoders here
+        self.labAzEnc = tk.Label(fraEnc, text=config.azMountPosn)       # self reference makes this publicly acessible
+        self.labElEnc = tk.Label(fraEnc, text=config.elMountPosn)       # self reference makes this publicly acessible
         butJogN = tk.Button(self.root, text="Jog North", command=slewNorth)
         butJogS = tk.Button(self.root, text="Jog South", command=slewSouth)
         butJogE = tk.Button(self.root, text="Jog East", command=slewEast)
@@ -68,11 +70,24 @@ class App(threading.Thread):
         butZeroAz = tk.Button(self.root, text="Zero AZ Enc", command=zeroAzEncoder)
         butZeroEl = tk.Button(self.root, text="Zero El Enc", command=zeroElEncoder)
         butZeroEnc = tk.Button(self.root, text="Zero All Enc", command=zeroEncoders)
+        # Relative moves frames and widgets
+        fraRelAz = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butRelAz = tk.Button(fraRelAz, text="Rel Move Az", command=lambda: relMoveAz(entRelAz.get()))
+        entRelAz = tk.Entry(fraRelAz)
+        
+        fraRelEl = tk.Frame(self.root, borderwidth=1)     # relative move button and entry
+        butRelEl = tk.Button(fraRelEl, text="Rel Move El", command=lambda: relMoveEl(entRelEl.get()))
+        entRelEl = tk.Entry(fraRelEl)        
+
+        
         butQuit = tk.Button(self.root, text="Quit", command=self.die)
         
         # Place widgets
-        self.labAzEnc.pack()
-        self.labElEnc.pack()
+        #self.root.pack(fill=tk.BOTH, expand=True)        
+        
+        fraEnc.pack()   # for the encoders
+        self.labAzEnc.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        self.labElEnc.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
         butJogN.pack()
         butJogS.pack()
         butJogE.pack()
@@ -88,7 +103,15 @@ class App(threading.Thread):
         butZeroEl.pack()
         butZeroEnc.pack()
         
-        butQuit.pack()
+        fraRelAz.pack()
+        butRelAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entRelAz.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        fraRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        butRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        entRelEl.pack(side = tk.LEFT, expand = True, fill = tk.BOTH)
+        
+        butQuit.pack(side = tk.BOTTOM, expand = True, fill = tk.BOTH)
 
         self.root.mainloop()
 
@@ -291,7 +314,7 @@ class periodicThread (threading.Thread):
             print('Exception raise failure')
 
 
-
+# This will be completely removed later on
 class Variables():
     def __init__(self):
         # Process variables
@@ -587,21 +610,21 @@ def slewSouth():
 
 def stopAllSlew():
     logging.debug("stopAllSlew()")
-    print(sendStepperCommand("3:0"))
+    sendStepperCommand("3:0")
     config.isAzRunning = False
     config.isElRunning = False
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
     logging.debug("relMoveAz(%s)", distance)
-    print (sendStepperCommand(cmd))
+    sendStepperCommand(cmd)
     time.sleep(0.5)
     config.isAzRunning = True
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
     logging.debug("relMoveEl(%s)", distance)
-    print (sendStepperCommand(cmd))
+    sendStepperCommand(cmd)
     time.sleep(0.5)
     config.isElRunning = True
 
@@ -626,12 +649,12 @@ def printEncodersDegrees():
 
 def stopAz():
     logging.debug("stopAz()")
-    print(sendStepperCommand("4:0"))
+    sendStepperCommand("4:0")
     config.isAzRunning = False
 
 def stopEl():
     logging.debug("stopEl()")
-    print(sendStepperCommand("5:0"))
+    sendStepperCommand("5:0")
     config.isElRunning = False
 
 # quickStop functions stop both axes at the same time
