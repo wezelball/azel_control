@@ -82,6 +82,8 @@ class App(threading.Thread):
         butHomeEl = tk.Button(self.root, text="Home El", command=homeElevation)
         butZeroAz = tk.Button(self.root, text="Zero AZ Enc", command=zeroAzEncoder)
         butZeroEl = tk.Button(self.root, text="Zero El Enc", command=zeroElEncoder)
+        butZeroStepAz = tk.Button(self.root, text="Zero Az Step", command=lambda: zeroSteppers(0))
+        butZeroStepEl = tk.Button(self.root, text="Zero El Step", command=lambda: zeroSteppers(1))
         butZeroEnc = tk.Button(self.root, text="Zero All Enc", command=zeroEncoders)
         butQuit = tk.Button(self.root, text="Quit", command=self.die)
         
@@ -145,6 +147,8 @@ class App(threading.Thread):
         butZeroAz.pack()
         butZeroEl.pack()
         butZeroEnc.pack()
+        butZeroStepAz.pack()
+        butZeroStepEl.pack()
         butQuit.pack()
         
         fraRelAz.pack()
