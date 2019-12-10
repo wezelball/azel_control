@@ -19,6 +19,9 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 
+# Trying pysimpleGUI
+import PySimpleGUI as sg
+
 # This is where I will keep global data
 import config
 
