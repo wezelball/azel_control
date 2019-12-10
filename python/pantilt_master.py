@@ -3,7 +3,7 @@
 # pantilt_master.py
 # Dave Cohen
 
-#import sys
+import sys
 import smbus
 import time
 #import os
@@ -14,10 +14,6 @@ import ctypes
 from threading import Thread, Event, Timer
 # I love python logging
 import logging
-
-# Tk GUI
-import tkinter as tk
-from tkinter import ttk
 
 # Trying pysimpleGUI
 import PySimpleGUI as sg
@@ -278,7 +274,7 @@ class motionThread(threading.Thread):
                 
             else:
                 config.azStepperPosn = getStepperPosn(0)
-                gui.updateSteppers()
+                #gui.updateSteppers()
 
                 
             if config.isElRunning == True:    # elevation
@@ -301,7 +297,7 @@ class motionThread(threading.Thread):
 
             else:
                 config.elStepperPosn = getStepperPosn(1)
-                gui.updateSteppers()
+                #gui.updateSteppers()
         
     def stop(self):
         self.running = False
@@ -343,7 +339,7 @@ class periodicThread (threading.Thread):
             try:
                 config.azMountPosn, config.elMountPosn = getEncoders()
                 # Update the gui encoder label
-                gui.updateEncoders()                 
+                #gui.updateEncoders()                 
             except ValueError:
                 config.encoderIOError = True
             
@@ -943,6 +939,15 @@ def case_default():
     #print("No case")
     logging.debug("case_default() entered")
 
+def shutdown():
+    logging.debug("shutdown() entered")
+    commThread.raise_exception()
+    motionCheckThread.raise_exception()
+    time.sleep(1.0)
+    log.close()    
+    window.Close()
+    sys.exit()
+
 def switchCase(case):
     return {
         ":Mn#":slewNorth,
@@ -1000,8 +1005,47 @@ if __name__ == "__main__":
     variable = Variables()    
 
     # Start the Tk GUI
-    gui = App()
+    # gui = App()
     #gui.daemon = True
+
+    # PySimpleGUI
+    operation_layout =  [
+                        [sg.Text('Jog Az')],             # assign a key to this and use it
+                        [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],       # assign a key to this and use it
+                        [sg.Text('Jog El')],
+                        [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],      # assign a key to this and use it
+                        [sg.Text('GoTo Horizontal Coordinate')],
+                        [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
+                        #[sg.Text('Homed', size=(10,1)), sg.Button('Az', button_color=('white', 'red'),enable_events=True, key='butAzHome'), sg.Button('El', button_color=('white', 'red'),enable_events=True, key='butElHome')],
+                        ]    
+
+    position_layout =   [
+                        #[sg.Text('Azimuth', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azimuth')],
+                        #[sg.Text('Elevation', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elevation')],
+                        [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azEncoder')],
+                        [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elEncoder')],
+                        [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
+                        [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
+                        [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
+                        [sg.Button('ZERO_AZ_STEP'),sg.Button('ZERO_EL_STEP')],
+                        #[sg.Text('Az Limit', size=(10,1)), sg.Button('AzCW', button_color=('white', 'green'),enable_events=True, key='butAzCW', 
+                        #    size = (10,1)), sg.Button('AzCCW', button_color=('green', 'red'),enable_events=True, key='butAzCCW', size = (10,1)),],
+                        #[sg.Text('El Limit', size=(10,1)), sg.Button('ElDown', button_color=('white', 'green'),enable_events=True, key='butElDown',
+                        #     size = (10,1)), sg.Button('ElUp', button_color=('green', 'red'),enable_events=True, key='butElUp',size = (10,1)),],
+                        #[sg.Text('Soft limit az', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'softLimitAz')],
+                        #[sg.Text('Soft limit alt', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'softLimitAlt')],
+                        #[sg.Text('Hard limit az', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'hardLimitAz')],
+                        #[sg.Text('Hard limit alt', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'hardLimitAlt')],
+                        ]    
+
+
+    layout =            [
+                        [sg.Frame('Position', position_layout)],
+                        [sg.Frame('Operation', operation_layout)],
+                        ]    
+    
+    window = sg.Window('Radio Telescope Control', layout)    
+
 
     # Start the comms thread after initialization
     commThread = periodicThread(1, "Thread-1")
@@ -1013,28 +1057,36 @@ if __name__ == "__main__":
     # Set initial values - motor speeds, etc
     setInitialValues()    
 
-    while not exit:
+    while True:
+        event, values = window.Read(1000) # Please try and use as high of a timeout value as you can
+    
+        # EVENTS
+        if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
+            shutdown()
+        if event == 'JOG_AZ_CW':
+            slewEast()
+        if event == 'JOG_AZ_CCW':
+            slewWest()
+        if event == 'JOG_EL_UP':
+            slewNorth()
+        if event == 'JOG_EL_DOWN':
+            slewSouth()
+        if event == 'ZERO_AZ_ENC':
+            zeroAzEncoder()
+        if event == 'ZERO_EL_ENC':
+            zeroElEncoder()        
+        if event == 'ZERO_AZ_STEP':
+            zeroSteppers(0)
+        if event == 'REL_AZ':
+            relMoveAz(values['relAz'])
+        if event == 'REL_EL':
+            relMoveEl(values['relEl'])        
 
-        # Get the user command
-        r = input('-> ')
-        cmdList = r.split()
-
-        # Pass the command to the switch construct
-        if len(cmdList) == 1:           # command with no parms
-            switchCase(cmdList[0])()
-        elif len(cmdList) == 2:         # command with one parm
-            switchCase(cmdList[0])(cmdList[1])
-        elif len(cmdList) == 0:
-            cmdList.append('')
-
-        if cmdList[0] == 'q':
-            exit = True
-
-            # Exit program here
-
-            # Kill threads
-            # kills the main application, but not the gui window
-            commThread.raise_exception()
-            motionCheckThread.raise_exception()
-            time.sleep(1.0)
-            log.close()
+            
+        # UPDATES
+        # Updates the information in the window
+        # These values can be updated only on change
+        window.Element('azEncoder').Update(config.azMountPosn)
+        window.Element('elEncoder').Update(config.elMountPosn)
+        window.Element('stepsAz').Update(config.azStepperPosn)
+        window.Element('stepsEl').Update(config.elStepperPosn)
