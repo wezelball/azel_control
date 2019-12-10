@@ -524,21 +524,26 @@ def getEncoders():
             # positions - this is ugly and might cause issues
             #encPosList = config.azMountPosn, config.elMountPosn
             logging.warn("getEncoders() - IOError")
+            encPosList = [0,0]
             
     #logging.debug("getEncoders() returned %s", encPosList)
    
     return tuple(encPosList)
 
-def getEncodersDegrees():
+# Gets the position of the encoder (in degrees) defined by axis
+# axis 0 = azimuth
+# axis 1 = elevation
+def getEncodersDegrees(axis):
     # Assign raw counts to tuple
     encodersCounts = getEncoders()
-    azEncoderDegrees = encoderCountsToDegrees(0, encodersCounts[0])
-    elEncoderDegrees = encoderCountsToDegrees(1, encodersCounts[1])
-    
-    encoderDegrees = (azEncoderDegrees, elEncoderDegrees)
+    if axis == 0:
+        encoderDegrees = encoderCountsToDegrees(0, encodersCounts[0])
+    elif axis == 1:
+        encoderDegrees = encoderCountsToDegrees(0, encodersCounts[1])
+
     return encoderDegrees    
 
-# Gets he position of the stepper defined by axis
+# Gets the position of the stepper defined by axis
 # axis 0 = azimuth
 # axis 1 = elevation
 def getStepperPosn(axis):    
@@ -1022,8 +1027,8 @@ if __name__ == "__main__":
     position_layout =   [
                         #[sg.Text('Azimuth', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azimuth')],
                         #[sg.Text('Elevation', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elevation')],
-                        [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azEncoder')],
-                        [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elEncoder')],
+                        [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
+                        [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
                         [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
                         [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
                         [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
@@ -1077,6 +1082,8 @@ if __name__ == "__main__":
             zeroElEncoder()        
         if event == 'ZERO_AZ_STEP':
             zeroSteppers(0)
+        if event == 'ZERO_EL_STEP':
+            zeroSteppers(1)        
         if event == 'REL_AZ':
             relMoveAz(values['relAz'])
         if event == 'REL_EL':
@@ -1088,5 +1095,7 @@ if __name__ == "__main__":
         # These values can be updated only on change
         window.Element('azEncoder').Update(config.azMountPosn)
         window.Element('elEncoder').Update(config.elMountPosn)
+        window.Element('azEncoderDeg').Update(getEncodersDegrees(0))
+        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))        
         window.Element('stepsAz').Update(config.azStepperPosn)
         window.Element('stepsEl').Update(config.elStepperPosn)
