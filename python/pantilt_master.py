@@ -14,7 +14,11 @@ import ctypes
 from threading import Thread, Event, Timer
 # I love python logging
 import logging
+
+# Tk GUI
 import tkinter as tk
+from tkinter import ttk
+
 # This is where I will keep global data
 import config
 
@@ -51,18 +55,23 @@ class App(threading.Thread):
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
 
+        nb = ttk.Notebook(self.root)
+        f1 = ttk.Frame(nb)
+        f2 = ttk.Frame(nb)
+        nb.add(f1, text='One')
+        nb.add(f2, text='Two')
         
         # Define widgets
         
         # Encoders
-        fraEnc = tk.Frame(self.root, borderwidth=1)     # pack the encoders here
-        labEncAz = tk.Label(fraEnc, text="Az Encoder:")
-        self.labAzEnc = tk.Label(fraEnc, text=config.azMountPosn)       # 'self' reference makes this publicly acessible
-        labEncEl = tk.Label(fraEnc, text="El Encoder:")
-        self.labElEnc = tk.Label(fraEnc, text=config.elMountPosn)       # 'self' reference makes this publicly acessible
+        fraEnc = tk.Frame(f1, borderwidth=1)     # pack the encoders here
+        labEncAz = tk.Label(f1, text="Az Encoder:")
+        self.labAzEnc = tk.Label(f1, text=config.azMountPosn)       # 'self' reference makes this publicly acessible
+        labEncEl = tk.Label(f1, text="El Encoder:")
+        self.labElEnc = tk.Label(f1, text=config.elMountPosn)       # 'self' reference makes this publicly acessible
         
         # Stepper positions
-        fraStep = tk.Frame(self.root, borderwidth=1)     # pack the encoders here
+        fraStep = tk.Frame(f1, borderwidth=1)     # pack the encoders here
         labStepAz = tk.Label(fraStep, text="Az Stepper:")
         self.labStepAzValue = tk.Label(fraStep, text=config.azStepperPosn)       # 'self' reference makes this publicly acessible
         labStepEl = tk.Label(fraStep, text="El Stepper:")
@@ -117,6 +126,8 @@ class App(threading.Thread):
         butSlewEl = tk.Button(fraSpdEl, text="Slew El", command=lambda: runSpeed(1))
         
         # Place widgets
+        
+        nb.pack()
         
         # Encoder positions
         fraEnc.pack()
@@ -182,6 +193,7 @@ class App(threading.Thread):
 
     def die(self):
         # kills the window, but not the main application
+        # kills the main application, but not the gui window
         self.root.destroy()
 
     def updateEncoders(self):
