@@ -1010,7 +1010,7 @@ if __name__ == "__main__":
     variable = Variables()    
 
     # PySimpleGUI
-    operation_layout =  [
+    motion_layout =  [
                         [sg.Text('Jog Az')],             # assign a key to this and use it
                         [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],       # assign a key to this and use it
                         [sg.Text('Jog El')],
@@ -1045,7 +1045,7 @@ if __name__ == "__main__":
 
     layout =            [
                         [sg.Frame('Position', position_layout)],
-                        [sg.Frame('Operation', operation_layout)],
+                        [sg.Frame('Operation', motion_layout)],
                         ]    
     
     window = sg.Window('Radio Telescope Control', layout)    
