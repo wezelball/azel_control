@@ -274,7 +274,8 @@ class motionThread(threading.Thread):
                 
             else:
                 config.azStepperPosn = getStepperPosn(0)
-                #gui.updateSteppers()
+                config.azCCWLimit = isAzCCWLimit()
+                config.azCWLimit = isAzCWLimit()
 
                 
             if config.isElRunning == True:    # elevation
@@ -297,7 +298,8 @@ class motionThread(threading.Thread):
 
             else:
                 config.elStepperPosn = getStepperPosn(1)
-                #gui.updateSteppers()
+                config.elUpLimit = isElUpLimit()
+                config.elDownLimit = isElDownLimit()
         
     def stop(self):
         self.running = False
@@ -950,7 +952,15 @@ def shutdown():
     motionCheckThread.raise_exception()
     time.sleep(1.0)
     log.close()    
-    window.Close()
+    
+    # Close the damn window
+    try:
+        window.Close()
+    except UnboundLocalError:
+        sys.exit
+    
+    del window
+
     sys.exit()
 
 def switchCase(case):
@@ -1011,6 +1021,8 @@ if __name__ == "__main__":
 
     # PySimpleGUI
     motion_layout =  [
+                        [sg.Text('Slew')],
+                        [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
                         [sg.Text('Jog Az')],             # assign a key to this and use it
                         [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],       # assign a key to this and use it
                         [sg.Text('Jog El')],
@@ -1019,6 +1031,8 @@ if __name__ == "__main__":
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Move in Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
+                        [sg.Text('Homing')],             # assign a key to this and use it
+                        [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],       # assign a key to this and use it                        
                         [sg.Text('Stop Motion')],
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
@@ -1032,22 +1046,23 @@ if __name__ == "__main__":
                         [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
                         [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
                         [sg.Button('ZERO_AZ_STEP'),sg.Button('ZERO_EL_STEP')],
-                        #[sg.Text('Az Limit', size=(10,1)), sg.Button('AzCW', button_color=('white', 'green'),enable_events=True, key='butAzCW', 
-                        #    size = (10,1)), sg.Button('AzCCW', button_color=('green', 'red'),enable_events=True, key='butAzCCW', size = (10,1)),],
-                        #[sg.Text('El Limit', size=(10,1)), sg.Button('ElDown', button_color=('white', 'green'),enable_events=True, key='butElDown',
-                        #     size = (10,1)), sg.Button('ElUp', button_color=('green', 'red'),enable_events=True, key='butElUp',size = (10,1)),],
-                        #[sg.Text('Soft limit az', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'softLimitAz')],
-                        #[sg.Text('Soft limit alt', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'softLimitAlt')],
-                        #[sg.Text('Hard limit az', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'hardLimitAz')],
-                        #[sg.Text('Hard limit alt', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'hardLimitAlt')],
                         ]    
+
+
+    state_layout =      [
+                        [sg.Text('State')],
+                        [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit'), sg.Checkbox('AZ CW Limit', key = 'azCWLimit')],
+                        [sg.Checkbox('EL UP Limit', key = 'elUPLimit'), sg.Checkbox('EL Down Limit', key = 'elDownLimit')],
+                        ]
 
 
     layout =            [
-                        [sg.Frame('Position', position_layout)],
-                        [sg.Frame('Operation', motion_layout)],
+                        [sg.Frame('Position', position_layout),sg.Frame('State', state_layout)],
+                        [sg.Frame('Motion', motion_layout)],
                         ]    
     
+    # Open the GUI
+    sg.change_look_and_feel('GreenMono')
     window = sg.Window('Radio Telescope Control', layout)    
 
 
@@ -1062,11 +1077,17 @@ if __name__ == "__main__":
     setInitialValues()    
 
     while True:
-        event, values = window.Read(1000) # Please try and use as high of a timeout value as you can
+        event, values = window.Read(500) # Please try and use as high of a timeout value as you can
     
         # EVENTS
         if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
             shutdown()
+        if event == 'SLEW_AZ':
+            setAzSpeed(values['slewAz'])
+            runSpeed(0)
+        if event == 'SLEW_EL':
+            setElSpeed(values['slewEl'])
+            runSpeed(1)
         if event == 'JOG_AZ_CW':
             slewEast()
         if event == 'JOG_AZ_CCW':
@@ -1091,6 +1112,10 @@ if __name__ == "__main__":
             moveAzStepperDegrees(values['relAzDeg'])
         if event == 'REL_EL_DEG':
             moveElStepperDegrees(values['relElDeg'])
+        if event == 'HOME_AZ':
+            homeAzimuth()
+        if event == 'HOME_EL':
+            homeElevation()
         if event == 'STOP_AZ':
             stopAz()
         if event == 'STOP_EL':
@@ -1109,3 +1134,7 @@ if __name__ == "__main__":
         window.Element('elEncoderDeg').Update(getEncodersDegrees(1))        
         window.Element('stepsAz').Update(config.azStepperPosn)
         window.Element('stepsEl').Update(config.elStepperPosn)
+        window.Element('azCCWLimit').Update(config.azCCWLimit)
+        window.Element('azCWLimit').Update(config.azCWLimit)
+        window.Element('elUPLimit').Update(config.elUpLimit)
+        window.Element('elDownLimit').Update(config.elDownLimit)

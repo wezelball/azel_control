@@ -21,6 +21,12 @@ azHoming = False
 elHomed = False
 elHoming = False
 
+# State of limit switches
+azCWLimit = False
+azCCWLimit = False
+elUpLimit = False
+elDownLimit = False
+
 # Axis positions
 # The physical position of the mount in encoder counts, referenced to home limits
 azMountPosn = 0
