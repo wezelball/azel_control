@@ -1009,19 +1009,18 @@ if __name__ == "__main__":
     # This will be deprecated soon
     variable = Variables()    
 
-    # Start the Tk GUI
-    # gui = App()
-    #gui.daemon = True
-
     # PySimpleGUI
     operation_layout =  [
                         [sg.Text('Jog Az')],             # assign a key to this and use it
                         [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],       # assign a key to this and use it
                         [sg.Text('Jog El')],
                         [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],      # assign a key to this and use it
-                        [sg.Text('GoTo Horizontal Coordinate')],
+                        [sg.Text('Relative Move in Steps')],
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
-                        #[sg.Text('Homed', size=(10,1)), sg.Button('Az', button_color=('white', 'red'),enable_events=True, key='butAzHome'), sg.Button('El', button_color=('white', 'red'),enable_events=True, key='butElHome')],
+                        [sg.Text('Relative Move in Degrees')],
+                        [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
+                        [sg.Text('Stop Motion')],
+                        [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
     position_layout =   [
@@ -1087,8 +1086,19 @@ if __name__ == "__main__":
         if event == 'REL_AZ':
             relMoveAz(values['relAz'])
         if event == 'REL_EL':
-            relMoveEl(values['relEl'])        
-
+            relMoveEl(values['relEl'])
+        if event == 'REL_AZ_DEG':
+            moveAzStepperDegrees(values['relAzDeg'])
+        if event == 'REL_EL_DEG':
+            moveElStepperDegrees(values['relElDeg'])
+        if event == 'STOP_AZ':
+            stopAz()
+        if event == 'STOP_EL':
+            stopEl()
+        if event == 'FSTOP_AZ':
+            quickStopAz()
+        if event == 'FSTOP_EL':
+            quickStopEl()
             
         # UPDATES
         # Updates the information in the window
