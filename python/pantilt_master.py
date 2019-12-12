@@ -797,41 +797,7 @@ def shutdown():
     # Close the damn window
     del window
     sys.exit()
-
-def switchCase(case):
-    return {
-        ":Mn#":slewNorth,
-        ":Me#":slewEast,
-        ":Mw#":slewWest,
-        ":Ms#":slewSouth,
-        ":Q#":stopAllSlew,
-        "0":printEncodersCounts,
-        "1":stopAz,
-        "2":stopEl,
-        "3":quickStopAz,
-        "4":quickStopEl,
-        "5":printIsAzCWLimit,
-        "6":printIsAzCCWLimit,
-        "7":printIsElUpLimit,
-        "8":printIsElDownLimit,
-        "9":homeAzimuth,
-        "10":homeElevation,
-        "11":zeroEncoders,
-        "12":relMoveAz,             # requires distance
-        "13":relMoveEl,             # requires distance
-        "14":printStepPosnSteps,    # requires axis, 0=az, 1=el
-        "15":isRunning,             # requires axis, 0=az, 1=el
-        "16":zeroAzEncoder,
-        "17":zeroElEncoder,
-        "18":moveAzStepperDegrees,  # requires axis, 0=az, 1=el
-        "19":moveElStepperDegrees,  # requires axis, 0=az, 1=el
-        "20":setAzSpeed,            # requires speed
-        "21":setElSpeed,            # requires speed
-        "22":runSpeed,              # requires axis, 0=az, 1=el
-        "23":printEncodersDegrees,  # returns a tuple
-        "24":zeroSteppers,          # requires axis, 0=az, 1=el
-    }.get(case, case_default)
-
+    
 
 if __name__ == "__main__":
 
