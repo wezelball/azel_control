@@ -795,6 +795,7 @@ def shutdown():
     log.close()    
     
     # Close the damn window
+    window.Close()
     del window
     sys.exit()
     
@@ -824,23 +825,21 @@ if __name__ == "__main__":
     motion_layout =  [
                         [sg.Text('Slew')],
                         [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
-                        [sg.Text('Jog Az')],             # assign a key to this and use it
-                        [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],       # assign a key to this and use it
+                        [sg.Text('Jog Az')],             
+                        [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],
                         [sg.Text('Jog El')],
-                        [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],      # assign a key to this and use it
+                        [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],
                         [sg.Text('Relative Move in Steps')],
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Move in Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
-                        [sg.Text('Homing')],             # assign a key to this and use it
-                        [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],       # assign a key to this and use it                        
+                        [sg.Text('Homing')],
+                        [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        
                         [sg.Text('Stop Motion')],
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
     position_layout =   [
-                        #[sg.Text('Azimuth', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azimuth')],
-                        #[sg.Text('Elevation', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elevation')],
                         [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
                         [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
                         [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
@@ -851,9 +850,11 @@ if __name__ == "__main__":
 
 
     state_layout =      [
-                        [sg.Text('State')],
                         [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit'), sg.Checkbox('AZ CW Limit', key = 'azCWLimit')],
                         [sg.Checkbox('EL UP Limit', key = 'elUPLimit'), sg.Checkbox('EL Down Limit', key = 'elDownLimit')],
+                        [sg.Checkbox('AZ Running', key = 'azRunning'), sg.Checkbox('EL Running', key = 'elRunning')],
+                        [sg.Button('AZ_SPD'),sg.InputText('',size=(5,1),key='azSpeed'),sg.Button('AZ_MAX'),sg.InputText('',size=(5,1),key='azMax'),sg.Button('AZ_ACCEL'),sg.InputText('',size=(5,1),key='azAccel')],
+                        [sg.Button('EL_SPD'),sg.InputText('',size=(5,1),key='elSpeed'),sg.Button('EL_MAX'),sg.InputText('',size=(5,1),key='elMax'),sg.Button('EL_ACCEL'),sg.InputText('',size=(5,1),key='elAccel')],
                         ]
 
 
@@ -925,6 +926,19 @@ if __name__ == "__main__":
             quickStopAz()
         if event == 'FSTOP_EL':
             quickStopEl()
+        # Speeds and accelerations
+        if event == 'AZ_SPD':
+            setAzSpeed(values['azSpeed'])
+        if event == 'AZ_MAX':
+            setAzMaxSpeed(values['azMax'])
+        if event == 'AZ_ACCEL':
+            setAzAccel(values['azAccel'])            
+        if event == 'EL_SPD':
+            setAzSpeed(values['elSpeed'])
+        if event == 'EL_MAX':
+            setAzMaxSpeed(values['elMax'])
+        if event == 'EL_ACCEL':
+            setAzAccel(values['elAccel'])        
             
         # UPDATES
         # Updates the information in the window
@@ -939,3 +953,5 @@ if __name__ == "__main__":
         window.Element('azCWLimit').Update(config.azCWLimit)
         window.Element('elUPLimit').Update(config.elUpLimit)
         window.Element('elDownLimit').Update(config.elDownLimit)
+        window.Element('azRunning').Update(config.isAzRunning)
+        window.Element('elRunning').Update(config.isElRunning)
