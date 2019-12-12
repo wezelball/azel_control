@@ -272,11 +272,6 @@ class motionThread(threading.Thread):
                 elif abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == False:
                     config.isAzRunning = False
                 
-            else:
-                config.azStepperPosn = getStepperPosn(0)
-                config.azCCWLimit = isAzCCWLimit()
-                config.azCWLimit = isAzCWLimit()
-
                 
             if config.isElRunning == True:    # elevation
                 # Look to see if stopped
@@ -296,10 +291,19 @@ class motionThread(threading.Thread):
                 elif abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == False:
                     config.isElRunning = False                
 
-            else:
+            # Get stepper and limit switch positions if neither motor running
+            # I have to do this when both motors are stopped or motors will "pulse" at the 
+            # motion thread update rate
+            if config.isAzRunning == False and config.isElRunning == False:
+                # Update azimuth
+                config.azStepperPosn = getStepperPosn(0)
+                config.azCCWLimit = isAzCCWLimit()
+                config.azCWLimit = isAzCWLimit()                
+                # Update elevation
                 config.elStepperPosn = getStepperPosn(1)
                 config.elUpLimit = isElUpLimit()
-                config.elDownLimit = isElDownLimit()
+                config.elDownLimit = isElDownLimit()                
+                
         
     def stop(self):
         self.running = False
@@ -762,6 +766,7 @@ def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
     config.isAzRunning = False
+    config.isElRunning = False
     config.azHoming = False
 
 # quickStop functions stop both axes at the same time
@@ -770,6 +775,7 @@ def quickStopAz():
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
+    config.isAzRunning = False
     config.isElRunning = False
     config.elHoming = False
 
@@ -954,13 +960,7 @@ def shutdown():
     log.close()    
     
     # Close the damn window
-    try:
-        window.Close()
-    except UnboundLocalError:
-        sys.exit
-    
     del window
-
     sys.exit()
 
 def switchCase(case):
