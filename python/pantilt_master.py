@@ -364,7 +364,6 @@ def getEncoders():
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             #encPosList = config.azMountPosn, config.elMountPosn
-            logging.warn("getEncoders() - IOError")
             encPosList = [0,0]
             
     #logging.debug("getEncoders() returned %s", encPosList)
@@ -564,6 +563,7 @@ def relMoveEl(distance):
     sendStepperCommand(cmd)
     time.sleep(0.5)
     config.isElRunning = True
+
 
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
@@ -829,9 +829,9 @@ if __name__ == "__main__":
                         [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],
                         [sg.Text('Jog El')],
                         [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],
-                        [sg.Text('Relative Move in Steps')],
+                        [sg.Text('Relative Open Loop Move in Steps')],
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
-                        [sg.Text('Relative Move in Degrees')],
+                        [sg.Text('Relative Open Loop Move in Stepper Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
                         [sg.Text('Homing')],
                         [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        

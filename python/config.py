@@ -15,7 +15,31 @@ stepperIOError = False
 isAzRunning = False;
 isElRunning = False;
 
-# homing flags
+# Moving closed loop by encoder counts
+# Need some additional flags to control
+azMovingClosedLoop = False
+elMovingClosedLoop = False
+
+endpointFarDistance = 1000
+endpointNearDistance = 200
+endpointVeryNearDistance = 10
+
+azEndpointFarSpeed = 1000     # replace with axis max speed when available
+elEndpointFarSpeed = 1000     # replace with axis max speed when available
+azEndpointNearSpeed = 250
+elEndpointNearSpeed = 250
+azEndpointVeryNearSpeed = 100
+elEndpointVeryNearSpeed = 100
+
+# We need to know what region the axis is in
+azInFarApproach = False
+elInFarApproach = False
+azInNearApproach = False
+elInNearApproach = False
+azInVeryNearApproach = False
+elInVeryNearApproach = False
+
+# Homing flags
 azHomed = False
 azHoming = False
 elHomed = False
@@ -37,5 +61,5 @@ azStepperPosn = 0
 elStepperPosn = 0
 
 # The geographical position of the mount, referenced to true North and horizon
-#azGeoPosn = 0
-#elGeoPosn = 0
+#azGeoPosn = 0.0
+#elGeoPosn = 0.0
