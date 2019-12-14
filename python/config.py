@@ -20,9 +20,15 @@ isElRunning = False;
 azMovingClosedLoop = False
 elMovingClosedLoop = False
 
-endpointFarDistance = 1000
-endpointNearDistance = 200
+azDistance = 0
+elDistance = 0
+
+endpointFarDistance = 100
+endpointNearDistance = 50
 endpointVeryNearDistance = 10
+endpointDeadband = 2
+azDistanceTogo = 0
+elDistanceTogo = 0
 
 azEndpointFarSpeed = 1000     # replace with axis max speed when available
 elEndpointFarSpeed = 1000     # replace with axis max speed when available

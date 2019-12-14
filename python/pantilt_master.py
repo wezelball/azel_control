@@ -179,8 +179,6 @@ class periodicThread (threading.Thread):
             # Get position from encoders, but set flag if error
             try:
                 config.azMountPosn, config.elMountPosn = getEncoders()
-                # Update the gui encoder label
-                #gui.updateEncoders()                 
             except ValueError:
                 config.encoderIOError = True
             
@@ -221,6 +219,13 @@ class periodicThread (threading.Thread):
             
             if config.elHoming == True:
                 watchHomingAxis(1)
+                
+            # Control closed-loop move
+            if config.azMovingClosedLoop == True:
+                watchEncoderMove(0)
+            
+            #if config.elMovingClosedLoop == True:
+                #watchEncoderMove(1)            
                 
                 
     def print_time(self,threadName):
@@ -363,8 +368,8 @@ def getEncoders():
         except ValueError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
-            #encPosList = config.azMountPosn, config.elMountPosn
-            encPosList = [0,0]
+            encPosList = config.azMountPosn, config.elMountPosn
+            #encPosList = [0,0]
             
     #logging.debug("getEncoders() returned %s", encPosList)
    
@@ -564,6 +569,59 @@ def relMoveEl(distance):
     time.sleep(0.5)
     config.isElRunning = True
 
+# Triggers a closed-loop relative move by encoder couns
+# Called by GUI pushbutton and text entry
+def startEncoderMove(axis, distance):
+    if axis == 0:
+        config.azMovingClosedLoop = True
+        config.azDistance = int(distance)
+        logging.debug("startEncoderMove(%s, %s) invoked", axis, distance)
+    
+
+# Maintains a closed-loop relative move by encoder counts
+# Called by the periodic thread if xxMovingClosedLoop flag is set
+def watchEncoderMove(axis):
+    if axis == 0:
+        config.azDistanceTogo = config.azDistance - config.azMountPosn
+        
+        # Need to determine direction based on sign
+        if config.azDistance - config.azMountPosn > 0:
+            polarity = 1
+        else:
+            polarity = -1
+    
+        if abs(config.azDistanceTogo) > config.endpointFarDistance:
+            azSpeed = config.azEndpointFarSpeed * polarity
+            # Starts the motion at this speed
+            if config.azInFarApproach == False:
+                logging.debug("watchEncoderMove(%s) set far approach run", axis)
+                # Start slew at this speed
+                setAzSpeed(azSpeed)
+                runSpeed(0)
+            config.azInFarApproach = True
+        elif abs(config.azDistanceTogo) > config.endpointNearDistance:
+            azSpeed = config.azEndpointNearSpeed * polarity
+            if config.azInNearApproach == False:
+                logging.debug("watchEncoderMove(%s) set near approach run", axis)
+                # Start slew at this speed
+                setAzSpeed(azSpeed)
+                runSpeed(0)                        
+            config.azInNearApproach = True
+        elif abs(config.azDistanceTogo) > config.endpointVeryNearDistance:
+            azSpeed = config.azEndpointVeryNearSpeed * polarity
+            if config.azInVeryNearApproach == False:
+                logging.debug("watchEncoderMove(%s) set very near approach run", axis)
+                setAzSpeed(azSpeed)
+                runSpeed(0)                        
+            config.azInVeryNearApproach = True
+        elif abs(config.azDistanceTogo) < config.endpointDeadband:
+            logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
+            stopAz()
+            # Reset the flags
+            config.azInFarApproach = False
+            config.azInNearApproach = False
+            config.azInVeryNearApproach = False
+            config.azMovingClosedLoop = False    
 
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
@@ -833,6 +891,8 @@ if __name__ == "__main__":
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
+                        [sg.Text('Relative Closed Loop Move in Encoder Counts')],
+                        [sg.Button('REL_AZ_ENC'),sg.InputText('',size=(10,1),key='relAzEnc'),sg.Button('REL_EL_ENC'),sg.InputText('', size=(10,1),key='relElEnc')],
                         [sg.Text('Homing')],
                         [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        
                         [sg.Text('Stop Motion')],
@@ -914,6 +974,12 @@ if __name__ == "__main__":
             moveAzStepperDegrees(values['relAzDeg'])
         if event == 'REL_EL_DEG':
             moveElStepperDegrees(values['relElDeg'])
+
+        if event == 'REL_AZ_ENC':
+            startEncoderMove(0, values['relAzEnc'])
+        if event == 'REL_EL_ENC':
+            startEncoderMove(1, values['relElEnc'])        
+
         if event == 'HOME_AZ':
             homeAzimuth()
         if event == 'HOME_EL':
