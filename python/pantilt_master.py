@@ -24,17 +24,8 @@ import config
 # Set up the i2c bus
 bus = smbus.SMBus(1)
 
-# I2C address of Arduino Slaves
-#steppers_i2c_address = 0x04
-#encoders_i2c_address = 0x05
-#i2c_cmd = 0x01
-
 # Start a message queue
 messageQ = []
-
-# i2c comms error flags
-#encoderIOError = False
-#stepperIOError = False
 
 
 # *********************** BEGIN CLASSES ******************************
@@ -254,32 +245,12 @@ class periodicThread (threading.Thread):
 # This will be completely removed later on
 class Variables():
     def __init__(self):
-        # Process variables
-        #self.azHomingSpeed = 500;
-        #self.elHomingSpeed = 500;
-        #self.azSlewSpeed = 500;
-        #self.elSlewSpeed = 500;
-        #self.azAccel = 500;
-        #self.elAccel = 500;
-        #self.isAzRunning = False;
-        #self.isElRunning = False;
 
         # Real-time values
         self.azVelocity = 0
         self.elVelocity = 0
-        self.azAvgVelocity = MovingAverage(3)
-        self.elAvgVelocity = MovingAverage(3)
-        #self.azStepperPos = getStepperPosn(0)
-        #self.elStepperPos = getStepperPosn(1)
-
-        #self.azPos = 0
-        #self.elPos = 0
-
-        # homing flags
-        #self.azHomed = False
-        #self.azHoming = False
-        #self.elHomed = False
-        #self.elHoming = False 
+        self.azAvgVelocity = MovingAverage(5)
+        self.elAvgVelocity = MovingAverage(5)
         
 # ************************* END CLASSES ******************************
 
@@ -420,37 +391,31 @@ def sendStepperCommand(cmd):
 # Process functions
 def setAzSpeed(speed):
     cmd = "12" + ':' + str(speed)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setAzSpeed() %s", speed)
 
 def setAzMaxSpeed(speed):
     cmd = "16" + ':' + str(speed)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setAzMaxSpeed() %s", speed)
 
 def setElSpeed(speed):
     cmd = "13" + ':' + str(speed)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setElSpeed() %s", speed)
 
 def setElMaxSpeed(speed):
     cmd = "17" + ':' + str(speed)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setElMaxSpeed() %s", speed)
 
 def setAzAccel(accel):
     cmd = "14" + ':' + str(accel)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setAzAccel() %s", accel)
 
 def setElAccel(accel):
     cmd = "15" + ':' + str(accel)
-    #print("command: %s" % cmd)
     sendStepperCommand(cmd)
     logging.debug("setAzAccel() %s", accel)
 
@@ -685,12 +650,6 @@ def runSpeed(axis):
     elif axis == 1:
         config.isElRunning = True
 
-def printEncodersCounts():
-    print(getEncoders())
-
-def printEncodersDegrees():
-    print(getEncodersDegrees())
-
 def stopAz():
     logging.debug("stopAz()")
     sendStepperCommand("4:0")
@@ -739,9 +698,6 @@ def isAzCWLimit():
     elif azCWLimit.find('1') != -1:
         return False
 
-def printIsAzCWLimit():
-    print(isAzCWLimit())
-
 # returns True if limit made	
 def isAzCCWLimit():
     azCCWLimit = sendStepperCommand("9:0")
@@ -749,9 +705,6 @@ def isAzCCWLimit():
         return True
     elif azCCWLimit.find('1') != -1:
         return False
-
-def printIsAzCCWLimit():
-    print(isAzCCWLimit())
 
 # returns True if limit made
 def isElUpLimit():
@@ -761,8 +714,6 @@ def isElUpLimit():
     elif elUpLimit.find('1') != -1:
         return False
 
-def printIsElUpLimit():
-    print(isElUpLimit())
 
 # returns True if limit made
 def isElDownLimit():
@@ -771,16 +722,6 @@ def isElDownLimit():
         return True
     elif elDownLimit.find('1') != -1:
         return False
-
-def printIsElDownLimit():
-    print(isElDownLimit())
-
-
-# 0 = azimuth
-# 1 = elevation
-def printStepPosnSteps(axis):
-    print (getStepperPosn(axis))
-
 
 # For now, let's home west
 def homeAzimuth():
@@ -914,7 +855,7 @@ def shutdown():
     
     # Close the damn window
     window.Close()
-    del window
+    #del window
     sys.exit()
     
 
@@ -951,8 +892,8 @@ if __name__ == "__main__":
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
-                        [sg.Text('Relative Closed Loop Move in Encoder Counts')],
-                        [sg.Button('REL_AZ_ENC'),sg.InputText('',size=(10,1),key='relAzEnc'),sg.Button('REL_EL_ENC'),sg.InputText('', size=(10,1),key='relElEnc')],
+                        [sg.Text('Absolute Closed Loop Move in Encoder Counts')],
+                        [sg.Button('ABS_AZ_ENC'),sg.InputText('',size=(10,1),key='relAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='relElEnc')],
                         [sg.Text('Homing')],
                         [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        
                         [sg.Text('Stop Motion')],
@@ -1034,12 +975,10 @@ if __name__ == "__main__":
             moveAzStepperDegrees(values['relAzDeg'])
         if event == 'REL_EL_DEG':
             moveElStepperDegrees(values['relElDeg'])
-
-        if event == 'REL_AZ_ENC':
+        if event == 'ABS_AZ_ENC':
             startEncoderMove(0, values['relAzEnc'])
-        if event == 'REL_EL_ENC':
+        if event == 'ABS_EL_ENC':
             startEncoderMove(1, values['relElEnc'])        
-
         if event == 'HOME_AZ':
             homeAzimuth()
         if event == 'HOME_EL':
