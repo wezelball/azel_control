@@ -224,8 +224,8 @@ class periodicThread (threading.Thread):
             if config.azMovingClosedLoop == True:
                 watchEncoderMove(0)
             
-            #if config.elMovingClosedLoop == True:
-                #watchEncoderMove(1)            
+            if config.elMovingClosedLoop == True:
+                watchEncoderMove(1)            
                 
                 
     def print_time(self,threadName):
@@ -575,7 +575,11 @@ def startEncoderMove(axis, distance):
     if axis == 0:
         config.azMovingClosedLoop = True
         config.azDistance = int(distance)
-        logging.debug("startEncoderMove(%s, %s) invoked", axis, distance)
+    elif axis == 1:
+        config.elMovingClosedLoop = True
+        config.elDistance = int(distance)
+        
+    logging.debug("startEncoderMove(%s, %s) invoked", axis, distance)
     
 
 # Maintains a closed-loop relative move by encoder counts
@@ -622,6 +626,51 @@ def watchEncoderMove(axis):
             config.azInNearApproach = False
             config.azInVeryNearApproach = False
             config.azMovingClosedLoop = False    
+
+    if axis == 1:
+        config.elDistanceTogo = config.elDistance - config.elMountPosn
+        
+        # Need to determine direction based on sign
+        if config.elDistance - config.elMountPosn > 0:
+            polarity = 1
+        else:
+            polarity = -1
+    
+        if abs(config.elDistanceTogo) > config.endpointFarDistance:
+            elSpeed = config.elEndpointFarSpeed * polarity
+            # Starts the motion at this speed
+            if config.elInFarApproach == False:
+                logging.debug("watchEncoderMove(%s) set far approach run", axis)
+                # Start slew at this speed
+                setElSpeed(elSpeed)
+                runSpeed(1)
+            config.elInFarApproach = True
+        elif abs(config.elDistanceTogo) > config.endpointNearDistance:
+            elSpeed = config.elEndpointNearSpeed * polarity
+            if config.elInNearApproach == False:
+                logging.debug("watchEncoderMove(%s) set near approach run", axis)
+                # Start slew at this speed
+                setElSpeed(elSpeed)
+                runSpeed(1)                        
+            config.elInNearApproach = True
+        elif abs(config.elDistanceTogo) > config.endpointVeryNearDistance:
+            elSpeed = config.elEndpointVeryNearSpeed * polarity
+            if config.elInVeryNearApproach == False:
+                logging.debug("watchEncoderMove(%s) set very near approach run", axis)
+                setElSpeed(elSpeed)
+                runSpeed(1)                        
+            config.elInVeryNearApproach = True
+        elif abs(config.elDistanceTogo) < config.endpointDeadband:
+            logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
+            stopEl()
+            # Reset the flags
+            config.elInFarApproach = False
+            config.elInNearApproach = False
+            config.elInVeryNearApproach = False
+            config.elMovingClosedLoop = False
+
+
+
 
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
@@ -833,12 +882,23 @@ def azJam():
     logging.debug("azJam() timeout")
     variable.azFailTiming = False
     quickStopAz()
-    #print("azimuth jam detected")
+    
+    # Reset flags so encoder move will work again
+    config.azInFarApproach = False
+    config.azInNearApproach = False
+    config.azInVeryNearApproach = False
+    config.azMovingClosedLoop = False    
+    
     
 def elJam():
     logging.debug("elJam() timeout")
     quickStopEl()
-    #print("elevation jam detected")
+    
+    # Reset flags so encoder move will work again
+    config.elInFarApproach = False
+    config.elInNearApproach = False
+    config.elInVeryNearApproach = False
+    config.elMovingClosedLoop = False    
 
 # Called if no case passed to switch function
 def case_default():
