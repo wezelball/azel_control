@@ -85,7 +85,8 @@ class motionThread(threading.Thread):
                 if abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == True:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
-                        logging.debug("motionThread.run() azFailTiming = True")
+                        #logging.debug("motionThread.run() azFailTiming = True")
+                        logging.debug("motionThread() azAvgVel too low: %s", variable.azAvgVelocity.computeAverage())
                     elif self.azFailTiming == True:
                         self.azFailTiming == False
                         azJam()
@@ -104,7 +105,8 @@ class motionThread(threading.Thread):
                 if abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == True:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
-                        logging.debug("motionThread.run() elFailTiming = True")
+                        #logging.debug("motionThread.run() elFailTiming = True")
+                        logging.debug("motionThread() elAvgVel too low: %s", variable.elAvgVelocity.computeAverage())
                     elif self.elFailTiming == True:
                         self.elFailTiming = False
                         elJam()
@@ -176,9 +178,9 @@ class periodicThread (threading.Thread):
             
             # Calculate velocities
             # the variable.xxx values can be converted to locals
-            variable.azVelocity = (config.azMountPosn - self.lastAz)/self.delay
+            variable.azVelocity = 2 * (config.azMountPosn - self.lastAz)/self.delay
             variable.azAvgVelocity.addValue(variable.azVelocity)
-            variable.elVelocity = (config.elMountPosn - self.lastEl)/self.delay
+            variable.elVelocity = 2 * (config.elMountPosn - self.lastEl)/self.delay
             variable.elAvgVelocity.addValue(variable.elVelocity)
             
             # Compute average velocities
@@ -186,17 +188,14 @@ class periodicThread (threading.Thread):
             self.azAvgVel = variable.azAvgVelocity.computeAverage()
             self.elAvgVel = variable.elAvgVelocity.computeAverage()
             
-            # Save encoder position to last position
-            try:
-                self.lastAz,self.lastEl = getEncoders()
-            except ValueError:
-                config.encoderIOError = True            
+            # Update the last encoders positions
+            self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
             
             # Update the process logfile
             #log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ',' + str(config.azStepperPos) + ',' \
             #          + str(config.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
-                      +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')            
+                      +  str(self.azAvgVel) + ',' + str(self.elAvgVel) + '\n')            
 
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
