@@ -261,7 +261,9 @@ void fastStop(int axis) {
     azMovingCW = false;
     azMovingCCW = false;
     elMovingUp = false;
-    elMovingDown = false;   
+    elMovingDown = false;
+    // debug
+    Serial.println("fstop(n)");   
   }
   
 }
@@ -373,13 +375,13 @@ void receiveEvent(int howMany) {
   param = parseParameter(rawCommand);
   rawCommand = "";
 
-  Serial.print("command: ");
-  Serial.println(command);
+  //Serial.print("command: ");
+  //Serial.println(command);
   
-  Serial.print("param: ");
-  Serial.println(param);
+  //Serial.print("param: ");
+  //Serial.println(param);
 
-  Serial.println();
+  //Serial.println();
 
   // Process the i2c command from master RPi
   processCommand();
@@ -607,9 +609,13 @@ void loop() {
 
   // ************************* Check hard limits ******************************
   if ((getLimit(0,0) == 0) && azMovingCW) {           // az max CW
+    // debug
+    Serial.println("fstop azCW");
     fastStop(0);
     azCWLimit = true;
   } else if ((getLimit(0,1) == 0) && azMovingCCW) {   // az max CCW
+    // debug
+    Serial.println("fstop azCCW");
     fastStop(0);
     azCCWLimit = true;
   } else {                                      // reset flags
@@ -619,9 +625,13 @@ void loop() {
 
   // Check hard limits
   if ((getLimit(1,0) == 0) && elMovingUp) {           // el max up
+    // debug
+    Serial.println("fstop elUp");
     fastStop(1);
     elUpLimit = true;
   } else if ((getLimit(1,1) == 0) && elMovingDown) {  // el max down
+    // debug
+    Serial.println("fstop elDown");
     fastStop(1);
     elDownLimit = true;
   } else {                                      // reset flags

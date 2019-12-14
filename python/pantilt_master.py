@@ -36,9 +36,13 @@ class MovingAverage():
         self.windowsize = windowsize
         self._setWindowSize(windowsize)
         self.accumValue = 0.0
-        1.0
+    
     def _setWindowSize(self, size):
-        self.window = [0.0 for i in range(self.windowsize)]
+        self.window = [0.0 for i in range(size)]
+    
+    # Preload window with a certain value
+    def preload(self, value):
+        self.window = [value for i in range(self.windowsize)]
         
     def addValue(self,value):
         self.window.insert(0,value)
@@ -61,62 +65,55 @@ class motionThread(threading.Thread):
         self.delay = 1.5
         self.azFailTiming = False
         self.elFailTiming = False
-        self.azAvgVel = 0.0
-        self.elAvgVel = 0.0        
-        
     
     def run(self):
         while self.running:
             time.sleep(self.delay)
-            #logging.debug("motionThread() %s running", self.name)
-
-            # Compute average velocities
-            self.azAvgVel = variable.azAvgVelocity.computeAverage()
-            self.elAvgVel = variable.elAvgVelocity.computeAverage()            
-
-            #logging.debug("motionThread() azAvgVel %s", self.azAvgVel)
-            #logging.debug("motionThread() elAvgVel %s", self.elAvgVel)
+            #logging.debug("motionThread() %s running", self.name)            
+            
+            logging.debug("motionThread() azAvgVel %s", config.azAvgVelocity)
+            logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
             
             # Monitor the run status of the steppers,
             # updating the process varaibles
             # This will used to invoke jam detection later
             if config.isAzRunning == True:    # azimuth
                 # Look to see if stopped
-                if abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == True:
+                if abs(config.azAvgVelocity) < 1.0 and isRunning(0) == True:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
                         #logging.debug("motionThread.run() azFailTiming = True")
-                        logging.debug("motionThread() azAvgVel too low: %s", variable.azAvgVelocity.computeAverage())
+                        logging.debug("motionThread() azAvgVel too low: %s", config.azAvgVelocity)
                     elif self.azFailTiming == True:
                         self.azFailTiming == False
                         azJam()
                     
-                elif abs(variable.azAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
+                elif abs(config.azAvgVelocity) > 1.0:   # running above min velocity
                     if self.azFailTiming == True:
                         self.azFailTiming = False
                         logging.debug("motionThread.run() azFailTiming = False")
                         
-                elif abs(variable.azAvgVelocity.computeAverage()) < 1.0 and isRunning(0) == False:
+                elif abs(config.azAvgVelocity) < 1.0 and isRunning(0) == False:
                     config.isAzRunning = False
                 
                 
             if config.isElRunning == True:    # elevation
                 # Look to see if stopped
-                if abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == True:
+                if abs(config.elAvgVelocity) < 1.0 and isRunning(1) == True:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
                         #logging.debug("motionThread.run() elFailTiming = True")
-                        logging.debug("motionThread() elAvgVel too low: %s", variable.elAvgVelocity.computeAverage())
+                        logging.debug("motionThread() elAvgVel too low: %s", config.elAvgVelocity)
                     elif self.elFailTiming == True:
                         self.elFailTiming = False
                         elJam()
                         
-                elif abs(variable.elAvgVelocity.computeAverage()) > 1.0:   # running above min velocity
+                elif abs(config.elAvgVelocity) > 1.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
                         logging.debug("motionThread.run() elFailTiming = False")
                         
-                elif abs(variable.elAvgVelocity.computeAverage()) < 1.0 and isRunning(1) == False:
+                elif abs(config.elAvgVelocity) < 1.0 and isRunning(1) == False:
                     config.isElRunning = False                
 
             # Get stepper and limit switch positions if neither motor running
@@ -162,8 +159,6 @@ class periodicThread (threading.Thread):
         self.running = True
         self.delay = 0.2
         self.lastAz, self.lastEl = getEncoders()
-        self.azAvgVel = 0.0
-        self.elAvgVel = 0.0
 
     def run(self):      
         while(self.running):
@@ -174,28 +169,26 @@ class periodicThread (threading.Thread):
                 config.azMountPosn, config.elMountPosn = getEncoders()
             except ValueError:
                 config.encoderIOError = True
-            
-            
+           
             # Calculate velocities
-            # the variable.xxx values can be converted to locals
-            variable.azVelocity = 2 * (config.azMountPosn - self.lastAz)/self.delay
-            variable.azAvgVelocity.addValue(variable.azVelocity)
-            variable.elVelocity = 2 * (config.elMountPosn - self.lastEl)/self.delay
-            variable.elAvgVelocity.addValue(variable.elVelocity)
+            azVel = 10 * (config.azMountPosn - self.lastAz)/self.delay
+            elVel = 10 * (config.elMountPosn - self.lastEl)/self.delay
+            
+            # Add the calculated velocities to the 
+            azMovingAverage.addValue(azVel)
+            elMovingAverage.addValue(elVel)
             
             # Compute average velocities
             # the variable.xxx values can be converted to locals
-            self.azAvgVel = variable.azAvgVelocity.computeAverage()
-            self.elAvgVel = variable.elAvgVelocity.computeAverage()
+            config.azAvgVelocity = azMovingAverage.computeAverage()
+            config.elAvgVelocity = elMovingAverage.computeAverage()
             
             # Update the last encoders positions
             self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
             
             # Update the process logfile
-            #log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ',' + str(config.azStepperPos) + ',' \
-            #          + str(config.elStepperPos)+ ',' +  str(variable.azVelocity) + ',' + str(variable.elVelocity) + '\n')
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
-                      +  str(self.azAvgVel) + ',' + str(self.elAvgVel) + '\n')            
+                      +  str(config.azAvgVelocity) + ',' + str(config.elAvgVelocity) + '\n')            
 
             # Logging
             #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
@@ -248,8 +241,8 @@ class Variables():
         # Real-time values
         self.azVelocity = 0
         self.elVelocity = 0
-        self.azAvgVelocity = MovingAverage(5)
-        self.elAvgVelocity = MovingAverage(5)
+        #self.azAvgVelocity = MovingAverage(5)
+        #self.elAvgVelocity = MovingAverage(5)
         
 # ************************* END CLASSES ******************************
 
@@ -820,7 +813,7 @@ def isRunning(axis):
     
 def azJam():
     logging.debug("azJam() timeout")
-    variable.azFailTiming = False
+    # Diabled for now, too many nuisance trips
     quickStopAz()
     
     # Reset flags so encoder move will work again
@@ -832,6 +825,7 @@ def azJam():
     
 def elJam():
     logging.debug("elJam() timeout")
+    # Diabled for now, too many nuisance trips
     quickStopEl()
     
     # Reset flags so encoder move will work again
@@ -877,7 +871,11 @@ if __name__ == "__main__":
 
     # Instantiate global variables
     # This will be deprecated soon
-    variable = Variables()    
+    #variable = Variables()    
+
+    # Instantiate moving averages
+    azMovingAverage = MovingAverage(10)
+    elMovingAverage = MovingAverage(10)
 
     # PySimpleGUI
     motion_layout =  [
@@ -904,6 +902,8 @@ if __name__ == "__main__":
                         [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
                         [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
                         [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
+                        [sg.Text('Az Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azVel')],
+                        [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elVel')],                        
                         [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
                         [sg.Button('ZERO_AZ_STEP'),sg.Button('ZERO_EL_STEP')],
                         ]    
@@ -1019,3 +1019,5 @@ if __name__ == "__main__":
         window.Element('elDownLimit').Update(config.elDownLimit)
         window.Element('azRunning').Update(config.isAzRunning)
         window.Element('elRunning').Update(config.isElRunning)
+        window.Element('azVel').Update(config.azAvgVelocity)
+        window.Element('elVel').Update(config.elAvgVelocity)

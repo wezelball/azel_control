@@ -69,3 +69,7 @@ elStepperPosn = 0
 # The geographical position of the mount, referenced to true North and horizon
 #azGeoPosn = 0.0
 #elGeoPosn = 0.0
+
+# Average velocities
+azAvgVelocity = 0
+elAvgVelocity = 0
