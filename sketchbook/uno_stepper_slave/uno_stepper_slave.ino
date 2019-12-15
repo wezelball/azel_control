@@ -9,6 +9,11 @@
 #include <Wire.h>
 #include "AccelStepper.h"
 
+// Include the Bounce2 library found here :
+// https://github.com/thomasfredericks/Bounce2
+#include <Bounce2.h>
+
+
 // Define Slave answer size
 #define ANSWERSIZE 8
 #define SLAVE_ADDRESS 0x04
@@ -23,6 +28,12 @@ AccelStepper stepperY(1, 8, 9);   // Y is the elevation axis
                                   // 1 = Easy Driver interface
                                   // UNO Pin a connected to STEP pin of Easy Driver
                                   // UNO Pin b connected to DIR pin of Easy Driver
+
+// Instantiate Bounce objects for limit switches
+Bounce azCWBounce = Bounce();
+Bounce azCCWBounce = Bounce();
+Bounce elUpBounce = Bounce();
+Bounce elDownBounce = Bounce();
 
 
 // ******************************BEGIN GLOBALS ***************************************
@@ -323,32 +334,32 @@ void moveToAbsolute(int axis, long absolute) {   // must add hard limits check h
 int getLimit(int axis, int limit) {
    if (axis == 0) {                         // azimuth
     if (limit == 0) {
-      if (digitalRead(azLimitCW) == HIGH)   // CW limit not reached
+      if (azCWBounce.read() == HIGH)   // CW limit not reached
         return 0;
 
-      if (digitalRead(azLimitCW) == LOW)    // CW limit reached
+      if (azCWBounce.read() == LOW)    // CW limit reached
         return 1;
         
     } else if (limit == 1) {
-      if (digitalRead(azLimitCCW) == HIGH)  // CCW limit not reached
+      if (azCCWBounce.read() == HIGH)  // CCW limit not reached
         return 0;
 
-      if (digitalRead(azLimitCCW) == LOW)   // CCW limit reached
+      if (azCCWBounce.read() == LOW)   // CCW limit reached
         return 1;
     }
-  } else if (axis == 1) {
+  } else if (axis == 1) {                   // elevation
     if (limit == 0) {
-      if (digitalRead(elLimitUp) == HIGH)   // UP limit not reached
+      if (elUpBounce.read() == HIGH)   // UP limit not reached
         return 0;
 
-      if (digitalRead(elLimitUp) == LOW)    // UP limit reached
+      if (elUpBounce.read() == LOW)    // UP limit reached
         return 1;
         
     } else if (limit == 1) {
-      if (digitalRead(elLimitDown) == HIGH) // DOWN limit not reached
+      if (elDownBounce.read() == HIGH) // DOWN limit not reached
         return 0;
 
-      if (digitalRead(elLimitDown) == LOW)  // DOWN limit reached
+      if (elDownBounce.read() == LOW)  // DOWN limit reached
         return 1;
     }
   }
@@ -555,6 +566,19 @@ void setup() {
   pinMode(elLimitUp, INPUT_PULLUP);
   pinMode(elLimitDown, INPUT_PULLUP);
   
+  // Attach debouncers to limit switches
+  azCWBounce.attach(azLimitCW);
+  azCWBounce.interval(10); // interval in ms
+
+  azCCWBounce.attach(azLimitCCW);
+  azCCWBounce.interval(10); // interval in ms
+
+  elUpBounce.attach(elLimitUp);
+  elUpBounce.interval(10); // interval in ms
+
+  elDownBounce.attach(elLimitDown);
+  elDownBounce.interval(10); // interval in ms
+  
   // Setup stepper enable pins
   // Each stepper should have its own enable pin so that
   // I can fastStop each axis individually. Right now both
@@ -564,6 +588,11 @@ void setup() {
 }
 
 void loop() {
+  // Update debouncer instances
+  azCWBounce.update();
+  azCCWBounce.update();
+  elUpBounce.update();
+  elDownBounce.update();
 
 
   // *************************** Start Motion ***********************************
