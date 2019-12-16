@@ -568,16 +568,16 @@ void setup() {
   
   // Attach debouncers to limit switches
   azCWBounce.attach(azLimitCW);
-  azCWBounce.interval(10); // interval in ms
+  azCWBounce.interval(5); // interval in ms
 
   azCCWBounce.attach(azLimitCCW);
-  azCCWBounce.interval(10); // interval in ms
+  azCCWBounce.interval(5); // interval in ms
 
   elUpBounce.attach(elLimitUp);
-  elUpBounce.interval(10); // interval in ms
+  elUpBounce.interval(5); // interval in ms
 
   elDownBounce.attach(elLimitDown);
-  elDownBounce.interval(10); // interval in ms
+  elDownBounce.interval(5); // interval in ms
   
   // Setup stepper enable pins
   // Each stepper should have its own enable pin so that

@@ -521,21 +521,21 @@ def updateGeoPosition(axis):
 
 
 # ****************** Command functions ***********************
-def slewNorth():
-    logging.debug("slewNorth()")
-    relMoveEl(8000)
+#def slewNorth():
+#    logging.debug("slewNorth()")
+#    relMoveEl(8000)
 
-def slewEast():
-    logging.debug("slewEast()")
-    relMoveAz(8000)
+#def slewEast():
+#    logging.debug("slewEast()")
+#    relMoveAz(8000)
 
-def slewWest():
-    logging.debug("slewWest()")
-    relMoveAz(-8000)
+#def slewWest():
+#    logging.debug("slewWest()")
+#    relMoveAz(-8000)
 
-def slewSouth():
-    logging.debug("slewSouth()")
-    relMoveEl(-8000)
+#def slewSouth():
+#    logging.debug("slewSouth()")
+#    relMoveEl(-8000)
 
 def stopAllSlew():
     logging.debug("stopAllSlew()")
@@ -750,12 +750,14 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
+    setAzMaxSpeed(100)
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
+    setElMaxSpeed(100)
     # slew south a long friggin way
     relMoveEl(-40000)
 
@@ -912,10 +914,10 @@ if __name__ == "__main__":
     motion_layout =  [
                         [sg.Text('Slew')],
                         [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
-                        [sg.Text('Jog Az')],             
-                        [sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],
-                        [sg.Text('Jog El')],
-                        [sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],
+                        #[sg.Text('Jog Az')],             
+                        #[sg.Button('JOG_AZ_CCW'),sg.Button('JOG_AZ_CW')],
+                        #[sg.Text('Jog El')],
+                        #[sg.Button('JOG_EL_DOWN'),sg.Button('JOG_EL_UP')],
                         [sg.Text('Relative Open Loop Move in Steps')],
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
@@ -988,14 +990,14 @@ if __name__ == "__main__":
         if event == 'SLEW_EL':
             setElSpeed(values['slewEl'])
             runSpeed(1)
-        if event == 'JOG_AZ_CW':
-            slewEast()
-        if event == 'JOG_AZ_CCW':
-            slewWest()
-        if event == 'JOG_EL_UP':
-            slewNorth()
-        if event == 'JOG_EL_DOWN':
-            slewSouth()
+        #if event == 'JOG_AZ_CW':
+            #slewEast()
+        #if event == 'JOG_AZ_CCW':
+            #slewWest()
+        #if event == 'JOG_EL_UP':
+            #slewNorth()
+        #if event == 'JOG_EL_DOWN':
+            #slewSouth()
         if event == 'ZERO_AZ_ENC':
             zeroAzEncoder()
         if event == 'ZERO_EL_ENC':
@@ -1005,16 +1007,22 @@ if __name__ == "__main__":
         if event == 'ZERO_EL_STEP':
             zeroSteppers(1)        
         if event == 'REL_AZ':
+            setAzMaxSpeed(500)
             relMoveAz(values['relAz'])
         if event == 'REL_EL':
+            setElMaxSpeed(500)
             relMoveEl(values['relEl'])
         if event == 'REL_AZ_DEG':
+            setAzMaxSpeed(500)
             moveAzStepperDegrees(values['relAzDeg'])
         if event == 'REL_EL_DEG':
+            setElMaxSpeed(500)
             moveElStepperDegrees(values['relElDeg'])
         if event == 'ABS_AZ_ENC':
+            setAzMaxSpeed(500)
             startEncoderMove(0, values['relAzEnc'])
         if event == 'ABS_EL_ENC':
+            setElMaxSpeed(500)
             startEncoderMove(1, values['relElEnc'])        
         if event == 'HOME_AZ':
             homeAzimuth()
