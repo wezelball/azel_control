@@ -71,8 +71,8 @@ class motionThread(threading.Thread):
             time.sleep(self.delay)
             #logging.debug("motionThread() %s running", self.name)            
             
-            logging.debug("motionThread() azAvgVel %s", config.azAvgVelocity)
-            logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
+            #logging.debug("motionThread() azAvgVel %s", config.azAvgVelocity)
+            #logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
             
             # Monitor the run status of the steppers,
             # updating the process varaibles
@@ -185,6 +185,10 @@ class periodicThread (threading.Thread):
             
             # Update the last encoders positions
             self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
+
+            # Update geographical positions
+            updateGeoPosition(0)
+            updateGeoPosition(1)
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
@@ -488,6 +492,33 @@ def encoderDegreesToCounts(degrees):
     pulsesPerDegree = 10.83333333
     pulses = degrees * pulsesPerDegree
     return int(pulses)
+
+
+# Set the geographical posiion between of the axis based
+# on operator pointing to a known position
+# This is a "one-star" calibration
+# mount must be level for this to work
+# position is in degrees
+# axis 0 = azimuth
+# axis 1 = elevation
+def setGeoOffset(axis, position):
+    if axis == 0:
+        config.azGeoOffset = float(position) - encoderCountsToDegrees(0, config.azMountPosn)
+        logging.debug("setGeoOffset(0) set offset to %s", config.azGeoOffset)
+    elif axis == 1:
+        config.elGeoOffset = float(position) - encoderCountsToDegrees(1, config.elMountPosn)
+        logging.debug("setGeoOffset(1) set offset to %s", config.elGeoOffset)
+
+# Get the geographical posiion between of the axis
+# returns position in degrees
+# axis 0 = azimuth
+# axis 1 = elevation
+def updateGeoPosition(axis):
+    if axis == 0:
+        config.azGeoPosn = encoderCountsToDegrees(0, config.azMountPosn) + config.azGeoOffset
+    elif axis == 1:
+        config.elGeoPosn = encoderCountsToDegrees(1, config.elMountPosn) + config.elGeoOffset        
+
 
 # ****************** Command functions ***********************
 def slewNorth():
@@ -903,7 +934,9 @@ if __name__ == "__main__":
                         [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
                         [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
                         [sg.Text('Az Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azVel')],
-                        [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elVel')],                        
+                        [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elVel')],
+                        [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azGeoPosn')],
+                        [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elGeoPosn')],
                         [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
                         [sg.Button('ZERO_AZ_STEP'),sg.Button('ZERO_EL_STEP')],
                         ]    
@@ -917,10 +950,15 @@ if __name__ == "__main__":
                         [sg.Button('EL_SPD'),sg.InputText('',size=(5,1),key='elSpeed'),sg.Button('EL_MAX'),sg.InputText('',size=(5,1),key='elMax'),sg.Button('EL_ACCEL'),sg.InputText('',size=(5,1),key='elAccel')],
                         ]
 
+    celestial_layout =  [
+                        [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
+                        ]
+
+
 
     layout =            [
                         [sg.Frame('Position', position_layout),sg.Frame('State', state_layout)],
-                        [sg.Frame('Motion', motion_layout)],
+                        [sg.Frame('Motion', motion_layout),sg.Frame('Celestial', celestial_layout)],
                         ]    
     
     # Open the GUI
@@ -1003,6 +1041,11 @@ if __name__ == "__main__":
             setAzMaxSpeed(values['elMax'])
         if event == 'EL_ACCEL':
             setAzAccel(values['elAccel'])        
+        if event == 'SET_AZ_GEO':
+            setGeoOffset(0, values['azGeoInput'])
+        if event == 'SET_EL_GEO':
+            setGeoOffset(1, values['elGeoInput'])        
+           
             
         # UPDATES
         # Updates the information in the window
@@ -1021,3 +1064,5 @@ if __name__ == "__main__":
         window.Element('elRunning').Update(config.isElRunning)
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
+        window.Element('azGeoPosn').Update(config.azGeoPosn)
+        window.Element('elGeoPosn').Update(config.elGeoPosn)        

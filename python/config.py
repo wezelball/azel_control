@@ -67,8 +67,11 @@ azStepperPosn = 0
 elStepperPosn = 0
 
 # The geographical position of the mount, referenced to true North and horizon
-#azGeoPosn = 0.0
-#elGeoPosn = 0.0
+azGeoPosn = 0.0
+elGeoPosn = 0.0
+# Offset values are added to the mount position values to get the geo values
+azGeoOffset = 0.0
+elGeoOffset = 0.0
 
 # Average velocities
 azAvgVelocity = 0
