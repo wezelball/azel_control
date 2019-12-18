@@ -76,3 +76,6 @@ elGeoOffset = 0.0
 # Average velocities
 azAvgVelocity = 0
 elAvgVelocity = 0
+
+# Current LST
+#currentLST

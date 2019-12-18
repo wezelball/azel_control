@@ -8,7 +8,7 @@ import smbus
 import time
 #import os
 import datetime
-#import ephem
+import ephem
 import threading
 import ctypes
 from threading import Thread, Event, Timer
@@ -378,6 +378,11 @@ def getStepperPosn(axis):
             config.stepperIOError = True
             return 0
     
+
+# Get the local sidereal time
+def getCurrentLST():
+    observer.date = ephem.now()
+    return (observer.sidereal_time())
 
 # Send a stepper motion command to the Uno
 def sendStepperCommand(cmd):
@@ -901,10 +906,12 @@ if __name__ == "__main__":
     logging.basicConfig(filename='debug.log', filemode='w', \
                     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
+    # Pyephem
+    observer = ephem.Observer()
+    observer.lon = '-77:55:27'
+    observer.lat = '37:47:26'
+    observer.elevation = 116   # i'm calling this heightASL from now on    
 
-    # Instantiate global variables
-    # This will be deprecated soon
-    #variable = Variables()    
 
     # Instantiate moving averages
     azMovingAverage = MovingAverage(10)
@@ -954,6 +961,7 @@ if __name__ == "__main__":
 
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
+                        [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')]
                         ]
 
 
@@ -1073,4 +1081,5 @@ if __name__ == "__main__":
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
         window.Element('azGeoPosn').Update(config.azGeoPosn)
-        window.Element('elGeoPosn').Update(config.elGeoPosn)        
+        window.Element('elGeoPosn').Update(config.elGeoPosn)
+        window.Element('localSiderealTime').Update(str(getCurrentLST()))
