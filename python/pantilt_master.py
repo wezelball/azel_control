@@ -493,9 +493,14 @@ def encoderCountsToDegrees(axis, pulses):
     degrees = pulses * degreesPerPulse
     return degrees
 
-def encoderDegreesToCounts(degrees):
-    pulsesPerDegree = 10.83333333
-    pulses = degrees * pulsesPerDegree
+# Given encoder degrees, return pulse equivalent
+def encoderDegreesToCounts(axis, degrees):
+    if axis == 0:
+        pulsesPerDegree = 39.438397
+    elif axis == 1:
+        pulsesPerDegree = 40.861357
+        
+    pulses = float(degrees) * pulsesPerDegree
     return int(pulses)
 
 
@@ -931,6 +936,8 @@ if __name__ == "__main__":
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
                         [sg.Text('Absolute Closed Loop Move in Encoder Counts')],
                         [sg.Button('ABS_AZ_ENC'),sg.InputText('',size=(10,1),key='relAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='relElEnc')],
+                        [sg.Text('Absolute Closed Loop Move in Encoder Degrees')],
+                        [sg.Button('DEG_AZ_ENC'),sg.InputText('',size=(10,1),key='degAzEnc'),sg.Button('DEG_EL_ENC'),sg.InputText('', size=(10,1),key='degElEnc')],
                         [sg.Text('Homing')],
                         [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        
                         [sg.Text('Stop Motion')],
@@ -992,73 +999,100 @@ if __name__ == "__main__":
         # EVENTS
         if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
             shutdown()
+
         if event == 'SLEW_AZ':
             setAzSpeed(values['slewAz'])
             runSpeed(0)
+
         if event == 'SLEW_EL':
             setElSpeed(values['slewEl'])
             runSpeed(1)
-        #if event == 'JOG_AZ_CW':
-            #slewEast()
-        #if event == 'JOG_AZ_CCW':
-            #slewWest()
-        #if event == 'JOG_EL_UP':
-            #slewNorth()
-        #if event == 'JOG_EL_DOWN':
-            #slewSouth()
+
         if event == 'ZERO_AZ_ENC':
             zeroAzEncoder()
+
         if event == 'ZERO_EL_ENC':
             zeroElEncoder()        
+
         if event == 'ZERO_AZ_STEP':
             zeroSteppers(0)
+
         if event == 'ZERO_EL_STEP':
             zeroSteppers(1)        
+
         if event == 'REL_AZ':
             setAzMaxSpeed(500)
             relMoveAz(values['relAz'])
+
         if event == 'REL_EL':
             setElMaxSpeed(500)
             relMoveEl(values['relEl'])
+
         if event == 'REL_AZ_DEG':
             setAzMaxSpeed(500)
             moveAzStepperDegrees(values['relAzDeg'])
+
         if event == 'REL_EL_DEG':
             setElMaxSpeed(500)
             moveElStepperDegrees(values['relElDeg'])
+
         if event == 'ABS_AZ_ENC':
             setAzMaxSpeed(500)
             startEncoderMove(0, values['relAzEnc'])
+
         if event == 'ABS_EL_ENC':
+            setAzMaxSpeed(500)
+            startEncoderMove(1, values['relElEnc'])
+
+        if event == 'DEG_AZ_ENC':
+            setAzMaxSpeed(500)
+            startEncoderMove(0, encoderDegreesToCounts(0,values['degAzEnc']))
+
+        if event == 'DEG_EL_ENC':
             setElMaxSpeed(500)
-            startEncoderMove(1, values['relElEnc'])        
+            startEncoderMove(1, encoderDegreesToCounts(0,values['degElEnc']))        
+
         if event == 'HOME_AZ':
             homeAzimuth()
+
         if event == 'HOME_EL':
             homeElevation()
+
         if event == 'STOP_AZ':
             stopAz()
+
         if event == 'STOP_EL':
             stopEl()
+
         if event == 'FSTOP_AZ':
             quickStopAz()
+
         if event == 'FSTOP_EL':
             quickStopEl()
+
         # Speeds and accelerations
         if event == 'AZ_SPD':
             setAzSpeed(values['azSpeed'])
+
         if event == 'AZ_MAX':
             setAzMaxSpeed(values['azMax'])
+
+
         if event == 'AZ_ACCEL':
             setAzAccel(values['azAccel'])            
+
         if event == 'EL_SPD':
             setAzSpeed(values['elSpeed'])
+
         if event == 'EL_MAX':
             setAzMaxSpeed(values['elMax'])
+
         if event == 'EL_ACCEL':
             setAzAccel(values['elAccel'])        
+
         if event == 'SET_AZ_GEO':
             setGeoOffset(0, values['azGeoInput'])
+
         if event == 'SET_EL_GEO':
             setGeoOffset(1, values['elGeoInput'])        
            
