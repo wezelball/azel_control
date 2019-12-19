@@ -32,6 +32,19 @@ messageQ = []
 
 # Moving average class
 class MovingAverage():
+    """Moving average class - keeps track of encoder velocities
+    
+    Methods
+    -------
+    preload()
+    loads the window with a constant value
+    
+    addValue()
+    adds a value to the window, discarding the first value added
+    
+    computeAverage()
+    return the computed average of the window elements
+    """
     def __init__(self, windowsize):
         self.windowsize = windowsize
         self._setWindowSize(windowsize)
@@ -42,13 +55,16 @@ class MovingAverage():
     
     # Preload window with a certain value
     def preload(self, value):
+        """loads the window with a constant value """
         self.window = [value for i in range(self.windowsize)]
         
     def addValue(self,value):
+        """adds a value to the window, discarding the first value added"""
         self.window.insert(0,value)
         self.window.pop()
         
     def computeAverage(self):
+        """return the computed average of the window elements """
         self.accumValue = 0
         for i in self.window:
             self.accumValue += i
