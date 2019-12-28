@@ -8,6 +8,8 @@ import smbus
 import time
 #import os
 import datetime
+# For the tracking velocity calculations
+import math
 import ephem
 import threading
 import ctypes
@@ -549,6 +551,102 @@ def updateGeoPosition(axis):
     elif axis == 1:
         config.elGeoPosn = encoderCountsToDegrees(1, config.elMountPosn) + config.elGeoOffset        
 
+# Returns tracking velocity for an axis
+# axis 0 = azimuth
+# axis 1 = elevation
+# az = azimuth in degrees
+# el = elevation (altitude) in degrees
+# angle is either azimuth or elevation angle in degrees
+# latitude is observer's latitude
+# Returns velocity is steps per second
+def getTrackVelocity(axis, az, el, latitude):
+    # convert angles to radians
+    latR = math.radians(latitude)
+    azR = math.radians(az)
+    elR = math.radians(el)
+        
+    # trigonometric functions
+    SA = math.sin(azR)
+    CA = math.cos(azR)
+    SE = math.sin(elR)
+    CE = math.cos(elR)
+    SP = math.sin(latR)
+    CP = math.cos(latR)
+    
+    # First, solve for HA and DEC (h2e.f)
+    # HA, Dec as X, Y, Z
+    X = -CA * CE * SP + SE * CP
+    Y = -SA * CE
+    Z = CA * CE * CP + SE * SP
+    
+    # To HA, Dec
+    R = math.sqrt(X*X+Y*Y)
+    
+    if R == 0:
+        HA = 0.0
+    else:
+        HA = math.atan2(Y,X)
+        
+    DEC = math.atan2(Z,R)
+    
+    #ha = math.degrees(HA)/15    # convert angle to time
+    #haF = ephem.hours(HA)       # convert HA to time
+    #dec = math.degrees(DEC)     # declination in degrees
+    
+    # Solve for velocities
+    # trigonometric functions
+    SH = math.sin(HA)       # already in radians
+    CH = math.cos(HA)
+    SD = math.sin(DEC)
+    CD = math.cos(DEC)
+    CHCD = CH * CD
+    SDCP = SD * CP
+    X = -CHCD * SP + SDCP
+    Y = -SH * CD
+    Z = CHCD * CP + SD * SP
+    RSQ = X*X+Y*Y
+    R = math.sqrt(RSQ)
+       
+    # Parallactic angle
+    C = CD * SP - CH * SDCP
+    S = SH * CP
+    
+    if (C*C+S*S) > 0:
+        Q = math.atan2(S,C)
+    else:
+        Q = math.pi - HA
+    
+    PA = Q  # parallactic angle
+    
+    # Velocities (and accelerations, if I want them)
+    TINY =  1e-30   # a very small number
+    
+    if RSQ < TINY:
+        RSQ = TINY
+        R = math.sqrt(RSQ)
+    
+    QD = -X*CP/RSQ
+    AD = SP + Z * QD
+    ED = CP*Y/R
+    EDR = ED/R
+    
+    AZD = AD    # azimuth velocity
+    ELD = ED    # elevation velocity
+    
+    # convert to degrees/sec
+    azV = AZD * ((2*math.pi)/86400) * (360/(2*math.pi))
+    elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))
+    
+    # Convert to pulses per second, then return
+    if axis == 0:
+        return int(azV * 401.250)
+    elif axis == 1:
+        return int(elV * 769.166)
+    else:
+        return 0.0
+    
+    
+    
 
 # ****************** Command functions ***********************
 
@@ -969,7 +1067,8 @@ if __name__ == "__main__":
 
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
-                        [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')]
+                        [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')],
+                        [sg.Text('TrackVel:', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azTrackVel'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elTrackVel')],
                         ]
 
 
@@ -1116,3 +1215,6 @@ if __name__ == "__main__":
         window.Element('azGeoPosn').Update(config.azGeoPosn)
         window.Element('elGeoPosn').Update(config.elGeoPosn)            # see above elEncoderDeg
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
+        # Hard-coding the latitude for now
+        window.Element('azTrackVel').Update(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
+        window.Element('elTrackVel').Update(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79))
