@@ -89,6 +89,11 @@ class motionThread(threading.Thread):
             
             #logging.debug("motionThread() azAvgVel %s", config.azAvgVelocity)
             #logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
+            #logging.debug("motionThread() config.azGeoPosn %s", config.azGeoPosn)
+            #logging.debug("motionThread() config.azMountPosn %s", config.azMountPosn)
+            logging.debug("motionThread() config.elGeoPosn %s", config.elGeoPosn)
+            logging.debug("motionThread() config.elMountPosn %s", config.elMountPosn)
+            logging.debug("motionThread() getEncodersDegrees(1) %s", getEncodersDegrees(1))
             
             # Monitor the run status of the steppers,
             # updating the process varaibles
@@ -931,7 +936,7 @@ if __name__ == "__main__":
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
                         [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
                         [sg.Text('Absolute Closed Loop Move in Encoder Counts')],
-                        [sg.Button('ABS_AZ_ENC'),sg.InputText('',size=(10,1),key='relAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='relElEnc')],
+                        [sg.Button('ABS_AZ_ENC'),sg.InputText('',size=(10,1),key='absAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='absElEnc')],
                         [sg.Text('Absolute Closed Loop Move in Encoder Degrees')],
                         [sg.Button('DEG_AZ_ENC'),sg.InputText('',size=(10,1),key='degAzEnc'),sg.Button('DEG_EL_ENC'),sg.InputText('', size=(10,1),key='degElEnc')],
                         [sg.Text('Homing')],
@@ -1033,11 +1038,11 @@ if __name__ == "__main__":
 
         if event == 'ABS_AZ_ENC':
             setAzMaxSpeed(500)
-            startEncoderMove(0, values['relAzEnc'])
+            startEncoderMove(0, values['absAzEnc'])
 
         if event == 'ABS_EL_ENC':
-            setAzMaxSpeed(500)
-            startEncoderMove(1, values['relElEnc'])
+            setElMaxSpeed(500)
+            startEncoderMove(1, values['absElEnc'])
 
         if event == 'DEG_AZ_ENC':
             setAzMaxSpeed(500)
@@ -1097,7 +1102,7 @@ if __name__ == "__main__":
         window.Element('azEncoder').Update(config.azMountPosn)
         window.Element('elEncoder').Update(config.elMountPosn)
         window.Element('azEncoderDeg').Update(getEncodersDegrees(0))
-        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))        
+        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))   # does not agree with elGeoPosn below, looks more accurate     
         window.Element('stepsAz').Update(config.azStepperPosn)
         window.Element('stepsEl').Update(config.elStepperPosn)
         window.Element('azCCWLimit').Update(config.azCCWLimit)
@@ -1109,5 +1114,5 @@ if __name__ == "__main__":
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
         window.Element('azGeoPosn').Update(config.azGeoPosn)
-        window.Element('elGeoPosn').Update(config.elGeoPosn)
+        window.Element('elGeoPosn').Update(config.elGeoPosn)            # see above elEncoderDeg
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
