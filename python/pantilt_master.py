@@ -142,6 +142,7 @@ class motionThread(threading.Thread):
             # Get stepper and limit switch positions if neither motor running
             # I have to do this when both motors are stopped or motors will "pulse" at the 
             # motion thread update rate
+            # This is here to keep the GUI updated
             if config.isAzRunning == False and config.isElRunning == False:
                 # Update azimuth
                 config.azStepperPosn = getStepperPosn(0)
@@ -442,10 +443,12 @@ def setElAccel(accel):
     sendStepperCommand(cmd)
     logging.debug("setAzAccel() %s", accel)
 
-# Watches the axis while it's homing
+# Manages homing flags during homing process,
+# and terminates when homw limit switch made
 # When home limit made, terminate homing mode 
 # If the encoder velocity approaches zero while
 # homing, issue an estop and error
+# 
 #
 # axis = 0    azimuth
 # axis = 1    elevation
@@ -1013,7 +1016,7 @@ if __name__ == "__main__":
     observer.elevation = 116   # i'm calling this heightASL from now on    
 
 
-    # Instantiate moving averages
+    # Instantiate moving averages for jam detection velocity calculations
     azMovingAverage = MovingAverage(10)
     elMovingAverage = MovingAverage(10)
 
