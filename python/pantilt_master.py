@@ -93,9 +93,9 @@ class motionThread(threading.Thread):
             #logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
             #logging.debug("motionThread() config.azGeoPosn %s", config.azGeoPosn)
             #logging.debug("motionThread() config.azMountPosn %s", config.azMountPosn)
-            logging.debug("motionThread() config.elGeoPosn %s", config.elGeoPosn)
-            logging.debug("motionThread() config.elMountPosn %s", config.elMountPosn)
-            logging.debug("motionThread() getEncodersDegrees(1) %s", getEncodersDegrees(1))
+            #logging.debug("motionThread() config.elGeoPosn %s", config.elGeoPosn)
+            #logging.debug("motionThread() config.elMountPosn %s", config.elMountPosn)
+            #logging.debug("motionThread() getEncodersDegrees(1) %s", getEncodersDegrees(1))
             
             # Monitor the run status of the steppers,
             # updating the process varaibles
@@ -796,23 +796,17 @@ def stopEl():
     sendStepperCommand("5:0")
     config.isElRunning = False
 
-# quickStop functions stop both axes at the same time
-# because the both stepper enable pins are tied to the
-# same output
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
     config.isAzRunning = False
-    config.isElRunning = False
+    #config.isElRunning = False
     config.azHoming = False
 
-# quickStop functions stop both axes at the same time
-# because the both stepper enable pins are tied to the
-# same output
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
-    config.isAzRunning = False
+    #config.isAzRunning = False
     config.isElRunning = False
     config.elHoming = False
 
@@ -863,14 +857,14 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
-    setAzMaxSpeed(100)
+    setAzMaxSpeed(150)
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
-    setElMaxSpeed(100)
+    setElMaxSpeed(150)
     # slew south a long friggin way
     relMoveEl(-40000)
 
@@ -959,7 +953,6 @@ def isRunning(axis):
     
 def azJam():
     logging.debug("azJam() timeout")
-    # Diabled for now, too many nuisance trips
     quickStopAz()
     
     # Reset flags so encoder move will work again
@@ -971,7 +964,6 @@ def azJam():
     
 def elJam():
     logging.debug("elJam() timeout")
-    # Diabled for now, too many nuisance trips
     quickStopEl()
     
     # Reset flags so encoder move will work again

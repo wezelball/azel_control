@@ -580,11 +580,10 @@ void setup() {
   elDownBounce.interval(5); // interval in ms
   
   // Setup stepper enable pins
-  // Each stepper should have its own enable pin so that
-  // I can fastStop each axis individually. Right now both
-  // stop at the same time
+  // Each stepper has its own enable pin so that
+  // I can fastStop each axis individually.
   stepperX.setEnablePin(7);   // using an enable pin
-  stepperY.setEnablePin(7);
+  stepperY.setEnablePin(13);
 }
 
 void loop() {
