@@ -13,7 +13,7 @@ import math
 import ephem
 import threading
 import ctypes
-from threading import Thread, Event, Timer
+
 # I love python logging
 import logging
 
@@ -174,7 +174,8 @@ class motionThread(threading.Thread):
             print('Exception raise failure')
 
 
-# This thread is for updating live parameters
+# This thread is for updating live parameters - it is faster than the motion thread
+# The logifile is updated here
 class periodicThread (threading.Thread):
     def __init__(self, threadID, name):
         threading.Thread.__init__(self)
@@ -242,6 +243,7 @@ class periodicThread (threading.Thread):
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
 
+    # This does not seem to work
     def stop(self):
         self.running = False
         log.close()
@@ -263,12 +265,12 @@ class periodicThread (threading.Thread):
 
 
 # This will be completely removed later on
-class Variables():
-    def __init__(self):
+#class Variables():
+#    def __init__(self):
 
         # Real-time values
-        self.azVelocity = 0
-        self.elVelocity = 0
+#       self.azVelocity = 0
+#       self.elVelocity = 0
         #self.azAvgVelocity = MovingAverage(5)
         #self.elAvgVelocity = MovingAverage(5)
         
@@ -360,7 +362,12 @@ def getEncoders():
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             encPosList = config.azMountPosn, config.elMountPosn
-            #encPosList = [0,0]
+            logging.debug("getEncoders() Value error")
+        except AttributeError:
+            # Bus error, assign last known values of encoder
+            # positions - this is ugly and might cause issues
+            encPosList = config.azMountPosn, config.elMountPosn
+            logging.debug("getEncoders() Attribute error")
             
     #logging.debug("getEncoders() returned %s", encPosList)
    
@@ -860,14 +867,14 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
-    setAzMaxSpeed(150)
+    setAzMaxSpeed(250)
     # slew west a long friggin way
     relMoveAz(-40000)
 
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
-    setElMaxSpeed(150)
+    setElMaxSpeed(250)
     # slew south a long friggin way
     relMoveEl(-40000)
 

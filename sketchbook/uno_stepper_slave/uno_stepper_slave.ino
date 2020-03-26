@@ -125,12 +125,14 @@ void relativeMove(int axis, long steps)  {
     else if (steps < 0)
       azMovingCCW = true;       // rotating anti-clockwise
 
+    Serial.println("relMove az");
+    
     // Don't run the motor against a hard stop
     if ((azMovingCW && !azCWLimit) || (azMovingCCW && !azCCWLimit)) {
       stepperX.enableOutputs();
       movingX = true;
       stepperX.move(steps);
-      //mySerial.println("az not in limit");
+      Serial.println("az not in limit");
     }
     
   }
@@ -141,12 +143,14 @@ void relativeMove(int axis, long steps)  {
     else if (steps < 0)
       elMovingDown = true;      // rotating down
 
+    Serial.println("relMove el");
+
     // Don't run the motor against a hard stop
     if ((elMovingDown && !elDownLimit) || (elMovingUp && !elUpLimit)) {
       stepperY.enableOutputs();
       movingY = true;
       stepperY.move(steps);
-      //mySerial.println("el not in limit");
+      Serial.println("el not in limit");
     }
 
   }
