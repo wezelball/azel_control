@@ -175,7 +175,7 @@ class motionThread(threading.Thread):
 
 
 # This thread is for updating live parameters - it is faster than the motion thread
-# The logifile is updated here
+# The logfile is updated here
 class periodicThread (threading.Thread):
     def __init__(self, threadID, name):
         threading.Thread.__init__(self)
@@ -316,13 +316,16 @@ def sendMessage(priority, message, i2c_address):
         except IOError:
             if i2c_address == config.ENCODERS_I2C_ADDR:
                 config.encoderIOError = True
+                config.encoderi2CErrorCount += 1
                 reply = ""
-                logging.warn("sendMessage() - encoderIOError")
+                logging.warn("sendMessage() - encoderI2CError %d", config.encoderi2CErrorCount)
+                #logging.debug("setAzSpeed() %s", speed)
                 
             elif i2c_address == config.STEPPERS_I2C_ADDR:
                 config.stepperIOError = True
+                config.stepperi2CErrorCount += 1
                 reply = ""
-                logging.warn("sendMessage() - config.stepperIOError") 
+                logging.warn("sendMessage() - stepperI2CError %d", config.stepperi2CErrorCount) 
                 
         else:   # Reset error flags if there was a good read
             if i2c_address == config.ENCODERS_I2C_ADDR:
@@ -362,12 +365,12 @@ def getEncoders():
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             encPosList = config.azMountPosn, config.elMountPosn
-            logging.debug("getEncoders() Value error")
+            #logging.debug("getEncoders() Value error")
         except AttributeError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             encPosList = config.azMountPosn, config.elMountPosn
-            logging.debug("getEncoders() Attribute error")
+            #logging.debug("getEncoders() Attribute error")
             
     #logging.debug("getEncoders() returned %s", encPosList)
    
@@ -378,7 +381,9 @@ def getEncoders():
 # axis 1 = elevation
 def getEncodersDegrees(axis):
     # Assign raw counts to tuple
-    encodersCounts = getEncoders()
+    #encodersCounts = getEncoders() # TODO - change this to look at config.azMountPosn, config.elMountPosn instead 
+    encodersCounts = (config.azMountPosn, config.elMountPosn) # TODO - change this to look at config.azMountPosn, config.elMountPosn instead 
+    
     if axis == 0:
         encoderDegrees = encoderCountsToDegrees(0, encodersCounts[0])
     elif axis == 1:

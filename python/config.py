@@ -77,5 +77,9 @@ elGeoOffset = 0.0
 azAvgVelocity = 0
 elAvgVelocity = 0
 
+# Track the number of i2c errors per session
+encoderi2CErrorCount = 0
+stepperi2CErrorCount = 0
+
 # Current LST
 #currentLST
