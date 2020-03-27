@@ -81,5 +81,7 @@ elAvgVelocity = 0
 encoderi2CErrorCount = 0
 stepperi2CErrorCount = 0
 
-# Current LST
-#currentLST
+# I need to know if az or el are finished starting to make this jam detection work
+# If ramping, ignore timeout in motion thread
+azStartupComplete = False
+elStartupComplete = False

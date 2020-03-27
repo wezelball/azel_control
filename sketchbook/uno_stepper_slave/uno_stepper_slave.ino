@@ -89,9 +89,6 @@ int parseCommand(String cmd) {
   i = cmd.indexOf(':');
   cmdString = cmd.substring(0, i) + '\0';
 
-  //Serial.print("command: ");
-  //Serial.println(cmdString.toInt());
-  
   return (int)cmdString.toInt();
 }
 
@@ -102,9 +99,6 @@ long parseParameter(String cmd) {
 
   i = cmd.indexOf(':');
   paramString = cmd.substring(i+1) + '\0';
-
-  //Serial.print("param: ");
-  //Serial.println(paramString.toInt());
 
   return paramString.toInt();
 }
@@ -255,6 +249,7 @@ void fastStop(int axis) {
     slewingX = false;
     azMovingCW = false;
     azMovingCCW = false;
+    Serial.println("fstopAz");
   } 
   else if (axis == 1)
   {
@@ -264,6 +259,7 @@ void fastStop(int axis) {
     slewingY = false;
     elMovingUp = false;
     elMovingDown = false;
+    Serial.println("fstopEl");
   }
   else
   {
@@ -389,14 +385,6 @@ void receiveEvent(int howMany) {
   command = parseCommand(rawCommand);
   param = parseParameter(rawCommand);
   rawCommand = "";
-
-  //Serial.print("command: ");
-  //Serial.println(command);
-  
-  //Serial.print("param: ");
-  //Serial.println(param);
-
-  //Serial.println();
 
   // Process the i2c command from master RPi
   processCommand();

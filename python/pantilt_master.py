@@ -74,6 +74,7 @@ class MovingAverage():
         return self.accumValue/len(self.window)
 
 # Checks for failure of motion in either axis
+# It's slower than the periodic thread
 class motionThread(threading.Thread):
     def __init__(self, threadID, name):
         threading.Thread.__init__(self)
@@ -83,6 +84,8 @@ class motionThread(threading.Thread):
         self.delay = 1.5
         self.azFailTiming = False
         self.elFailTiming = False
+        self.azStartCount = 0
+        self.elStartCount = 0
     
     def run(self):
         while self.running:
@@ -97,12 +100,38 @@ class motionThread(threading.Thread):
             #logging.debug("motionThread() config.elMountPosn %s", config.elMountPosn)
             #logging.debug("motionThread() getEncodersDegrees(1) %s", getEncodersDegrees(1))
             
+            # Update the state of the startup flags
+            # If an axis has been told to run, we will give it several
+            # iterations of the motion thread before setting the
+            # startup complete flag
+            # Then zero speed will be checked
+
+            # Azimuth
+            if config.isAzRunning == True:
+                self.azStartCount += 1
+                if self.azStartCount > 3:
+                    config.azStartupComplete = True
+                    logging.debug("motionThread() azStartup complete")
+                
+            else:
+                self.azStartCount = 0
+
+            # Elevation
+            if config.isElRunning == True:
+                self.elStartCount += 1
+                if self.elStartCount > 3:
+                    config.elStartupComplete = True
+                    logging.debug("motionThread() elStartup complete")
+                
+            else:
+                self.azStartCount = 0            
+
             # Monitor the run status of the steppers,
             # updating the process varaibles
             # This will used to invoke jam detection later
             if config.isAzRunning == True:    # azimuth
                 # Look to see if stopped
-                if abs(config.azAvgVelocity) < 1.0 and isRunning(0) == True:
+                if abs(config.azAvgVelocity) < 1.0 and config.azStartupComplete == True:
                     if self.azFailTiming == False:
                         self.azFailTiming = True
                         #logging.debug("motionThread.run() azFailTiming = True")
@@ -110,19 +139,22 @@ class motionThread(threading.Thread):
                     elif self.azFailTiming == True:
                         self.azFailTiming == False
                         azJam()
-                    
+                
+                # Reset the fail timeout if speed above minimum    
                 elif abs(config.azAvgVelocity) > 1.0:   # running above min velocity
                     if self.azFailTiming == True:
                         self.azFailTiming = False
                         logging.debug("motionThread.run() azFailTiming = False")
                         
+                # If below min speed and stepper controller reports not running,
+                # reset the motor run state
                 elif abs(config.azAvgVelocity) < 1.0 and isRunning(0) == False:
                     config.isAzRunning = False
                 
                 
             if config.isElRunning == True:    # elevation
-                # Look to see if stopped
-                if abs(config.elAvgVelocity) < 1.0 and isRunning(1) == True:
+                # Look to see if stopped, after 
+                if abs(config.elAvgVelocity) < 1.0 and config.elStartupComplete == True:
                     if self.elFailTiming == False:
                         self.elFailTiming = True
                         #logging.debug("motionThread.run() elFailTiming = True")
@@ -131,11 +163,14 @@ class motionThread(threading.Thread):
                         self.elFailTiming = False
                         elJam()
                         
+                # Reset the fail timeout if speed above minimum    
                 elif abs(config.elAvgVelocity) > 1.0:   # running above min velocity
                     if self.elFailTiming == True:
                         self.elFailTiming = False
                         logging.debug("motionThread.run() elFailTiming = False")
-                        
+
+                # If below min speed and stepper controller reports not running,
+                # reset the motor run state                        
                 elif abs(config.elAvgVelocity) < 1.0 and isRunning(1) == False:
                     config.isElRunning = False                
 
@@ -195,16 +230,15 @@ class periodicThread (threading.Thread):
             except ValueError:
                 config.encoderIOError = True
            
-            # Calculate velocities
+            # Calculate velocities - these aren't real velocities, just for reference
             azVel = 10 * (config.azMountPosn - self.lastAz)/self.delay
             elVel = 10 * (config.elMountPosn - self.lastEl)/self.delay
             
-            # Add the calculated velocities to the 
+            # Add the calculated velocities to the moving average
             azMovingAverage.addValue(azVel)
             elMovingAverage.addValue(elVel)
             
             # Compute average velocities
-            # the variable.xxx values can be converted to locals
             config.azAvgVelocity = azMovingAverage.computeAverage()
             config.elAvgVelocity = elMovingAverage.computeAverage()
             
@@ -456,7 +490,7 @@ def setElAccel(accel):
     logging.debug("setAzAccel() %s", accel)
 
 # Manages homing flags during homing process,
-# and terminates when homw limit switch made
+# and terminates when home limit switch made
 # When home limit made, terminate homing mode 
 # If the encoder velocity approaches zero while
 # homing, issue an estop and error
@@ -798,32 +832,36 @@ def runSpeed(axis):
     time.sleep(0.5)
     if axis == 0:
         config.isAzRunning = True
+        config.azStartupComplete = False
     elif axis == 1:
         config.isElRunning = True
+        config.elStartupComplete = False
 
 def stopAz():
     logging.debug("stopAz()")
     sendStepperCommand("4:0")
     config.isAzRunning = False
+    config.azStartupComplete = False
 
 def stopEl():
     logging.debug("stopEl()")
     sendStepperCommand("5:0")
     config.isElRunning = False
+    config.elStartupComplete = False
 
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
     config.isAzRunning = False
-    #config.isElRunning = False
     config.azHoming = False
+    config.azStartupComplete = False
 
 def quickStopEl():
     logging.debug("quickStopEl()")
     sendStepperCommand("7:0")
-    #config.isAzRunning = False
     config.isElRunning = False
     config.elHoming = False
+    config.elStartupComplete = False
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -868,7 +906,9 @@ def isElDownLimit():
     elif elDownLimit.find('1') != -1:
         return False
 
-# For now, let's home west
+# Moves west in Azimuth until CCW limit switch made
+# This results in setting the azHoming flag which is watched in
+# the periodic thread by calling watchHomingAxis()
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
@@ -876,6 +916,9 @@ def homeAzimuth():
     # slew west a long friggin way
     relMoveAz(-40000)
 
+# Moves south in elvation until down limit switch made
+# This results in setting the elHoming flag which is watched in
+# the periodic thread by calling watchHomingAxis()
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
@@ -945,6 +988,8 @@ def zeroSteppers(axis):
     sendStepperCommand(cmd)    
 
 # Is the stepper axis running?
+# Let's ask the Arduino stepper controller
+# Note - this doesn't always return correct value
 def isRunning(axis):
     cmd = "19" + ':' + str(axis)
     reply = sendStepperCommand(cmd)
@@ -1127,35 +1172,35 @@ if __name__ == "__main__":
             zeroSteppers(1)        
 
         if event == 'REL_AZ':
-            setAzMaxSpeed(500)
+            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
             relMoveAz(values['relAz'])
 
         if event == 'REL_EL':
-            setElMaxSpeed(500)
+            setElMaxSpeed(500)   # TODO - max speed should be read from config file
             relMoveEl(values['relEl'])
 
         if event == 'REL_AZ_DEG':
-            setAzMaxSpeed(500)
+            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
             moveAzStepperDegrees(values['relAzDeg'])
 
         if event == 'REL_EL_DEG':
-            setElMaxSpeed(500)
+            setElMaxSpeed(500)   # TODO - max speed should be read from config file
             moveElStepperDegrees(values['relElDeg'])
 
         if event == 'ABS_AZ_ENC':
-            setAzMaxSpeed(500)
+            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
             startEncoderMove(0, values['absAzEnc'])
 
         if event == 'ABS_EL_ENC':
-            setElMaxSpeed(500)
+            setElMaxSpeed(500)   # TODO - max speed should be read from config file
             startEncoderMove(1, values['absElEnc'])
 
         if event == 'DEG_AZ_ENC':
-            setAzMaxSpeed(500)
+            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
             startEncoderMove(0, encoderDegreesToCounts(0,values['degAzEnc']))
 
         if event == 'DEG_EL_ENC':
-            setElMaxSpeed(500)
+            setElMaxSpeed(500)   # TODO - max speed should be read from config file
             startEncoderMove(1, encoderDegreesToCounts(0,values['degElEnc']))        
 
         if event == 'HOME_AZ':
