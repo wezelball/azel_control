@@ -4,6 +4,9 @@
 Created on Mon Sep 16 09:42:27 2019
 
 @author: dcohen
+
+I checked this against Mel Bartels Scope To Sky Calculator
+and it is in close agreement
 """
 import sys
 import ephem
@@ -47,9 +50,9 @@ print("LST: %s" % gumSpring.sidereal_time())
 print("")
 
 # input parameters
-latitude = 37.79        # degrees
-azimuth = 186.0         # degrees
-elevation = 28.0        # degrees
+latitude = 40.0        # degrees
+azimuth = 186.141      # degrees
+elevation = 49.7795    # degrees
 
 azString = input("Azimuth: ")
 elString = input("Elevation: ")
@@ -62,6 +65,11 @@ azR = math.radians(azimuth)
 elR = math.radians(elevation)
 latR = math.radians(latitude)
 
+#print("")
+#print("azR: %f" % azR)
+#print("elR: %f" % elR)
+#print("latR: %f" % latR)
+
 # trigonometric functions
 SA = math.sin(azR)
 CA = math.cos(azR)
@@ -70,6 +78,14 @@ CE = math.cos(elR)
 SP = math.sin(latR)
 CP = math.cos(latR)
 
+#print("")
+#print("SA: %f" % SA)
+#print("CA: %f" % CA)
+#print("SE: %f" % SE)
+#print("CE: %f" % CE)
+#print("SP: %f" % SP)
+#print("CP: %f" % CP)
+
 # First, solve for HA and DEC (h2e.f)
 
 # HA, Dec as X, Y, Z
@@ -77,23 +93,35 @@ X = -CA * CE * SP + SE * CP
 Y = -SA * CE
 Z = CA * CE * CP + SE * SP
 
+#print("")
+#print("X: %f" % X)
+#print("Y: %f" % Y)
+#print("Z: %f" % Z)
+
 # To HA, Dec
 R = math.sqrt(X*X+Y*Y)
+
+
 
 if R == 0:
     HA = 0.0
 else:
     HA = math.atan2(Y,X)
     
+#print("")
+#print("HA: %f" % HA)
+    
 DEC = math.atan2(Z,R)
+#print("DEC: %f" % DEC)
+
 
 ha = math.degrees(HA)/15    # convert angle to time
 haF = ephem.hours(HA)       # convert HA to time
 dec = math.degrees(DEC)
 
-print("Declination: %f" % dec)
-print("Hour angle: %s" % haF)
-print("")
+#print("Declination: %f" % dec)
+#print("Hour angle: %s" % haF)
+#print("")
 
 # Next, solve for velocities
 
@@ -109,6 +137,19 @@ Y = -SH * CD
 Z = CHCD * CP + SD * SP
 RSQ = X*X+Y*Y
 R = math.sqrt(RSQ)
+
+#print("")
+#print("SH: %f" % SH)
+#print("CH: %f" % CH)
+#print("SD: %f" % SD)
+#print("CD: %f" % CD)
+#print("CHCD: %f" % CHCD)
+#print("SDCP: %f" % SDCP)
+#print("X: %f" % X)
+#print("Y: %f" % Y)
+#print("Z: %f" % Z)
+#print("RSQ: %f" % RSQ)
+#print("R: %f" % R)
 
 # Azimuth and elvation (just for checking)
 if RSQ == 0.0:  
@@ -144,6 +185,9 @@ TINY =  1e-30   # a very small number
 if RSQ < TINY:
     RSQ = TINY
     R = math.sqrt(RSQ)
+
+#print("")
+#print("R: %f" % R)
 
 QD = -X*CP/RSQ
 AD = SP + Z * QD

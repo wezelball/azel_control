@@ -246,8 +246,9 @@ class periodicThread (threading.Thread):
             self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
 
             # Update geographical positions
-            updateGeoPosition(0)
-            updateGeoPosition(1)
+            # Do I need to maintain these variables?
+            #config.azGeoPosn = getGeoPosition(0)
+            #config.elGeoPosn = getGeoPosition(1)
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
@@ -413,15 +414,15 @@ def getEncoders():
 # Gets the position of the encoder (in degrees) defined by axis
 # axis 0 = azimuth
 # axis 1 = elevation
+
+# TODO - I could probably eliminate this by calling 
+# encoderCountsToDegrees instead
+# This seems redundant
 def getEncodersDegrees(axis):
-    # Assign raw counts to tuple
-    #encodersCounts = getEncoders() # TODO - change this to look at config.azMountPosn, config.elMountPosn instead 
-    encodersCounts = (config.azMountPosn, config.elMountPosn) # TODO - change this to look at config.azMountPosn, config.elMountPosn instead 
-    
     if axis == 0:
-        encoderDegrees = encoderCountsToDegrees(0, encodersCounts[0])
+        encoderDegrees = encoderCountsToDegrees(0, config.azMountPosn)
     elif axis == 1:
-        encoderDegrees = encoderCountsToDegrees(0, encodersCounts[1])
+        encoderDegrees = encoderCountsToDegrees(0, config.elMountPosn)
 
     return encoderDegrees    
 
@@ -590,15 +591,27 @@ def setGeoOffset(axis, position):
         config.elGeoOffset = float(position) - encoderCountsToDegrees(1, config.elMountPosn)
         logging.debug("setGeoOffset(1) set offset to %s", config.elGeoOffset)
 
-# Get the geographical posiion between of the axis
-# returns position in degrees
+# Updates the geographical posiions of the axes
+# does not return a value
 # axis 0 = azimuth
 # axis 1 = elevation
+#
+# TODO - get rid of this and use getGeoPosition()
 def updateGeoPosition(axis):
     if axis == 0:
         config.azGeoPosn = encoderCountsToDegrees(0, config.azMountPosn) + config.azGeoOffset
     elif axis == 1:
         config.elGeoPosn = encoderCountsToDegrees(1, config.elMountPosn) + config.elGeoOffset        
+
+# Gets the geographical posiions of an axis
+# Returns position in degrees
+# axis 0 = azimuth
+# axis 1 = elevation
+def getGeoPosition(axis):
+    if axis == 0:
+        return encoderCountsToDegrees(0, config.azMountPosn) + config.azGeoOffset
+    elif axis == 1:
+        return encoderCountsToDegrees(1, config.elMountPosn) + config.elGeoOffset
 
 # Returns tracking velocity for an axis
 # axis 0 = azimuth
@@ -665,7 +678,7 @@ def getTrackVelocity(axis, az, el, latitude):
     else:
         Q = math.pi - HA
     
-    PA = Q  # parallactic angle
+    #PA = Q  # parallactic angle
     
     # Velocities (and accelerations, if I want them)
     TINY =  1e-30   # a very small number
@@ -989,7 +1002,7 @@ def zeroSteppers(axis):
 
 # Is the stepper axis running?
 # Let's ask the Arduino stepper controller
-# Note - this doesn't always return correct value
+# Note - this doesn't always return correct value for elevation axis
 def isRunning(axis):
     cmd = "19" + ':' + str(axis)
     reply = sendStepperCommand(cmd)
@@ -1264,8 +1277,10 @@ if __name__ == "__main__":
         window.Element('elRunning').Update(config.isElRunning)
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
-        window.Element('azGeoPosn').Update(config.azGeoPosn)
-        window.Element('elGeoPosn').Update(config.elGeoPosn)            # see above elEncoderDeg
+        #window.Element('azGeoPosn').Update(config.azGeoPosn)
+        window.Element('azGeoPosn').Update(getGeoPosition(0))
+        #window.Element('elGeoPosn').Update(config.elGeoPosn)
+        window.Element('elGeoPosn').Update(getGeoPosition(1))# see above elEncoderDeg
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
         # Hard-coding the latitude for now
         window.Element('azTrackVel').Update(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
