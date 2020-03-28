@@ -111,7 +111,7 @@ class motionThread(threading.Thread):
                 self.azStartCount += 1
                 if self.azStartCount > 3:
                     config.azStartupComplete = True
-                    logging.debug("motionThread() azStartup complete")
+                    #logging.debug("motionThread() azStartup complete")
                 
             else:
                 self.azStartCount = 0
@@ -121,15 +121,16 @@ class motionThread(threading.Thread):
                 self.elStartCount += 1
                 if self.elStartCount > 3:
                     config.elStartupComplete = True
-                    logging.debug("motionThread() elStartup complete")
+                    #logging.debug("motionThread() elStartup complete")
                 
             else:
                 self.azStartCount = 0            
 
             # Monitor the run status of the steppers,
             # updating the process varaibles
-            # This will used to invoke jam detection later
-            if config.isAzRunning == True:    # azimuth
+            # This is used to invoke jam detection
+            # Does not work for tracking, speed too slow  
+            if config.isAzRunning == True and config.isTracking == False:    # azimuth
                 # Look to see if stopped
                 if abs(config.azAvgVelocity) < 1.0 and config.azStartupComplete == True:
                     if self.azFailTiming == False:
@@ -152,7 +153,7 @@ class motionThread(threading.Thread):
                     config.isAzRunning = False
                 
                 
-            if config.isElRunning == True:    # elevation
+            if config.isElRunning == True and config.isTracking == False:    # elevation
                 # Look to see if stopped, after 
                 if abs(config.elAvgVelocity) < 1.0 and config.elStartupComplete == True:
                     if self.elFailTiming == False:
@@ -858,12 +859,14 @@ def stopAz():
     sendStepperCommand("4:0")
     config.isAzRunning = False
     config.azStartupComplete = False
+    config.isTracking = False
 
 def stopEl():
     logging.debug("stopEl()")
     sendStepperCommand("5:0")
     config.isElRunning = False
     config.elStartupComplete = False
+    config.isTracking = False
 
 def quickStopAz():
     logging.debug("quickStopAz()")
@@ -871,6 +874,7 @@ def quickStopAz():
     config.isAzRunning = False
     config.azHoming = False
     config.azStartupComplete = False
+    config.isTracking = False
 
 def quickStopEl():
     logging.debug("quickStopEl()")
@@ -878,6 +882,7 @@ def quickStopEl():
     config.isElRunning = False
     config.elHoming = False
     config.elStartupComplete = False
+    config.isTracking = False
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -1035,8 +1040,7 @@ def azJam():
     config.azInFarApproach = False
     config.azInNearApproach = False
     config.azInVeryNearApproach = False
-    config.azMovingClosedLoop = False    
-    
+    config.azMovingClosedLoop = False       
     
 def elJam():
     logging.debug("elJam() timeout")
@@ -1064,6 +1068,23 @@ def shutdown():
     window.Close()
     #del window
     sys.exit()
+
+# Star sidereal rate tracking
+def startTracking():
+    config.isTracking = True
+    azSpeed = getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)
+    elSpeed = getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)
+
+    logging.debug("startTracking() azSpeed: %f", azSpeed)
+    logging.debug("startTracking() elSpeed: %f", elSpeed)
+
+    # Set the stepper speeds
+    setAzSpeed(azSpeed)
+    setElSpeed(elSpeed)
+    
+    # Start the motors
+    runSpeed(0)
+    runSpeed(1)
     
 
 if __name__ == "__main__":
@@ -1128,13 +1149,14 @@ if __name__ == "__main__":
     state_layout =      [
                         [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit'), sg.Checkbox('AZ CW Limit', key = 'azCWLimit')],
                         [sg.Checkbox('EL UP Limit', key = 'elUPLimit'), sg.Checkbox('EL Down Limit', key = 'elDownLimit')],
-                        [sg.Checkbox('AZ Running', key = 'azRunning'), sg.Checkbox('EL Running', key = 'elRunning')],
+                        [sg.Checkbox('AZ Running', key = 'azRunning'), sg.Checkbox('EL Running', key = 'elRunning'), sg.Checkbox('Tracking', key = 'tracking')],
                         [sg.Button('AZ_SPD'),sg.InputText('',size=(5,1),key='azSpeed'),sg.Button('AZ_MAX'),sg.InputText('',size=(5,1),key='azMax'),sg.Button('AZ_ACCEL'),sg.InputText('',size=(5,1),key='azAccel')],
                         [sg.Button('EL_SPD'),sg.InputText('',size=(5,1),key='elSpeed'),sg.Button('EL_MAX'),sg.InputText('',size=(5,1),key='elMax'),sg.Button('EL_ACCEL'),sg.InputText('',size=(5,1),key='elAccel')],
                         ]
 
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
+                        [sg.Button('TRACK')],
                         [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')],
                         [sg.Text('TrackVel:', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azTrackVel'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elTrackVel')],
                         ]
@@ -1260,7 +1282,10 @@ if __name__ == "__main__":
             setGeoOffset(0, values['azGeoInput'])
 
         if event == 'SET_EL_GEO':
-            setGeoOffset(1, values['elGeoInput'])        
+            setGeoOffset(1, values['elGeoInput'])
+            
+        if event == 'TRACK':
+            startTracking()
            
             
         # UPDATES
@@ -1278,6 +1303,7 @@ if __name__ == "__main__":
         window.Element('elDownLimit').Update(config.elDownLimit)
         window.Element('azRunning').Update(config.isAzRunning)
         window.Element('elRunning').Update(config.isElRunning)
+        window.Element('tracking').Update(config.isTracking)
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
         #window.Element('azGeoPosn').Update(config.azGeoPosn)

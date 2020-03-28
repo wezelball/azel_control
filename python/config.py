@@ -51,6 +51,11 @@ azHoming = False
 elHomed = False
 elHoming = False
 
+# Tracking stuff
+# Make sure to update tracking speed periodically
+isTracking = False
+trackingAge = 0     # age of current tracking speed, in seconds
+
 # State of limit switches
 azCWLimit = False
 azCCWLimit = False

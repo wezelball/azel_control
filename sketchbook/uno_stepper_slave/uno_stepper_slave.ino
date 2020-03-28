@@ -44,6 +44,7 @@ String answer = "";  // must be 8 bytes, or 7 characters
 String rawCommand;
 int command;    // command from RPi
 long param;     // command parameter from RPi
+float f_param;  // run speeds come as floating point
 
 // Hard limits
 int azLimitCW = 2;
@@ -69,8 +70,8 @@ bool stoppingY = false;     // elevation axis is deceling to stop
 
 bool slewingX = false;      // Azimuth is slewing constant speed
 bool slewingY = false;      // Eelvation is slewing constant speed
-int azSlewSpeed = 0;        // Need to keep track of speed for limit checking
-int elSlewSpeed = 0;        // Need to keep track of speed for limit checking
+float azSlewSpeed = 0.0;    // Need to keep track of speed for limit checking
+float elSlewSpeed = 0.0;    // Need to keep track of speed for limit checking
 bool stoppingXSlew = false; // Explain this
 bool stoppingYSlew = false;
 
@@ -102,6 +103,18 @@ long parseParameter(String cmd) {
 
   return paramString.toInt();
 }
+
+// Accepts full command string from RPi and returns parameter as float
+float parseParameterFloat(String cmd) {
+  int i;
+  String paramString;  
+
+  i = cmd.indexOf(':');
+  paramString = cmd.substring(i+1) + '\0';
+
+  return paramString.toFloat();
+}
+
 
 
 // ***************************** END UTILITY FUNCTIONS *******************************
@@ -161,14 +174,18 @@ void setMaxSpeed(int axis, int speed)  {
 }
 
 // Sets desired speed for runSpeed()
-void setSpeed(int axis, int speed)  {
+void setSpeed(int axis, float speed)  {
   if (axis == 0) {       // azimuth
-    stepperX.setSpeed((float)speed);
+    stepperX.setSpeed(speed);
     azSlewSpeed = speed;
+    Serial.print("azSpeed: ");
+    Serial.println(azSlewSpeed);
   }
   else if (axis == 1) {   // elevation 
-    stepperY.setSpeed((float)speed);
+    stepperY.setSpeed(speed);
     elSlewSpeed = speed;
+    Serial.print("elSpeed: ");
+    Serial.println(elSlewSpeed);
   }
 }
 void runSpeed(int axis)  {     // must add hard limit checks 
@@ -176,10 +193,10 @@ void runSpeed(int axis)  {     // must add hard limit checks
     // Starts motion in loop()
     slewingX = true;
     // Setting up flags for limit checking
-    if (azSlewSpeed > 0)  {
+    if (azSlewSpeed > 0.0)  {
       azMovingCW = true;
       azMovingCCW = false;
-    } else if (azSlewSpeed < 0) {
+    } else if (azSlewSpeed < 0.0) {
       azMovingCW = false;
       azMovingCCW = true;
     }
@@ -382,8 +399,10 @@ void receiveEvent(int howMany) {
     //Serial.print(data);  
   }
 
+  // Command and parameter received off the wire
   command = parseCommand(rawCommand);
   param = parseParameter(rawCommand);
+  f_param = parseParameterFloat(rawCommand);
   rawCommand = "";
 
   // Process the i2c command from master RPi
@@ -459,15 +478,15 @@ void processCommand(){
       answer = "_______" + String(getLimit(1,1));
       break;
     case 12:    // set azimuth speed
-      setSpeed(0, param);
+      setSpeed(0, f_param);
       command = 0;
-      param = 0;
+      f_param = 0.0;
       answer = "azSpeed\n";
       break;
     case 13:    // set elevation speed
-      setSpeed(1, param);
+      setSpeed(1, f_param);
       command = 0;
-      param = 0;
+      f_param = 0.0;
       answer = "elSpeed\n";
       break;
     case 14:    // set azimuth accel
