@@ -247,8 +247,8 @@ class periodicThread (threading.Thread):
 
             # Update geographical positions
             # Do I need to maintain these variables?
-            #config.azGeoPosn = getGeoPosition(0)
-            #config.elGeoPosn = getGeoPosition(1)
+            config.azGeoPosn = getGeoPosition(0)
+            config.elGeoPosn = getGeoPosition(1)
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
@@ -621,6 +621,8 @@ def getGeoPosition(axis):
 # angle is either azimuth or elevation angle in degrees
 # latitude is observer's latitude
 # Returns velocity is steps per second
+# I have tested this algorithm several times
+# against Mel Bartels Scope To Sky Calculator
 def getTrackVelocity(axis, az, el, latitude):
     # convert angles to radians
     latR = math.radians(latitude)
@@ -690,7 +692,7 @@ def getTrackVelocity(axis, az, el, latitude):
     QD = -X*CP/RSQ
     AD = SP + Z * QD
     ED = CP*Y/R
-    EDR = ED/R
+    #EDR = ED/R
     
     AZD = AD    # azimuth velocity
     ELD = ED    # elevation velocity
@@ -699,16 +701,17 @@ def getTrackVelocity(axis, az, el, latitude):
     azV = AZD * ((2*math.pi)/86400) * (360/(2*math.pi))
     elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))
     
+    # convert to seconds of arc per second, so 
+    
     # Convert to pulses per second, then return
     if axis == 0:
-        return int(azV * 401.250)
+        return (azV * 401.250)
+        # Debug - show arcsec/second
+        #return azV * 3600
     elif axis == 1:
-        return int(elV * 769.166)
-    else:
-        return 0.0
-    
-    
-    
+        return (elV * 769.166)
+        # Debug - show arcsec/second
+        #return elV * 3600
 
 # ****************** Command functions ***********************
 

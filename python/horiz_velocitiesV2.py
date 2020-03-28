@@ -5,8 +5,10 @@ Created on Mon Sep 16 09:42:27 2019
 
 @author: dcohen
 
-I checked this against Mel Bartels Scope To Sky Calculator
-and it is in close agreement
+So far this checks out when compared with Mel Bartels
+Scope to Sky Calculator
+https://www.bbastrodesigns.com/scopeToSky.html
+
 """
 import sys
 import ephem
@@ -50,25 +52,27 @@ print("LST: %s" % gumSpring.sidereal_time())
 print("")
 
 # input parameters
-latitude = 40.0        # degrees
-azimuth = 186.141      # degrees
-elevation = 49.7795    # degrees
+latitude = 37.79        # degrees
+azimuth = 40.0      # degrees
+elevation = 30.0    # degrees
 
-azString = input("Azimuth: ")
-elString = input("Elevation: ")
+# Uncomment for keyboard input
+#azString = input("Azimuth: ")
+#elString = input("Elevation: ")
+#azimuth = dms2dec(azString)
+#elevation = dms2dec(elString)
+# Uncomment for keyboard input
 
-azimuth = dms2dec(azString)
-elevation = dms2dec(elString)
 
 # convert to radians
 azR = math.radians(azimuth)
 elR = math.radians(elevation)
 latR = math.radians(latitude)
 
-#print("")
-#print("azR: %f" % azR)
-#print("elR: %f" % elR)
-#print("latR: %f" % latR)
+print("")
+print("azR: %f" % azR)
+print("elR: %f" % elR)
+print("latR: %f" % latR)
 
 # trigonometric functions
 SA = math.sin(azR)
@@ -201,8 +205,8 @@ ELD = ED    # elevation velocity
 azV = AZD * ((2*math.pi)/86400) * (360/(2*math.pi))
 elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))
 
-print("Azimuth velocity: %f degrees/sec" %  azV)
-print("Elevation velocity: %f degrees/sec" % elV)
+#print("Azimuth velocity: %f degrees/sec" %  azV)
+#print("Elevation velocity: %f degrees/sec" % elV)
 print("Azimuth velocity: %f arcsec/sec" %  (3600.0 * azV))
 print("Elevation velocity: %f arcsec/sec" % (3600.0 * elV))
 
