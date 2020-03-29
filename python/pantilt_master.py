@@ -187,8 +187,22 @@ class motionThread(threading.Thread):
                 # Update elevation
                 config.elStepperPosn = getStepperPosn(1)
                 config.elUpLimit = isElUpLimit()
-                config.elDownLimit = isElDownLimit()                
+                config.elDownLimit = isElDownLimit()
                 
+            
+            # Let's also update tracking velocities here, the periodic thread is so busy
+            if config.isTracking == True:
+                # Add the thread time here
+                config.trackingAge += self.delay
+                
+                # Now check to see if an update is required, the tracking velocity
+                # is too old - 90 sec for now
+                if config.trackingAge >= 90:
+                    config.trackingAge = 0
+                    setAzSpeed(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
+                    setElSpeed(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79))
+                    logging.debug("motionThread.run() Tracking velocities updated")
+                    
         
     def stop(self):
         self.running = False
@@ -312,17 +326,17 @@ class periodicThread (threading.Thread):
         
 # ************************* END CLASSES ******************************
 
-# Sets inital values
+# Sets inital motion values
 def setInitialValues():
-    setAzSpeed(250)
-    setAzMaxSpeed(500)
-    time.sleep(01.25)
-    setAzAccel(500)
+    setAzSpeed(config.azSpeed)
+    setAzMaxSpeed(config.azMaxSpeed)
     time.sleep(0.25)
-    setElSpeed(250)
-    setElMaxSpeed(500)
+    setAzAccel(config.azAccel)
     time.sleep(0.25)
-    setElAccel(500)
+    setElSpeed(config.elSpeed)
+    setElMaxSpeed(config.elMaxSpeed)
+    time.sleep(0.25)
+    setElAccel(config.elAccel)
 
 # Sends the message over the i2c bus, using a 
 # prioritized messageQ
@@ -464,31 +478,37 @@ def sendStepperCommand(cmd):
 def setAzSpeed(speed):
     cmd = "12" + ':' + str(speed)
     sendStepperCommand(cmd)
+    config.azSpeed = speed
     logging.debug("setAzSpeed() %s", speed)
 
 def setAzMaxSpeed(speed):
     cmd = "16" + ':' + str(speed)
     sendStepperCommand(cmd)
+    config.azMaxSpeed = speed
     logging.debug("setAzMaxSpeed() %s", speed)
 
 def setElSpeed(speed):
     cmd = "13" + ':' + str(speed)
     sendStepperCommand(cmd)
+    config.elSpeed = speed
     logging.debug("setElSpeed() %s", speed)
 
 def setElMaxSpeed(speed):
     cmd = "17" + ':' + str(speed)
     sendStepperCommand(cmd)
+    config.elMaxSpeed = speed
     logging.debug("setElMaxSpeed() %s", speed)
 
 def setAzAccel(accel):
     cmd = "14" + ':' + str(accel)
     sendStepperCommand(cmd)
+    config.azAccel = accel
     logging.debug("setAzAccel() %s", accel)
 
 def setElAccel(accel):
     cmd = "15" + ':' + str(accel)
     sendStepperCommand(cmd)
+    config.elAccel = accel
     logging.debug("setAzAccel() %s", accel)
 
 # Manages homing flags during homing process,
@@ -933,7 +953,7 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
-    setAzMaxSpeed(250)
+    setAzMaxSpeed(config.azHomingSpeed)
     # slew west a long friggin way
     relMoveAz(-40000)
 
@@ -943,7 +963,7 @@ def homeAzimuth():
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
-    setElMaxSpeed(250)
+    setElMaxSpeed(config.elHomingSpeed)
     # slew south a long friggin way
     relMoveEl(-40000)
 
@@ -1115,7 +1135,7 @@ if __name__ == "__main__":
     elMovingAverage = MovingAverage(10)
 
     # PySimpleGUI
-    motion_layout =  [
+    motion_layout =     [
                         [sg.Text('Slew')],
                         [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
                         [sg.Text('Relative Open Loop Move in Steps')],
@@ -1150,8 +1170,12 @@ if __name__ == "__main__":
                         [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit'), sg.Checkbox('AZ CW Limit', key = 'azCWLimit')],
                         [sg.Checkbox('EL UP Limit', key = 'elUPLimit'), sg.Checkbox('EL Down Limit', key = 'elDownLimit')],
                         [sg.Checkbox('AZ Running', key = 'azRunning'), sg.Checkbox('EL Running', key = 'elRunning'), sg.Checkbox('Tracking', key = 'tracking')],
-                        [sg.Button('AZ_SPD'),sg.InputText('',size=(5,1),key='azSpeed'),sg.Button('AZ_MAX'),sg.InputText('',size=(5,1),key='azMax'),sg.Button('AZ_ACCEL'),sg.InputText('',size=(5,1),key='azAccel')],
-                        [sg.Button('EL_SPD'),sg.InputText('',size=(5,1),key='elSpeed'),sg.Button('EL_MAX'),sg.InputText('',size=(5,1),key='elMax'),sg.Button('EL_ACCEL'),sg.InputText('',size=(5,1),key='elAccel')],
+                        [sg.Button('AZ_SPD', size=(10,1)),sg.InputText('',size=(5,1),key='azSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzSpeed')],
+                        [sg.Button('AZ_MAX', size=(10,1)),sg.InputText('',size=(5,1),key='azMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzMax')],
+                        [sg.Button('AZ_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='azAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzAccel')],
+                        [sg.Button('EL_SPD', size=(10,1)),sg.InputText('',size=(5,1),key='elSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElSpeed')],
+                        [sg.Button('EL_MAX', size=(10,1)),sg.InputText('',size=(5,1),key='elMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElMax')],
+                        [sg.Button('EL_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='elAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElAccel')],                        
                         ]
 
     celestial_layout =  [
@@ -1169,8 +1193,10 @@ if __name__ == "__main__":
     
     # Open the GUI
     sg.change_look_and_feel('GreenMono')
-    window = sg.Window('Radio Telescope Control', layout)    
-
+    window = sg.Window('Radio Telescope Control', layout)
+    # Try to start out maximized, but it didn't work
+    #window = sg.Window('Radio Telescope Control', layout).Finalize()    
+    #window.Maximize()
 
     # Start the comms thread after initialization
     commThread = periodicThread(1, "Thread-1")
@@ -1209,36 +1235,36 @@ if __name__ == "__main__":
         if event == 'ZERO_EL_STEP':
             zeroSteppers(1)        
 
-        if event == 'REL_AZ':
-            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
+        if event == 'REL_AZ':                   # TODO - breaks if a floating-point entered
+            setAzMaxSpeed(config.azMaxSpeed)
             relMoveAz(values['relAz'])
 
-        if event == 'REL_EL':
-            setElMaxSpeed(500)   # TODO - max speed should be read from config file
+        if event == 'REL_EL':                   # TODO - breaks if a floating-point entered
+            setElMaxSpeed(config.elMaxSpeed)
             relMoveEl(values['relEl'])
 
         if event == 'REL_AZ_DEG':
-            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
+            setAzMaxSpeed(config.azMaxSpeed)
             moveAzStepperDegrees(values['relAzDeg'])
 
         if event == 'REL_EL_DEG':
-            setElMaxSpeed(500)   # TODO - max speed should be read from config file
+            setElMaxSpeed(config.elMaxSpeed)
             moveElStepperDegrees(values['relElDeg'])
 
-        if event == 'ABS_AZ_ENC':
-            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
+        if event == 'ABS_AZ_ENC':               # TODO - breaks if a floating-point entered
+            setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, values['absAzEnc'])
 
-        if event == 'ABS_EL_ENC':
-            setElMaxSpeed(500)   # TODO - max speed should be read from config file
+        if event == 'ABS_EL_ENC':               # TODO - breaks if a floating-point entered
+            setElMaxSpeed(config.elMaxSpeed)   
             startEncoderMove(1, values['absElEnc'])
 
         if event == 'DEG_AZ_ENC':
-            setAzMaxSpeed(500)   # TODO - max speed should be read from config file
+            setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, encoderDegreesToCounts(0,values['degAzEnc']))
 
         if event == 'DEG_EL_ENC':
-            setElMaxSpeed(500)   # TODO - max speed should be read from config file
+            setElMaxSpeed(config.elMaxSpeed)
             startEncoderMove(1, encoderDegreesToCounts(0,values['degElEnc']))        
 
         if event == 'HOME_AZ':
@@ -1260,6 +1286,8 @@ if __name__ == "__main__":
             quickStopEl()
 
         # Speeds and accelerations
+        # TODO - handle case where button is pressed but there 
+        # is invalid or no speed in text entry
         if event == 'AZ_SPD':
             setAzSpeed(values['azSpeed'])
 
@@ -1270,13 +1298,13 @@ if __name__ == "__main__":
             setAzAccel(values['azAccel'])            
 
         if event == 'EL_SPD':
-            setAzSpeed(values['elSpeed'])
+            setElSpeed(values['elSpeed'])
 
         if event == 'EL_MAX':
-            setAzMaxSpeed(values['elMax'])
+            setElMaxSpeed(values['elMax'])
 
         if event == 'EL_ACCEL':
-            setAzAccel(values['elAccel'])        
+            setElAccel(values['elAccel'])        
 
         if event == 'SET_AZ_GEO':
             setGeoOffset(0, values['azGeoInput'])
@@ -1306,11 +1334,16 @@ if __name__ == "__main__":
         window.Element('tracking').Update(config.isTracking)
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
-        #window.Element('azGeoPosn').Update(config.azGeoPosn)
         window.Element('azGeoPosn').Update(getGeoPosition(0))
-        #window.Element('elGeoPosn').Update(config.elGeoPosn)
         window.Element('elGeoPosn').Update(getGeoPosition(1))# see above elEncoderDeg
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
         # Hard-coding the latitude for now
         window.Element('azTrackVel').Update(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
         window.Element('elTrackVel').Update(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79))
+        # Default motion parms
+        window.Element('configAzSpeed').Update(config.azSpeed)
+        window.Element('configAzMax').Update(config.azMaxSpeed)
+        window.Element('configAzAccel').Update(config.azAccel)
+        window.Element('configElSpeed').Update(config.elSpeed)
+        window.Element('configElMax').Update(config.elMaxSpeed)
+        window.Element('configElAccel').Update(config.elAccel)        

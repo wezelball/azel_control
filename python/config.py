@@ -78,7 +78,7 @@ elGeoPosn = 0.0
 azGeoOffset = 0.0
 elGeoOffset = 0.0
 
-# Average velocities
+# Average velocities for jam detection
 azAvgVelocity = 0
 elAvgVelocity = 0
 
@@ -90,3 +90,14 @@ stepperi2CErrorCount = 0
 # If ramping, ignore timeout in motion thread
 azStartupComplete = False
 elStartupComplete = False
+
+# Initial motion parameters
+azSpeed = 250
+azMaxSpeed = 500
+azAccel = 500
+azHomingSpeed = 100
+
+elSpeed = 250
+elMaxSpeed = 500
+elAccel = 500
+elHomingSpeed = 100
