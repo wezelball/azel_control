@@ -92,12 +92,17 @@ azStartupComplete = False
 elStartupComplete = False
 
 # Initial motion parameters
-azSpeed = 250
-azMaxSpeed = 500
+azSpeed = 500
+azMaxSpeed = 1000
 azAccel = 500
 azHomingSpeed = 100
 
-elSpeed = 250
-elMaxSpeed = 500
+elSpeed = 500
+elMaxSpeed = 1000
 elAccel = 500
 elHomingSpeed = 100
+
+# The current speed of the axis
+# Each run/stop command must manage this
+azCurrentSpeed = 0.0  
+elCurrentSpeed = 0.0

@@ -86,6 +86,10 @@ class motionThread(threading.Thread):
         self.elFailTiming = False
         self.azStartCount = 0
         self.elStartCount = 0
+        self.azPulseAge = 0.0
+        self.elPulseAge = 0.0
+        self.azLastPosn = config.azMountPosn
+        self.elLastPosn = config.elMountPosn
     
     def run(self):
         while self.running:
@@ -125,6 +129,40 @@ class motionThread(threading.Thread):
                 
             else:
                 self.azStartCount = 0            
+
+            # Jam detection has been the causes of many issues, due to false triggering
+            # I'm rethinkng the way to accomplish this.
+            #
+            # When an axis is running, encoder counts will change periodically. The rate
+            # of change is based on the velocity of the axis, which may also have a rate
+            # of change, due to accel/decel. It's easy enough to detect a change, but the
+            # main problem will be in tracking, when there is a long time between pulses.
+            # In any case, there is an expected time between counts.  The startup complete
+            # can handle the problem of accel.
+            #
+            # So there needs to be a pulse age variable, which is based on the speed that
+            # we are running. After startupComplete (should really be rampComplete), we
+            # increment the pulse age age variable by the value of the motionThread interval.
+            # If that time exceeds the expected time by some value, we generate a jam signal
+            if config.isAzRunning == True and config.azStartupComplete == True:
+                if self.azLastPosn == config.azMountPosn:  
+                    self.azPulseAge += self.delay   # this is the interval of this thread
+                    logging.debug("motionThread() azPulseAge extended: %d", self.azPulseAge)
+                else:
+                    self.azLastPosn = config.azMountPosn
+                    self.azPulseAge = 0.0
+                    logging.debug("motionThread() azPulseAge reset")
+                    
+                    
+            if config.isElRunning == True and config.elStartupComplete == True:
+                if self.elLastPosn == config.elMountPosn:  
+                    self.elPulseAge += self.delay   # this is the interval of this thread
+                    logging.debug("motionThread() elPulseAge extended: %d", self.elPulseAge)
+                else:
+                    self.elLastPosn = config.elMountPosn
+                    self.elPulseAge = 0.0
+                    logging.debug("motionThread() elPulseAge reset")
+
 
             # Monitor the run status of the steppers,
             # updating the process varaibles
@@ -701,7 +739,7 @@ def getTrackVelocity(axis, az, el, latitude):
     else:
         Q = math.pi - HA
     
-    #PA = Q  # parallactic angle
+    PA = Q  # parallactic angle
     
     # Velocities (and accelerations, if I want them)
     TINY =  1e-30   # a very small number
@@ -741,6 +779,7 @@ def stopAllSlew():
     sendStepperCommand("3:0")
     config.isAzRunning = False
     config.isElRunning = False
+    config.azCurrentSpeed = 0.0
 
 def relMoveAz(distance):
     cmd = '1:' + str(distance)
@@ -748,6 +787,7 @@ def relMoveAz(distance):
     sendStepperCommand(cmd)
     time.sleep(0.5)
     config.isAzRunning = True
+    config.azCurrentSpeed = config.azMaxSpeed
 
 def relMoveEl(distance):
     cmd = '2:' + str(distance)
@@ -755,9 +795,11 @@ def relMoveEl(distance):
     sendStepperCommand(cmd)
     time.sleep(0.5)
     config.isElRunning = True
+    config.elCurrentSpeed = config.elMaxSpeed
 
 # Triggers a closed-loop relative move by encoder couns
 # Called by GUI pushbutton and text entry
+# This is controlled in the periodic thread?
 def startEncoderMove(axis, distance):
     if axis == 0:
         config.azMovingClosedLoop = True
@@ -880,6 +922,7 @@ def stopAz():
     config.isAzRunning = False
     config.azStartupComplete = False
     config.isTracking = False
+    config.azSpeed = 0.0
 
 def stopEl():
     logging.debug("stopEl()")
@@ -887,6 +930,7 @@ def stopEl():
     config.isElRunning = False
     config.elStartupComplete = False
     config.isTracking = False
+    config.elSpeed = 0.0
 
 def quickStopAz():
     logging.debug("quickStopAz()")
@@ -895,6 +939,7 @@ def quickStopAz():
     config.azHoming = False
     config.azStartupComplete = False
     config.isTracking = False
+    config.azSpeed = 0.0
 
 def quickStopEl():
     logging.debug("quickStopEl()")
@@ -903,6 +948,7 @@ def quickStopEl():
     config.elHoming = False
     config.elStartupComplete = False
     config.isTracking = False
+    config.elSpeed = 0.0
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -1152,6 +1198,7 @@ if __name__ == "__main__":
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
+    # TODO - for equal encoder counts, both az and el display the same angle.  I'm pretty sure that's not physically possible
     position_layout =   [
                         [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
                         [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
