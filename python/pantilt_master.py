@@ -67,7 +67,7 @@ class MovingAverage():
         
     def computeAverage(self):
         """return the computed average of the window elements """
-        self.accumValue = 0
+        self.accumValue = 0.0
         for i in self.window:
             self.accumValue += i
             
@@ -144,6 +144,7 @@ class motionThread(threading.Thread):
             # we are running. After startupComplete (should really be rampComplete), we
             # increment the pulse age age variable by the value of the motionThread interval.
             # If that time exceeds the expected time by some value, we generate a jam signal
+            
             if config.isAzRunning == True and config.azStartupComplete == True:
                 if self.azLastPosn == config.azMountPosn:  
                     self.azPulseAge += self.delay   # this is the interval of this thread
@@ -153,7 +154,9 @@ class motionThread(threading.Thread):
                     self.azPulseAge = 0.0
                     logging.debug("motionThread() azPulseAge reset")
                     
-                    
+            # TODO - This code is not stable, working to replace.  Jam detection is now disabled
+            
+            """        
             if config.isElRunning == True and config.elStartupComplete == True:
                 if self.elLastPosn == config.elMountPosn:  
                     self.elPulseAge += self.delay   # this is the interval of this thread
@@ -212,7 +215,8 @@ class motionThread(threading.Thread):
                 # reset the motor run state                        
                 elif abs(config.elAvgVelocity) < 1.0 and isRunning(1) == False:
                     config.isElRunning = False                
-
+            """
+            
             # Get stepper and limit switch positions if neither motor running
             # I have to do this when both motors are stopped or motors will "pulse" at the 
             # motion thread update rate
@@ -284,8 +288,11 @@ class periodicThread (threading.Thread):
                 config.encoderIOError = True
            
             # Calculate velocities - these aren't real velocities, just for reference
-            azVel = 10 * (config.azMountPosn - self.lastAz)/self.delay
-            elVel = 10 * (config.elMountPosn - self.lastEl)/self.delay
+            #azVel = 10 * (config.azMountPosn - self.lastAz)/self.delay
+            #elVel = 10 * (config.elMountPosn - self.lastEl)/self.delay
+            azVel = encoderCountsToDegrees(0, (config.azMountPosn - self.lastAz))/self.delay
+            elVel = encoderCountsToDegrees(1, (config.elMountPosn - self.lastEl))/self.delay
+            
             
             # Add the calculated velocities to the moving average
             azMovingAverage.addValue(azVel)
@@ -469,7 +476,7 @@ def getEncoders():
 # axis 1 = elevation
 
 # TODO - I could probably eliminate this by calling 
-# encoderCountsToDegrees instead
+# encoderCountsToDegrees directly instead
 # This seems redundant
 def getEncodersDegrees(axis):
     if axis == 0:
@@ -516,7 +523,7 @@ def sendStepperCommand(cmd):
 def setAzSpeed(speed):
     cmd = "12" + ':' + str(speed)
     sendStepperCommand(cmd)
-    config.azSpeed = speed
+    #config.azSpeed = speed
     logging.debug("setAzSpeed() %s", speed)
 
 def setAzMaxSpeed(speed):
@@ -528,7 +535,7 @@ def setAzMaxSpeed(speed):
 def setElSpeed(speed):
     cmd = "13" + ':' + str(speed)
     sendStepperCommand(cmd)
-    config.elSpeed = speed
+    #config.elSpeed = speed
     logging.debug("setElSpeed() %s", speed)
 
 def setElMaxSpeed(speed):
@@ -813,6 +820,15 @@ def startEncoderMove(axis, distance):
 
 # Maintains a closed-loop relative move by encoder counts
 # Called by the periodic thread if xxMovingClosedLoop flag is set
+# TODO - Sometimes starting the encoder move does not work, even
+# though the running flag is true.  It can be forced to start by
+# making an open-loop move.  When the OL move is done, the 
+# closed-loop move will execute.
+#
+# TODO - sometimes the axis moves past the encoder target and
+# keeps going. I've sssen this twice with az.  Subsequent
+# closed-loop moves will fail after that. I was able to force
+# it to work after making an open-loop degree move.
 def watchEncoderMove(axis):
     if axis == 0:
         config.azDistanceTogo = config.azDistance - config.azMountPosn
@@ -922,7 +938,7 @@ def stopAz():
     config.isAzRunning = False
     config.azStartupComplete = False
     config.isTracking = False
-    config.azSpeed = 0.0
+    #config.azSpeed = 0.0
 
 def stopEl():
     logging.debug("stopEl()")
@@ -930,7 +946,7 @@ def stopEl():
     config.isElRunning = False
     config.elStartupComplete = False
     config.isTracking = False
-    config.elSpeed = 0.0
+    #config.elSpeed = 0.0
 
 def quickStopAz():
     logging.debug("quickStopAz()")
@@ -939,7 +955,7 @@ def quickStopAz():
     config.azHoming = False
     config.azStartupComplete = False
     config.isTracking = False
-    config.azSpeed = 0.0
+    #config.azSpeed = 0.0
 
 def quickStopEl():
     logging.debug("quickStopEl()")
@@ -948,7 +964,7 @@ def quickStopEl():
     config.elHoming = False
     config.elStartupComplete = False
     config.isTracking = False
-    config.elSpeed = 0.0
+    #config.elSpeed = 0.0
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -1315,7 +1331,7 @@ if __name__ == "__main__":
 
         if event == 'DEG_EL_ENC':
             setElMaxSpeed(config.elMaxSpeed)
-            startEncoderMove(1, encoderDegreesToCounts(0,values['degElEnc']))        
+            startEncoderMove(1, encoderDegreesToCounts(1,values['degElEnc']))        
 
         if event == 'HOME_AZ':
             homeAzimuth()
