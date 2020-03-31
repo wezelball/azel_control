@@ -475,7 +475,7 @@ def getEncodersDegrees(axis):
     if axis == 0:
         encoderDegrees = encoderCountsToDegrees(0, config.azMountPosn)
     elif axis == 1:
-        encoderDegrees = encoderCountsToDegrees(0, config.elMountPosn)
+        encoderDegrees = encoderCountsToDegrees(1, config.elMountPosn)
 
     return encoderDegrees    
 
@@ -522,7 +522,7 @@ def setAzSpeed(speed):
 def setAzMaxSpeed(speed):
     cmd = "16" + ':' + str(speed)
     sendStepperCommand(cmd)
-    config.azMaxSpeed = speed
+    #config.azMaxSpeed = speed
     logging.debug("setAzMaxSpeed() %s", speed)
 
 def setElSpeed(speed):
@@ -534,7 +534,7 @@ def setElSpeed(speed):
 def setElMaxSpeed(speed):
     cmd = "17" + ':' + str(speed)
     sendStepperCommand(cmd)
-    config.elMaxSpeed = speed
+    #config.elMaxSpeed = speed
     logging.debug("setElMaxSpeed() %s", speed)
 
 def setAzAccel(accel):
@@ -1138,6 +1138,7 @@ def shutdown():
 # Star sidereal rate tracking
 def startTracking():
     config.isTracking = True
+    # TODO - latitude is hardcoded, fix it
     azSpeed = getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)
     elSpeed = getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)
 
@@ -1181,6 +1182,8 @@ if __name__ == "__main__":
     elMovingAverage = MovingAverage(10)
 
     # PySimpleGUI
+    # TODO - found a failure mode where I could not make absolute moves with the azimuth stepper, but could do open-loop 
+    # moves, positive or negative.
     motion_layout =     [
                         [sg.Text('Slew')],
                         [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
@@ -1198,7 +1201,7 @@ if __name__ == "__main__":
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
-    # TODO - for equal encoder counts, both az and el display the same angle.  I'm pretty sure that's not physically possible
+
     position_layout =   [
                         [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
                         [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
@@ -1340,6 +1343,7 @@ if __name__ == "__main__":
 
         if event == 'AZ_MAX':
             setAzMaxSpeed(values['azMax'])
+            config.azMaxSpeed = values['azMax']
 
         if event == 'AZ_ACCEL':
             setAzAccel(values['azAccel'])            
@@ -1349,6 +1353,7 @@ if __name__ == "__main__":
 
         if event == 'EL_MAX':
             setElMaxSpeed(values['elMax'])
+            config.elMaxSpeed = values['elMax']
 
         if event == 'EL_ACCEL':
             setElAccel(values['elAccel'])        
@@ -1369,7 +1374,7 @@ if __name__ == "__main__":
         window.Element('azEncoder').Update(config.azMountPosn)
         window.Element('elEncoder').Update(config.elMountPosn)
         window.Element('azEncoderDeg').Update(getEncodersDegrees(0))
-        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))   # does not agree with elGeoPosn below, looks more accurate     
+        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))    
         window.Element('stepsAz').Update(config.azStepperPosn)
         window.Element('stepsEl').Update(config.elStepperPosn)
         window.Element('azCCWLimit').Update(config.azCCWLimit)
@@ -1382,7 +1387,7 @@ if __name__ == "__main__":
         window.Element('azVel').Update(config.azAvgVelocity)
         window.Element('elVel').Update(config.elAvgVelocity)
         window.Element('azGeoPosn').Update(getGeoPosition(0))
-        window.Element('elGeoPosn').Update(getGeoPosition(1))# see above elEncoderDeg
+        window.Element('elGeoPosn').Update(getGeoPosition(1))
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
         # Hard-coding the latitude for now
         window.Element('azTrackVel').Update(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
