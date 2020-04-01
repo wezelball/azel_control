@@ -6,7 +6,6 @@
 import sys
 import smbus
 import time
-#import os
 import datetime
 # For the tracking velocity calculations
 import math
@@ -1212,8 +1211,6 @@ if __name__ == "__main__":
     # TODO - found a failure mode where I could not make absolute moves with the azimuth stepper, but could do open-loop 
     # moves, positive or negative.
     motion_layout =     [
-                        [sg.Text('Slew')],
-                        [sg.Button('SLEW_AZ'),sg.InputText('',size=(10,1),key='slewAz'),sg.Button('SLEW_EL'),sg.InputText('', size=(10,1),key='slewEl')],
                         [sg.Text('Relative Open Loop Move in Steps')],
                         [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
@@ -1228,18 +1225,17 @@ if __name__ == "__main__":
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
-    # TODO - positions/velocities are displayed to way too many decimal places
     position_layout =   [
-                        [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
-                        [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
-                        [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsAz')],
-                        [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'stepsEl')],
-                        [sg.Text('Az Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azVel')],
-                        [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elVel')],
-                        [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'azGeoPosn')],
-                        [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue',key = 'elGeoPosn')],
-                        [sg.Button('ZERO_AZ_ENC'),sg.Button('ZERO_EL_ENC')],
-                        [sg.Button('ZERO_AZ_STEP'),sg.Button('ZERO_EL_STEP')],
+                        [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(6,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
+                        [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(6,1), background_color = 'lightblue',key = 'elEncoderDeg')],
+                        [sg.Text('StepsAz', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'stepsAz')],
+                        [sg.Text('StepsEl', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'stepsEl')],
+                        [sg.Text('Az Vel', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azVel')],
+                        [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elVel')],
+                        [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azGeoPosn')],
+                        [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elGeoPosn')],
+                        [sg.Button('ZERO_AZ_ENC', size=(13,1)),sg.Button('ZERO_EL_ENC',size=(13,1))],
+                        [sg.Button('ZERO_AZ_STEP',size=(13,1)),sg.Button('ZERO_EL_STEP',size=(13,1))],
                         ]    
 
 
@@ -1255,26 +1251,32 @@ if __name__ == "__main__":
                         [sg.Button('EL_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='elAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElAccel')],                        
                         ]
 
-    # TODO - positions/velocities are displayed to way too many decimal places
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
-                        [sg.Button('TRACK')],
+                        [sg.Button('TRACK', size=(10,1)), sg.Button('STOP_TRACK', size=(10,1))],
                         [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')],
                         [sg.Text('TrackVel:', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azTrackVel'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elTrackVel')],
+                        ]
+
+    other_layout =      [
+                        [sg.Button('EXIT', size=(13,1))],
                         ]
 
 
     layout =            [
                         [sg.Frame('Position', position_layout),sg.Frame('State', state_layout)],
                         [sg.Frame('Motion', motion_layout),sg.Frame('Celestial', celestial_layout)],
+                        [sg.Frame('Other', other_layout)],
                         ]    
     
     # Open the GUI
     sg.change_look_and_feel('GreenMono')
-    window = sg.Window('Radio Telescope Control', layout)
-    # Try to start out maximized, but it didn't work
-    #window = sg.Window('Radio Telescope Control', layout).Finalize()    
-    #window.Maximize()
+    #window = sg.Window('Radio Telescope Control', layout)
+    # This starts the window maximized, but I need to add an exit button 
+    # cause the top bar dissapears
+    #window = sg.Window('Radio Telescope Control', layout, default_element_size=(100, 2), default_button_element_size=(100, 2), font='Courier 12', resizable = True).Finalize()    
+    window = sg.Window('Radio Telescope Control', layout, font='Courier 14', resizable = True).Finalize()
+    window.maximize()
 
     # Start the comms thread after initialization
     commThread = periodicThread(1, "Thread-1")
@@ -1292,15 +1294,6 @@ if __name__ == "__main__":
         # EVENTS
         if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
             shutdown()
-
-        # TODO - remove slew commands
-        if event == 'SLEW_AZ':
-            setAzSpeed(values['slewAz'])
-            runSpeed(0)
-
-        if event == 'SLEW_EL':
-            setElSpeed(values['slewEl'])
-            runSpeed(1)
 
         if event == 'ZERO_AZ_ENC':
             zeroAzEncoder()
@@ -1364,6 +1357,9 @@ if __name__ == "__main__":
         if event == 'FSTOP_EL':
             quickStopEl()
 
+        if event == 'EXIT':
+            shutdown()
+
         # Speeds and accelerations
         # TODO - handle case where button is pressed but there 
         # is invalid or no speed in text entry
@@ -1395,11 +1391,17 @@ if __name__ == "__main__":
             
         if event == 'TRACK':
             startTracking()
+            
+        if event == 'STOP_TRACK':
+            stopAz()
+            stopEl()
            
             
         # UPDATES
         # Updates the information in the text boxes
         # These values can be updated only on change
+        # Note the formatting - example '{:0.3f}'.format() which rounds to 3 decimal places,
+        # no padding to the left of the decimal point
         window.Element('azEncoder').Update(config.azMountPosn)
         window.Element('elEncoder').Update(config.elMountPosn)
         window.Element('azEncoderDeg').Update('{:0.3f}'.format(getEncodersDegrees(0)))
@@ -1418,7 +1420,7 @@ if __name__ == "__main__":
         window.Element('azGeoPosn').Update('{:0.3f}'.format(getGeoPosition(0)))
         window.Element('elGeoPosn').Update('{:0.3f}'.format(getGeoPosition(1)))
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
-        # Hard-coding the latitude for now    
+        # TODO - latitude is hard-coded, fix it    
         window.Element('azTrackVel').Update('{:0.4f}'.format(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)))
         window.Element('elTrackVel').Update('{:0.4f}'.format(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)))
         
