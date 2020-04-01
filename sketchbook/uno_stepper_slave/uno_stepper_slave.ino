@@ -204,6 +204,7 @@ void runSpeed(int axis)  {     // must add hard limit checks
     // Don't run the motor against a hard stop
     if ((azMovingCW && !azCWLimit) || (azMovingCCW && !azCCWLimit)) {
       stepperX.enableOutputs();
+      Serial.println("azRunSpeed");
     }
   
   }
@@ -223,6 +224,7 @@ void runSpeed(int axis)  {     // must add hard limit checks
     // Don't run the motor against a hard stop
     if ((elMovingDown && !elDownLimit) || (elMovingUp && !elUpLimit)) {
       stepperY.enableOutputs();
+      Serial.println("elRunSpeed");
     }
   }
 }

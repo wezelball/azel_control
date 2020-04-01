@@ -94,15 +94,6 @@ class motionThread(threading.Thread):
     def run(self):
         while self.running:
             time.sleep(self.delay)
-            #logging.debug("motionThread() %s running", self.name)            
-            
-            #logging.debug("motionThread() azAvgVel %s", config.azAvgVelocity)
-            #logging.debug("motionThread() elAvgVel %s", config.elAvgVelocity)
-            #logging.debug("motionThread() config.azGeoPosn %s", config.azGeoPosn)
-            #logging.debug("motionThread() config.azMountPosn %s", config.azMountPosn)
-            #logging.debug("motionThread() config.elGeoPosn %s", config.elGeoPosn)
-            #logging.debug("motionThread() config.elMountPosn %s", config.elMountPosn)
-            #logging.debug("motionThread() getEncodersDegrees(1) %s", getEncodersDegrees(1))
             
             # Update the state of the startup flags
             # If an axis has been told to run, we will give it several
@@ -287,9 +278,7 @@ class periodicThread (threading.Thread):
             except ValueError:
                 config.encoderIOError = True
            
-            # Calculate velocities - these aren't real velocities, just for reference
-            #azVel = 10 * (config.azMountPosn - self.lastAz)/self.delay
-            #elVel = 10 * (config.elMountPosn - self.lastEl)/self.delay
+            # Calculate velocities - current units are degrees/sec
             azVel = encoderCountsToDegrees(0, (config.azMountPosn - self.lastAz))/self.delay
             elVel = encoderCountsToDegrees(1, (config.elMountPosn - self.lastEl))/self.delay
             
@@ -826,9 +815,17 @@ def startEncoderMove(axis, distance):
 # closed-loop move will execute.
 #
 # TODO - sometimes the axis moves past the encoder target and
-# keeps going. I've sssen this twice with az.  Subsequent
+# keeps going. I've seen this twice with az.  Subsequent
 # closed-loop moves will fail after that. I was able to force
 # it to work after making an open-loop degree move.
+# 
+# TODO - runSpeed() starts the motor with max acceleration
+# should there be an initial starting ramp?  I would have
+# to generate it myself
+#
+# TODO - I am calling runSpeed() every iteration of the loop, 
+# which is poor programming.  I need to call only once for
+# every speed change
 def watchEncoderMove(axis):
     if axis == 0:
         config.azDistanceTogo = config.azDistance - config.azMountPosn
@@ -1012,22 +1009,36 @@ def isElDownLimit():
 # Moves west in Azimuth until CCW limit switch made
 # This results in setting the azHoming flag which is watched in
 # the periodic thread by calling watchHomingAxis()
+
+# TODO - it was observed after first starting program that
+# system went into homing but motors didn't move.  Debug log
+# showed that watchHoming was active. azRunning flag observed 
+# to stick on in this case
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
     setAzMaxSpeed(config.azHomingSpeed)
     # slew west a long friggin way
-    relMoveAz(-40000)
+    #relMoveAz(-40000)
+    setAzSpeed(-config.azHomingSpeed)
+    runSpeed(0)
 
 # Moves south in elvation until down limit switch made
 # This results in setting the elHoming flag which is watched in
 # the periodic thread by calling watchHomingAxis()
+
+# TODO - it was observed after first starting program that
+# system went into homing but motors didn't move.  Debug log
+# showed that watchHoming was activez. elRunning flag observed 
+# to stick on in this case
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
     setElMaxSpeed(config.elHomingSpeed)
     # slew south a long friggin way
-    relMoveEl(-40000)
+    #relMoveEl(-40000)
+    setElSpeed(-config.elHomingSpeed)
+    runSpeed(1)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
@@ -1217,7 +1228,7 @@ if __name__ == "__main__":
                         [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
                         ]    
 
-
+    # TODO - positions/velocities are displayed to way too many decimal places
     position_layout =   [
                         [sg.Text('Az Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azEncoderDeg')], 
                         [sg.Text('El Encoder', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoder'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elEncoderDeg')],
@@ -1244,6 +1255,7 @@ if __name__ == "__main__":
                         [sg.Button('EL_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='elAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElAccel')],                        
                         ]
 
+    # TODO - positions/velocities are displayed to way too many decimal places
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
                         [sg.Button('TRACK')],
@@ -1281,6 +1293,7 @@ if __name__ == "__main__":
         if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
             shutdown()
 
+        # TODO - remove slew commands
         if event == 'SLEW_AZ':
             setAzSpeed(values['slewAz'])
             runSpeed(0)
@@ -1302,18 +1315,18 @@ if __name__ == "__main__":
             zeroSteppers(1)        
 
         if event == 'REL_AZ':                   # TODO - breaks if a floating-point entered
-            setAzMaxSpeed(config.azMaxSpeed)
+            setAzMaxSpeed(config.azMaxSpeed)    # TODO - relative moves dont turn off isRunning state of motor
             relMoveAz(values['relAz'])
 
         if event == 'REL_EL':                   # TODO - breaks if a floating-point entered
-            setElMaxSpeed(config.elMaxSpeed)
+            setElMaxSpeed(config.elMaxSpeed)    # TODO - relative moves dont turn off isRunning state of motor
             relMoveEl(values['relEl'])
 
-        if event == 'REL_AZ_DEG':
+        if event == 'REL_AZ_DEG':               # TODO - relative moves dont turn off isRunning state of motor
             setAzMaxSpeed(config.azMaxSpeed)
             moveAzStepperDegrees(values['relAzDeg'])
 
-        if event == 'REL_EL_DEG':
+        if event == 'REL_EL_DEG':               # TODO - relative moves dont turn off isRunning state of motor
             setElMaxSpeed(config.elMaxSpeed)
             moveElStepperDegrees(values['relElDeg'])
 
@@ -1389,8 +1402,8 @@ if __name__ == "__main__":
         # These values can be updated only on change
         window.Element('azEncoder').Update(config.azMountPosn)
         window.Element('elEncoder').Update(config.elMountPosn)
-        window.Element('azEncoderDeg').Update(getEncodersDegrees(0))
-        window.Element('elEncoderDeg').Update(getEncodersDegrees(1))    
+        window.Element('azEncoderDeg').Update('{:0.3f}'.format(getEncodersDegrees(0)))
+        window.Element('elEncoderDeg').Update('{:0.3f}'.format(getEncodersDegrees(1)))    
         window.Element('stepsAz').Update(config.azStepperPosn)
         window.Element('stepsEl').Update(config.elStepperPosn)
         window.Element('azCCWLimit').Update(config.azCCWLimit)
@@ -1400,18 +1413,20 @@ if __name__ == "__main__":
         window.Element('azRunning').Update(config.isAzRunning)
         window.Element('elRunning').Update(config.isElRunning)
         window.Element('tracking').Update(config.isTracking)
-        window.Element('azVel').Update(config.azAvgVelocity)
-        window.Element('elVel').Update(config.elAvgVelocity)
-        window.Element('azGeoPosn').Update(getGeoPosition(0))
-        window.Element('elGeoPosn').Update(getGeoPosition(1))
+        window.Element('azVel').Update('{:0.3f}'.format(config.azAvgVelocity))
+        window.Element('elVel').Update('{:0.3f}'.format(config.elAvgVelocity))
+        window.Element('azGeoPosn').Update('{:0.3f}'.format(getGeoPosition(0)))
+        window.Element('elGeoPosn').Update('{:0.3f}'.format(getGeoPosition(1)))
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
-        # Hard-coding the latitude for now
-        window.Element('azTrackVel').Update(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
-        window.Element('elTrackVel').Update(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79))
+        # Hard-coding the latitude for now    
+        window.Element('azTrackVel').Update('{:0.4f}'.format(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)))
+        window.Element('elTrackVel').Update('{:0.4f}'.format(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)))
+        
         # Default motion parms
         window.Element('configAzSpeed').Update(config.azSpeed)
         window.Element('configAzMax').Update(config.azMaxSpeed)
         window.Element('configAzAccel').Update(config.azAccel)
         window.Element('configElSpeed').Update(config.elSpeed)
         window.Element('configElMax').Update(config.elMaxSpeed)
-        window.Element('configElAccel').Update(config.elAccel)        
+        window.Element('configElAccel').Update(config.elAccel)
+        
