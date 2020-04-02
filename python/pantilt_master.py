@@ -266,6 +266,10 @@ class periodicThread (threading.Thread):
         self.running = True
         self.delay = 0.2
         self.lastAz, self.lastEl = getEncoders()
+        self.azTrackingTicks = 0   # number of times the periodic thread iterated w/o encoder change
+        self.elTrackingTicks = 0
+        self.azDeltaT = 0.0         # time elapsed between encoder value changes
+        self.elDeltaT = 0.0         # time elapsed between encoder value changes
 
     def run(self):      
         while(self.running):
@@ -277,21 +281,55 @@ class periodicThread (threading.Thread):
             except ValueError:
                 config.encoderIOError = True
            
-            # Calculate velocities - current units are degrees/sec
-            azVel = encoderCountsToDegrees(0, (config.azMountPosn - self.lastAz))/self.delay
-            elVel = encoderCountsToDegrees(1, (config.elMountPosn - self.lastEl))/self.delay
+            # Calculate velocities - current units are (seconds of arc)/sec
+            # TODO - The velocities during tracking are not accurate because there
+            # is an unknown number of interations of the periodic thread that occur
+            # between encoder changes.  To fix this, I need to count the number
+            # of iterations and multiply by self.delay, and divide the difference in
+            # encoder counts by that value.  Need a separate value for az and el
             
-            
-            # Add the calculated velocities to the moving average
-            azMovingAverage.addValue(azVel)
-            elMovingAverage.addValue(elVel)
+            # No change in encoder counts during thread, increment the tracking ticks
+            if config.isTracking == True and config.azMountPosn == self.lastAz:
+                self.azTrackingTicks += 1
+            if config.isTracking == True and config.elMountPosn == self.lastEl:
+                self.elTrackingTicks += 1            
+                        
+            # Tracking, only calculate velocities if encoder value changes
+            if config.isTracking == True and config.azMountPosn != self.lastAz:
+                self.azTrackingTicks += 1
+                # Total time elaped between last encoder count
+                self.azDeltaT = self.azTrackingTicks * self.delay   
+                azVel = (encoderCountsToDegrees(0, (config.azMountPosn - self.lastAz))/self.azDeltaT) * 3600.0
+                # Add the calculated velocities to the moving average
+                azMovingAverage.addValue(azVel)
+                self.lastAz = config.azMountPosn                
+            # Tracking, only calculate velocities if encoder value changes
+            if config.isTracking == True and config.elMountPosn != self.lastEl:
+                self.elTrackingTicks += 1
+                # Total time elaped between last encoder count
+                self.elDeltaT = self.elTrackingTicks * self.delay                 
+                elVel = (encoderCountsToDegrees(1, (config.elMountPosn - self.lastEl))/self.elDeltaT) * 3600.0
+                # Add the calculated velocities to the moving average
+                elMovingAverage.addValue(elVel)
+                self.lastEl = config.elMountPosn
+            # Not tracking, calculate velocities and update averages
+            if config.isTracking == False:
+                azVel = (encoderCountsToDegrees(0, (config.azMountPosn - self.lastAz))/self.delay) * 3600.0
+                # Add the calculated velocities to the moving average
+                azMovingAverage.addValue(azVel)
+                self.lastAz = config.azMountPosn   
+                elVel = (encoderCountsToDegrees(1, (config.elMountPosn - self.lastEl))/self.delay) * 3600.0
+                # Add the calculated velocities to the moving average
+                elMovingAverage.addValue(elVel)
+                self.lastEl = config.elMountPosn                
+
             
             # Compute average velocities
             config.azAvgVelocity = azMovingAverage.computeAverage()
             config.elAvgVelocity = elMovingAverage.computeAverage()
             
             # Update the last encoders positions
-            self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
+            #self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
 
             # Update geographical positions
             # Do I need to maintain these variables?
@@ -1013,6 +1051,10 @@ def isElDownLimit():
 # system went into homing but motors didn't move.  Debug log
 # showed that watchHoming was active. azRunning flag observed 
 # to stick on in this case
+
+# TODO - observed that after home limit was made and motor stopped,
+# several very large values of velocity would display in the 
+# position window before zeroing out
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
@@ -1030,6 +1072,10 @@ def homeAzimuth():
 # system went into homing but motors didn't move.  Debug log
 # showed that watchHoming was activez. elRunning flag observed 
 # to stick on in this case
+
+# TODO - observed that after home limit was made and motor stopped,
+# several very large values of velocity would display in the 
+# position window before zeroing out
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
@@ -1204,8 +1250,8 @@ if __name__ == "__main__":
 
 
     # Instantiate moving averages for jam detection velocity calculations
-    azMovingAverage = MovingAverage(10)
-    elMovingAverage = MovingAverage(10)
+    azMovingAverage = MovingAverage(5)
+    elMovingAverage = MovingAverage(5)
 
     # PySimpleGUI
     # TODO - found a failure mode where I could not make absolute moves with the azimuth stepper, but could do open-loop 
@@ -1421,8 +1467,8 @@ if __name__ == "__main__":
         window.Element('elGeoPosn').Update('{:0.3f}'.format(getGeoPosition(1)))
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
         # TODO - latitude is hard-coded, fix it    
-        window.Element('azTrackVel').Update('{:0.4f}'.format(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)))
-        window.Element('elTrackVel').Update('{:0.4f}'.format(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)))
+        window.Element('azTrackVel').Update('{:0.4f}'.format(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)))   # pulses/second
+        window.Element('elTrackVel').Update('{:0.4f}'.format(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)))   # pulses/second
         
         # Default motion parms
         window.Element('configAzSpeed').Update(config.azSpeed)
