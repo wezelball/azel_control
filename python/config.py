@@ -106,3 +106,6 @@ elHomingSpeed = 100
 # Each run/stop command must manage this
 azCurrentSpeed = 0.0  
 elCurrentSpeed = 0.0
+
+# Button padding
+padSize = (20,20)

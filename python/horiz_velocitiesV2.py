@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Sep 16 09:42:27 2019
@@ -73,6 +73,7 @@ print("")
 print("azR: %f" % azR)
 print("elR: %f" % elR)
 print("latR: %f" % latR)
+print("")
 
 # trigonometric functions
 SA = math.sin(azR)
@@ -89,6 +90,7 @@ CP = math.cos(latR)
 #print("CE: %f" % CE)
 #print("SP: %f" % SP)
 #print("CP: %f" % CP)
+#print("")
 
 # First, solve for HA and DEC (h2e.f)
 
@@ -101,11 +103,10 @@ Z = CA * CE * CP + SE * SP
 #print("X: %f" % X)
 #print("Y: %f" % Y)
 #print("Z: %f" % Z)
+#print("")
 
 # To HA, Dec
 R = math.sqrt(X*X+Y*Y)
-
-
 
 if R == 0:
     HA = 0.0
@@ -113,18 +114,21 @@ else:
     HA = math.atan2(Y,X)
     
 #print("")
+#print("R: %f" % R)
 #print("HA: %f" % HA)
-    
+
 DEC = math.atan2(Z,R)
 #print("DEC: %f" % DEC)
-
+#print("")
 
 ha = math.degrees(HA)/15    # convert angle to time
 haF = ephem.hours(HA)       # convert HA to time
 dec = math.degrees(DEC)
 
+#print("")
 #print("Declination: %f" % dec)
 #print("Hour angle: %s" % haF)
+#print("Hour angle: %s" % ha)
 #print("")
 
 # Next, solve for velocities
@@ -136,24 +140,27 @@ SD = math.sin(DEC)
 CD = math.cos(DEC)
 CHCD = CH * CD
 SDCP = SD * CP
+
 X = -CHCD * SP + SDCP
 Y = -SH * CD
 Z = CHCD * CP + SD * SP
 RSQ = X*X+Y*Y
 R = math.sqrt(RSQ)
 
-#print("")
-#print("SH: %f" % SH)
-#print("CH: %f" % CH)
-#print("SD: %f" % SD)
-#print("CD: %f" % CD)
-#print("CHCD: %f" % CHCD)
-#print("SDCP: %f" % SDCP)
-#print("X: %f" % X)
-#print("Y: %f" % Y)
-#print("Z: %f" % Z)
-#print("RSQ: %f" % RSQ)
-#print("R: %f" % R)
+print("")
+print("SH: %f" % SH)
+print("CH: %f" % CH)
+print("SD: %f" % SD)
+print("CD: %f" % CD)
+print("CHCD: %f" % CHCD)
+print("SDCP: %f" % SDCP)
+print("X: %f" % X)
+print("Y: %f" % Y)
+print("Z: %f" % Z)
+print("RSQ: %f" % RSQ)
+print("R: %f" % R)
+print("")
+
 
 # Azimuth and elvation (just for checking)
 if RSQ == 0.0:  
@@ -166,13 +173,20 @@ if A < 0:
 
 E = math.atan2(Z,R)
 
-print("Check azimuth: %f" %  math.degrees(A))
-print("Check elevation: %f" % math.degrees(E))
-print("")
+#print("")
+#print("Check azimuth: %f" %  math.degrees(A))
+#print("Check elevation: %f" % math.degrees(E))
+#print("")
 
 # Parallactic angle
 C = CD * SP - CH * SDCP
 S = SH * CP
+
+print("")
+print("C: %f" % C)
+print("S: %f" % S)
+print("")
+
 
 if (C*C+S*S) > 0:
     Q = math.atan2(S,C)

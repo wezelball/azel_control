@@ -211,7 +211,8 @@ class motionThread(threading.Thread):
             # I have to do this when both motors are stopped or motors will "pulse" at the 
             # motion thread update rate
             # This is here to keep the GUI updated
-            if config.isAzRunning == False and config.isElRunning == False:
+            #if config.isAzRunning == False and config.isElRunning == False:
+            if config.isAzRunning == False and config.isElRunning == False or config.isTracking == True:
                 # Update azimuth
                 config.azStepperPosn = getStepperPosn(0)
                 config.azCCWLimit = isAzCCWLimit()
@@ -1208,6 +1209,7 @@ def shutdown():
     sys.exit()
 
 # Star sidereal rate tracking
+# TODO - stepper steps not updated while tracking
 def startTracking():
     config.isTracking = True
     # TODO - latitude is hardcoded, fix it
@@ -1258,17 +1260,17 @@ if __name__ == "__main__":
     # moves, positive or negative.
     motion_layout =     [
                         [sg.Text('Relative Open Loop Move in Steps')],
-                        [sg.Button('REL_AZ'),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL'),sg.InputText('', size=(10,1),key='relEl')],
+                        [sg.Button('REL_AZ', pad=config.padSize, size=(10,1)),sg.InputText('',size=(10,1),key='relAz'),sg.Button('REL_EL', pad=config.padSize, size=(10,1)),sg.InputText('', size=(10,1),key='relEl')],
                         [sg.Text('Relative Open Loop Move in Stepper Degrees')],
-                        [sg.Button('REL_AZ_DEG'),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
+                        [sg.Button('REL_AZ_DEG', pad=config.padSize),sg.InputText('',size=(10,1),key='relAzDeg'),sg.Button('REL_EL_DEG'),sg.InputText('', size=(10,1),key='relElDeg')],
                         [sg.Text('Absolute Closed Loop Move in Encoder Counts')],
-                        [sg.Button('ABS_AZ_ENC'),sg.InputText('',size=(10,1),key='absAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='absElEnc')],
+                        [sg.Button('ABS_AZ_ENC', pad=config.padSize),sg.InputText('',size=(10,1),key='absAzEnc'),sg.Button('ABS_EL_ENC'),sg.InputText('', size=(10,1),key='absElEnc')],
                         [sg.Text('Absolute Closed Loop Move in Encoder Degrees')],
-                        [sg.Button('DEG_AZ_ENC'),sg.InputText('',size=(10,1),key='degAzEnc'),sg.Button('DEG_EL_ENC'),sg.InputText('', size=(10,1),key='degElEnc')],
+                        [sg.Button('DEG_AZ_ENC', pad=config.padSize),sg.InputText('',size=(10,1),key='degAzEnc'),sg.Button('DEG_EL_ENC'),sg.InputText('', size=(10,1),key='degElEnc')],
                         [sg.Text('Homing')],
-                        [sg.Button('HOME_AZ'),sg.Button('HOME_EL')],                        
+                        [sg.Button('HOME_AZ', pad=config.padSize),sg.Button('HOME_EL', pad=config.padSize)],                        
                         [sg.Text('Stop Motion')],
-                        [sg.Button('STOP_AZ'),sg.Button('STOP_EL'),sg.Button('FSTOP_AZ'),sg.Button('FSTOP_EL')],
+                        [sg.Button('STOP_AZ', pad=config.padSize),sg.Button('STOP_EL', pad=config.padSize),sg.Button('FSTOP_AZ', pad=config.padSize),sg.Button('FSTOP_EL', pad=config.padSize)],
                         ]    
 
     position_layout =   [
@@ -1280,26 +1282,26 @@ if __name__ == "__main__":
                         [sg.Text('El Vel', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elVel')],
                         [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azGeoPosn')],
                         [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elGeoPosn')],
-                        [sg.Button('ZERO_AZ_ENC', size=(13,1)),sg.Button('ZERO_EL_ENC',size=(13,1))],
-                        [sg.Button('ZERO_AZ_STEP',size=(13,1)),sg.Button('ZERO_EL_STEP',size=(13,1))],
+                        [sg.Button('ZERO_AZ_ENC', size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_ENC',size=(13,1), pad=config.padSize)],
+                        [sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_STEP',size=(13,1), pad=config.padSize)],
                         ]    
 
 
     state_layout =      [
-                        [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit'), sg.Checkbox('AZ CW Limit', key = 'azCWLimit')],
-                        [sg.Checkbox('EL UP Limit', key = 'elUPLimit'), sg.Checkbox('EL Down Limit', key = 'elDownLimit')],
-                        [sg.Checkbox('AZ Running', key = 'azRunning'), sg.Checkbox('EL Running', key = 'elRunning'), sg.Checkbox('Tracking', key = 'tracking')],
-                        [sg.Button('AZ_SPD', size=(10,1)),sg.InputText('',size=(5,1),key='azSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzSpeed')],
-                        [sg.Button('AZ_MAX', size=(10,1)),sg.InputText('',size=(5,1),key='azMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzMax')],
-                        [sg.Button('AZ_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='azAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzAccel')],
-                        [sg.Button('EL_SPD', size=(10,1)),sg.InputText('',size=(5,1),key='elSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElSpeed')],
-                        [sg.Button('EL_MAX', size=(10,1)),sg.InputText('',size=(5,1),key='elMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElMax')],
-                        [sg.Button('EL_ACCEL', size=(10,1)),sg.InputText('',size=(5,1),key='elAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElAccel')],                        
+                        [sg.Checkbox('AZ CCW Limit', key = 'azCCWLimit', size = (15,1)), sg.Checkbox('AZ CW Limit', key = 'azCWLimit', size = (15,1))],
+                        [sg.Checkbox('EL UP Limit', key = 'elUPLimit', size = (15,1)), sg.Checkbox('EL Down Limit', key = 'elDownLimit', size = (15,1))],
+                        [sg.Checkbox('AZ Running', key = 'azRunning', size = (15,1)), sg.Checkbox('EL Running', key = 'elRunning', size = (15,1)), sg.Checkbox('Tracking', key = 'tracking', size = (15,1))],
+                        [sg.Button('AZ_SPD', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='azSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzSpeed')],
+                        [sg.Button('AZ_MAX', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='azMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzMax')],
+                        [sg.Button('AZ_ACCEL', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='azAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configAzAccel')],
+                        [sg.Button('EL_SPD', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='elSpeed'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElSpeed')],
+                        [sg.Button('EL_MAX', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='elMax'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElMax')],
+                        [sg.Button('EL_ACCEL', size=(10,1), pad=config.padSize),sg.InputText('',size=(5,1),key='elAccel'),sg.Text('', size=(6,1)), sg.Text('', size=(6,1), background_color = 'lightblue',key = 'configElAccel')],                        
                         ]
 
     celestial_layout =  [
-                        [sg.Button('SET_AZ_GEO'),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
-                        [sg.Button('TRACK', size=(10,1)), sg.Button('STOP_TRACK', size=(10,1))],
+                        [sg.Button('SET_AZ_GEO', pad=config.padSize),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
+                        [sg.Button('TRACK', size=(10,1), pad=config.padSize), sg.Button('STOP_TRACK', size=(10,1))],
                         [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')],
                         [sg.Text('TrackVel:', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azTrackVel'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elTrackVel')],
                         ]
@@ -1309,19 +1311,16 @@ if __name__ == "__main__":
                         ]
 
 
-    layout =            [
-                        [sg.Frame('Position', position_layout),sg.Frame('State', state_layout)],
-                        [sg.Frame('Motion', motion_layout),sg.Frame('Celestial', celestial_layout)],
-                        [sg.Frame('Other', other_layout)],
-                        ]    
+    # I've got tab groups now!
+    layout =            [[sg.TabGroup([[sg.Tab('Position', position_layout), sg.Tab('Motion', motion_layout), sg.Tab('State', state_layout), sg.Tab('Celestial', celestial_layout), sg.Tab('Other', other_layout),]],font='Courier 24')]]    
+                         
+    
     
     # Open the GUI
     sg.change_look_and_feel('GreenMono')
-    #window = sg.Window('Radio Telescope Control', layout)
     # This starts the window maximized, but I need to add an exit button 
     # cause the top bar dissapears
-    #window = sg.Window('Radio Telescope Control', layout, default_element_size=(100, 2), default_button_element_size=(100, 2), font='Courier 12', resizable = True).Finalize()    
-    window = sg.Window('Radio Telescope Control', layout, font='Courier 14', resizable = True).Finalize()
+    window = sg.Window('Radio Telescope Control', layout, font='Courier 30', resizable = True).Finalize()
     window.maximize()
 
     # Start the comms thread after initialization
