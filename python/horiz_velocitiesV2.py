@@ -217,6 +217,7 @@ ELD = ED    # elevation velocity
 
 # convert to degrees/sec
 azV = AZD * ((2*math.pi)/86400) * (360/(2*math.pi))
+
 elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))
 
 #print("Azimuth velocity: %f degrees/sec" %  azV)

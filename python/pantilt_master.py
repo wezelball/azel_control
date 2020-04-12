@@ -337,15 +337,13 @@ class periodicThread (threading.Thread):
             config.azGeoPosn = getGeoPosition(0)
             config.elGeoPosn = getGeoPosition(1)
             
+            # Update RA, dec
+            config.rightAscension, config.declination = observer.radec_of(math.radians(config.azGeoPosn), math.radians(config.elGeoPosn))
+            logging.debug("periodicThread() config.rightAscension %s", config.rightAscension)
+            
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
                       +  str(config.azAvgVelocity) + ',' + str(config.elAvgVelocity) + '\n')            
-
-            # Logging
-            #logging.debug("periodicThread() azVelocity %s", variable.azVelocity)
-            #logging.debug("periodicThread() elVelocity %s", variable.elVelocity)
-            #logging.debug("periodicThread() azAvgVel %s", self.azAvgVel)
-            #logging.debug("periodicThread() elAvgVel %s", self.elAvgVel)            
 
             # Watch homing axes if homing
             if config.azHoming == True:
@@ -385,16 +383,6 @@ class periodicThread (threading.Thread):
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0) 
             print('Exception raise failure')
 
-
-# This will be completely removed later on
-#class Variables():
-#    def __init__(self):
-
-        # Real-time values
-#       self.azVelocity = 0
-#       self.elVelocity = 0
-        #self.azAvgVelocity = MovingAverage(5)
-        #self.elAvgVelocity = MovingAverage(5)
         
 # ************************* END CLASSES ******************************
 
@@ -705,6 +693,7 @@ def getGeoPosition(axis):
         return encoderCountsToDegrees(0, config.azMountPosn) + config.azGeoOffset
     elif axis == 1:
         return encoderCountsToDegrees(1, config.elMountPosn) + config.elGeoOffset
+
 
 # Returns tracking velocity for an axis
 # axis 0 = azimuth
@@ -1302,7 +1291,9 @@ if __name__ == "__main__":
     celestial_layout =  [
                         [sg.Button('SET_AZ_GEO', pad=config.padSize),sg.InputText('',size=(10,1),key='azGeoInput'),sg.Button('SET_EL_GEO'),sg.InputText('', size=(10,1),key='elGeoInput')],
                         [sg.Button('TRACK', size=(10,1), pad=config.padSize), sg.Button('STOP_TRACK', size=(10,1))],
-                        [sg.Text('LST', size=(10,1)), sg.Text('', size=(18,1), background_color = 'lightblue', key = 'localSiderealTime')],
+                        [sg.Text('LST', size=(10,1)), sg.Text('', size=(12,1), background_color = 'lightblue', key = 'localSiderealTime')],
+                        [sg.Text('RA', size=(10,1)), sg.Text('', size=(12,1), background_color = 'lightblue',key = 'configRA')],
+                        [sg.Text('Dec', size=(10,1)), sg.Text('', size=(12,1), background_color = 'lightblue',key = 'configDec')],
                         [sg.Text('TrackVel:', size=(10,1)), sg.Text('', size=(9,1), background_color = 'lightblue',key = 'azTrackVel'),sg.Text('', size=(9,1), background_color = 'lightblue',key = 'elTrackVel')],
                         ]
 
@@ -1465,6 +1456,9 @@ if __name__ == "__main__":
         window.Element('azGeoPosn').Update('{:0.3f}'.format(getGeoPosition(0)))
         window.Element('elGeoPosn').Update('{:0.3f}'.format(getGeoPosition(1)))
         window.Element('localSiderealTime').Update(str(getCurrentLST()))
+        window.Element('configRA').Update(str(config.rightAscension))
+        window.Element('configDec').Update(str(config.declination))
+        
         # TODO - latitude is hard-coded, fix it    
         window.Element('azTrackVel').Update('{:0.4f}'.format(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79)))   # pulses/second
         window.Element('elTrackVel').Update('{:0.4f}'.format(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79)))   # pulses/second

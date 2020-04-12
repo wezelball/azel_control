@@ -71,6 +71,10 @@ elMountPosn = 0
 azStepperPosn = 0
 elStepperPosn = 0
 
+# Current celestial position in RA, Dec
+rightAscension = ''
+declination = ''
+
 # The geographical position of the mount, referenced to true North and horizon
 azGeoPosn = 0.0
 elGeoPosn = 0.0
