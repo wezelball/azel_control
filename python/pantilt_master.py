@@ -1303,13 +1303,14 @@ if __name__ == "__main__":
 
 
     # I've got tab groups now!
-    layout =            [[sg.TabGroup([[sg.Tab('Position', position_layout), sg.Tab('Motion', motion_layout), sg.Tab('State', state_layout), sg.Tab('Celestial', celestial_layout), sg.Tab('Other', other_layout),]],font='Courier 24')]]    
+    layout =            [[sg.TabGroup([[sg.Tab('Position', position_layout,font='Courier 24'), sg.Tab('Motion', motion_layout,font='Courier 24'), sg.Tab('State', state_layout,font='Courier 24'), sg.Tab('Celestial', celestial_layout,font='Courier 24'), sg.Tab('Other', other_layout,font='Courier 24'),]])]]    
                          
     
     
     # Open the GUI
-    sg.change_look_and_feel('GreenMono')
-    # This starts the window maximized, but I need to add an exit button 
+    #sg.change_look_and_feel('GreenMono')
+    sg.change_look_and_feel('DarkAmber')
+    # This starts the window maximized, but I had to add an exit button 
     # cause the top bar dissapears
     window = sg.Window('Radio Telescope Control', layout, font='Courier 30', resizable = True).Finalize()
     window.maximize()
