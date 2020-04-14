@@ -944,6 +944,7 @@ def watchEncoderMove(axis):
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
 # axis 1 = elevation
+# Testing - this should be in ramping branch only
 def runSpeed(axis):
     cmd = '20:' + str(axis)
     logging.debug("runSpeed() axis: %s", axis)
