@@ -20,6 +20,12 @@ isElRunning = False;
 azMovingClosedLoop = False
 elMovingClosedLoop = False
 
+# Are axes under an accel ramp?
+# We need this to implement closed-loop control
+#isAzRamping = False
+#isElRamping = False
+
+# Hey, put a fucking comment here, dummy!
 azDistance = 0
 elDistance = 0
 

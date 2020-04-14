@@ -31,6 +31,75 @@ messageQ = []
 
 # *********************** BEGIN CLASSES ******************************
 
+# Acceleration ramp for closed-loop moves
+class AccelRamp():
+    # Constructor
+    def __init__(self, axis, dT):
+        self.axis = axis    # 0 or 1
+        self.deltaT = dT    # periodic thread update time
+        self.isRampComplete = False
+        self.newSpeed = 0.0
+        self.deltaV = 0.0
+        self.cmd = '20:' + str(self.axis)
+        self.isEnabled = False
+        
+    # Set the ramp time for a specific move
+    def setRampTime(self, time):
+        self.rampTime = time
+    
+    # Set the final speed for a specific move    
+    def setFinalSpeed(self, speed):
+        self.finalSpeed = speed
+    
+    # We must know the current speed
+    def setCurrentSpeed(self, speed):
+        self.currentSpeed = speed
+        
+    # Is the ramp generator enabled?
+    def isEnabled(self):
+        # TODO - there's a cooler way to do this
+        if self.isEnabled == True:
+            return True
+        else:
+            return False
+    
+    # Is the ramp complete?
+    def isComplete(self):
+        # TODO - there's a cooler way to do this
+        if self.isRampComplete == True:
+            return True
+        else:
+            return False
+    
+    def enable(self):
+        self.isEnabled = True
+        
+    def disable(self):
+        self.isEnabled = False
+        self.isRampComplete = False
+
+    # Calculate deltaV, the speed increment
+    def getDeltaV(self):
+        return (self.finalSpeed - self.currentSpeed)*self.deltaT/self.rampTime
+
+    # perform a speed increment 
+    def update(self):
+        if self.isEnabled == True:
+            # Get the calculated speed increment
+            self.deltaV = self.getDeltaV()
+            # Update the speed
+            self.newSpeed = self.currentSpeed + self.deltaV
+            
+            # Make sure we don't exceed the speed limit
+            if self.newSpeed >= self.finalSpeed:
+                self.newSpeed = self.finalSpeed
+                self.isRampComplete = False
+            else:
+                # Update the stepper speed
+                sendStepperCommand(self.cmd)
+        
+
+
 # Moving average class
 class MovingAverage():
     """Moving average class - keeps track of encoder velocities
@@ -359,7 +428,18 @@ class periodicThread (threading.Thread):
             if config.elMovingClosedLoop == True:
                 watchEncoderMove(1)            
                 
+            # Maintain accel ramps for closed-loop moves
+            if azAccelRamp.isEnabled() == True:
+                azAccelRamp.update()
+            if azAccelRamp.isComplete == True:
+                azAccelRamp.disable()
+
+            if elAccelRamp.isEnabled() == True:
+                elAccelRamp.update()
+            if elAccelRamp.isComplete == True:
+                elAccelRamp.disable()
                 
+            
     def print_time(self,threadName):
         print ("%s: %s") % (threadName, time.ctime(time.time()))
 
@@ -869,23 +949,23 @@ def watchEncoderMove(axis):
             if config.azInFarApproach == False:
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
                 # Start slew at this speed
-                setAzSpeed(azSpeed)
-                runSpeed(0)
+                #setAzSpeed(azSpeed)
+                runSpeed(0, azSpeed, 10)
             config.azInFarApproach = True
         elif abs(config.azDistanceTogo) > config.endpointNearDistance:
             azSpeed = config.azEndpointNearSpeed * polarity
             if config.azInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
                 # Start slew at this speed
-                setAzSpeed(azSpeed)
-                runSpeed(0)                        
+                #setAzSpeed(azSpeed)
+                runSpeed(0, azSpeed, 10)                        
             config.azInNearApproach = True
         elif abs(config.azDistanceTogo) > config.endpointVeryNearDistance:
             azSpeed = config.azEndpointVeryNearSpeed * polarity
             if config.azInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
-                setAzSpeed(azSpeed)
-                runSpeed(0)                        
+                #setAzSpeed(azSpeed)
+                runSpeed(0, azSpeed, 10)                        
             config.azInVeryNearApproach = True
         elif abs(config.azDistanceTogo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
@@ -911,23 +991,23 @@ def watchEncoderMove(axis):
             if config.elInFarApproach == False:
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
                 # Start slew at this speed
-                setElSpeed(elSpeed)
-                runSpeed(1)
+                #setElSpeed(elSpeed)
+                runSpeed(1, elSpeed, 10)
             config.elInFarApproach = True
         elif abs(config.elDistanceTogo) > config.endpointNearDistance:
             elSpeed = config.elEndpointNearSpeed * polarity
             if config.elInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
                 # Start slew at this speed
-                setElSpeed(elSpeed)
-                runSpeed(1)                        
+                #setElSpeed(elSpeed)
+                runSpeed(1, elSpeed, 10)                        
             config.elInNearApproach = True
         elif abs(config.elDistanceTogo) > config.endpointVeryNearDistance:
             elSpeed = config.elEndpointVeryNearSpeed * polarity
             if config.elInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
-                setElSpeed(elSpeed)
-                runSpeed(1)                        
+                #setElSpeed(elSpeed)
+                runSpeed(1, elSpeed, 10)                        
             config.elInVeryNearApproach = True
         elif abs(config.elDistanceTogo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
@@ -944,18 +1024,32 @@ def watchEncoderMove(axis):
 # Run at constant speed, based on last setSpeed()
 # axis 0 = azimuth
 # axis 1 = elevation
-# Testing - this should be in ramping branch only
-def runSpeed(axis):
-    cmd = '20:' + str(axis)
+# This is part of the experimental ramping branch
+# runSpeed will be changed to implement an 
+# accel ramp based on passed arguments
+def runSpeed(axis, speed, acceltime):
+    #cmd = '20:' + str(axis)
     logging.debug("runSpeed() axis: %s", axis)
-    sendStepperCommand(cmd)
-    time.sleep(0.5)
+    #sendStepperCommand(cmd)
+    #time.sleep(0.5)
     if axis == 0:
         config.isAzRunning = True
         config.azStartupComplete = False
+        #config.isAzRamping = True
+        # Startup the ramp generator
+        azAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
+        azAccelRamp.setFinalSpeed(speed)
+        azAccelRamp.rampTime(time)
+        azAccelRamp.enable()
     elif axis == 1:
         config.isElRunning = True
         config.elStartupComplete = False
+        #config.isElRamping = True
+       # Startup the ramp generator
+        elAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
+        elAccelRamp.setFinalSpeed(speed)
+        elAccelRamp.rampTime(time)
+        elAccelRamp.enable()
 
 def stopAz():
     logging.debug("stopAz()")
@@ -1052,8 +1146,8 @@ def homeAzimuth():
     setAzMaxSpeed(config.azHomingSpeed)
     # slew west a long friggin way
     #relMoveAz(-40000)
-    setAzSpeed(-config.azHomingSpeed)
-    runSpeed(0)
+    #setAzSpeed(-config.azHomingSpeed)
+    runSpeed(0, -config.azHomingSpeed, 10)
 
 # Moves south in elvation until down limit switch made
 # This results in setting the elHoming flag which is watched in
@@ -1073,8 +1167,8 @@ def homeElevation():
     setElMaxSpeed(config.elHomingSpeed)
     # slew south a long friggin way
     #relMoveEl(-40000)
-    setElSpeed(-config.elHomingSpeed)
-    runSpeed(1)
+    #setElSpeed(-config.elHomingSpeed)
+    runSpeed(1, -config.elHomingSpeed, 10)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
@@ -1210,12 +1304,12 @@ def startTracking():
     logging.debug("startTracking() elSpeed: %f", elSpeed)
 
     # Set the stepper speeds
-    setAzSpeed(azSpeed)
-    setElSpeed(elSpeed)
+    #setAzSpeed(azSpeed)
+    #setElSpeed(elSpeed)
     
     # Start the motors
-    runSpeed(0)
-    runSpeed(1)
+    runSpeed(0, azSpeed, 5)
+    runSpeed(1, elSpeed, 5)
     
 
 if __name__ == "__main__":
@@ -1245,6 +1339,12 @@ if __name__ == "__main__":
     azMovingAverage = MovingAverage(5)
     elMovingAverage = MovingAverage(5)
 
+    # Instantiate accel ramps for both axes
+    # TODO - delta T's are hard-coded, fix
+    azAccelRamp = AccelRamp(0, 0.2)
+    elAccelRamp = AccelRamp(1, 0.2)
+    
+    
     # PySimpleGUI
     # TODO - found a failure mode where I could not make absolute moves with the azimuth stepper, but could do open-loop 
     # moves, positive or negative.
