@@ -39,9 +39,11 @@ class AccelRamp():
         self.deltaT = dT    # periodic thread update time
         self.isRampComplete = False
         self.newSpeed = 0.0
+        self.currentSpeed = 0.0
+        self.finalSpeed = 0.0
         self.deltaV = 0.0
         self.cmd = '20:' + str(self.axis)
-        self.isEnabled = False
+        self.enabled = False
         
     # Set the ramp time for a specific move
     def setRampTime(self, time):
@@ -58,7 +60,7 @@ class AccelRamp():
     # Is the ramp generator enabled?
     def isEnabled(self):
         # TODO - there's a cooler way to do this
-        if self.isEnabled == True:
+        if self.enabled == True:
             return True
         else:
             return False
@@ -72,10 +74,10 @@ class AccelRamp():
             return False
     
     def enable(self):
-        self.isEnabled = True
+        self.enabled = True
         
     def disable(self):
-        self.isEnabled = False
+        self.enabled = False
         self.isRampComplete = False
 
     # Calculate deltaV, the speed increment
@@ -84,7 +86,7 @@ class AccelRamp():
 
     # perform a speed increment 
     def update(self):
-        if self.isEnabled == True:
+        if self.enabled == True:
             # Get the calculated speed increment
             self.deltaV = self.getDeltaV()
             # Update the speed
@@ -429,14 +431,14 @@ class periodicThread (threading.Thread):
                 watchEncoderMove(1)            
                 
             # Maintain accel ramps for closed-loop moves
-            if azAccelRamp.isEnabled() == True:
+            if azAccelRamp.isEnabled():
                 azAccelRamp.update()
-            if azAccelRamp.isComplete == True:
+            if azAccelRamp.isComplete():
                 azAccelRamp.disable()
 
-            if elAccelRamp.isEnabled() == True:
+            if elAccelRamp.isEnabled():
                 elAccelRamp.update()
-            if elAccelRamp.isComplete == True:
+            if elAccelRamp.isComplete():
                 elAccelRamp.disable()
                 
             
@@ -900,9 +902,11 @@ def relMoveEl(distance):
     config.isElRunning = True
     config.elCurrentSpeed = config.elMaxSpeed
 
-# Triggers a closed-loop relative move by encoder couns
+# Triggers a closed-loop relative move by encoder counts
 # Called by GUI pushbutton and text entry
 # This is controlled in the periodic thread?
+# TODO - program crashes if I accidentally enter a floating-point
+# value for encoder counts
 def startEncoderMove(axis, distance):
     if axis == 0:
         config.azMovingClosedLoop = True
@@ -1039,7 +1043,7 @@ def runSpeed(axis, speed, acceltime):
         # Startup the ramp generator
         azAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
         azAccelRamp.setFinalSpeed(speed)
-        azAccelRamp.rampTime(time)
+        azAccelRamp.setRampTime(acceltime)
         azAccelRamp.enable()
     elif axis == 1:
         config.isElRunning = True
@@ -1048,7 +1052,7 @@ def runSpeed(axis, speed, acceltime):
        # Startup the ramp generator
         elAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
         elAccelRamp.setFinalSpeed(speed)
-        elAccelRamp.rampTime(time)
+        elAccelRamp.setRampTime(acceltime)
         elAccelRamp.enable()
 
 def stopAz():
@@ -1373,7 +1377,7 @@ if __name__ == "__main__":
                         [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azGeoPosn')],
                         [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elGeoPosn')],
                         [sg.Button('ZERO_AZ_ENC', size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_ENC',size=(13,1), pad=config.padSize)],
-                        [sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_STEP',size=(13,1), pad=config.padSize)],
+                        [sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize),sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize)],
                         ]    
 
 
