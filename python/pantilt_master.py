@@ -48,37 +48,46 @@ class AccelRamp():
     # Set the ramp time for a specific move
     def setRampTime(self, time):
         self.rampTime = time
+        logging.debug("AccelRamp() setRampTime(): %f", self.rampTime)
     
     # Set the final speed for a specific move    
     def setFinalSpeed(self, speed):
         self.finalSpeed = speed
+        logging.debug("AccelRamp() setFinalSpeed(): %f", self.finalSpeed)
     
     # We must know the current speed
     def setCurrentSpeed(self, speed):
         self.currentSpeed = speed
+        logging.debug("AccelRamp() setCurrentSpeed(): %f", self.currentSpeed)
         
     # Is the ramp generator enabled?
     def isEnabled(self):
         # TODO - there's a cooler way to do this
         if self.enabled == True:
+            #logging.debug("AccelRamp() isEnabled = True")
             return True
         else:
+            #logging.debug("AccelRamp() isEnabled = False")
             return False
     
     # Is the ramp complete?
     def isComplete(self):
         # TODO - there's a cooler way to do this
         if self.isRampComplete == True:
+            #logging.debug("AccelRamp() isComplete = True")
             return True
         else:
+            #logging.debug("AccelRamp() isComplete = False")
             return False
     
     def enable(self):
+        logging.debug("AccelRamp() enabled")
         self.enabled = True
         
     def disable(self):
         self.enabled = False
         self.isRampComplete = False
+        logging.debug("AccelRamp() disabled")
 
     # Calculate deltaV, the speed increment
     def getDeltaV(self):
@@ -90,15 +99,23 @@ class AccelRamp():
             # Get the calculated speed increment
             self.deltaV = self.getDeltaV()
             # Update the speed
-            self.newSpeed = self.currentSpeed + self.deltaV
+            self.newSpeed += self.deltaV
+            logging.debug("AccelRamp.update() newSpeed : %f", self.newSpeed)
             
             # Make sure we don't exceed the speed limit
-            if self.newSpeed >= self.finalSpeed:
+            if abs(self.newSpeed) >= abs(self.finalSpeed):
                 self.newSpeed = self.finalSpeed
-                self.isRampComplete = False
+                self.isRampComplete = True
             else:
                 # Update the stepper speed
+                if self.axis == 0:
+                    setAzSpeed(self.newSpeed)
+                elif self.axis == 1:
+                    setElSpeed(self.newSpeed)
+                    
+                # Tell the stepper to run at speed here
                 sendStepperCommand(self.cmd)
+                logging.debug("AccelRamp() sendStepperCommand(): %s", self.cmd)
         
 
 
@@ -410,7 +427,7 @@ class periodicThread (threading.Thread):
             
             # Update RA, dec
             config.rightAscension, config.declination = observer.radec_of(math.radians(config.azGeoPosn), math.radians(config.elGeoPosn))
-            logging.debug("periodicThread() config.rightAscension %s", config.rightAscension)
+            #logging.debug("periodicThread() config.rightAscension %s", config.rightAscension)
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
@@ -954,7 +971,7 @@ def watchEncoderMove(axis):
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
                 # Start slew at this speed
                 #setAzSpeed(azSpeed)
-                runSpeed(0, azSpeed, 10)
+                runSpeed(0, azSpeed, 2)
             config.azInFarApproach = True
         elif abs(config.azDistanceTogo) > config.endpointNearDistance:
             azSpeed = config.azEndpointNearSpeed * polarity
@@ -962,14 +979,14 @@ def watchEncoderMove(axis):
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
                 # Start slew at this speed
                 #setAzSpeed(azSpeed)
-                runSpeed(0, azSpeed, 10)                        
+                runSpeed(0, azSpeed, 2)                        
             config.azInNearApproach = True
         elif abs(config.azDistanceTogo) > config.endpointVeryNearDistance:
             azSpeed = config.azEndpointVeryNearSpeed * polarity
             if config.azInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
                 #setAzSpeed(azSpeed)
-                runSpeed(0, azSpeed, 10)                        
+                runSpeed(0, azSpeed, 2)                        
             config.azInVeryNearApproach = True
         elif abs(config.azDistanceTogo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
@@ -996,7 +1013,7 @@ def watchEncoderMove(axis):
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
                 # Start slew at this speed
                 #setElSpeed(elSpeed)
-                runSpeed(1, elSpeed, 10)
+                runSpeed(1, elSpeed, 2)
             config.elInFarApproach = True
         elif abs(config.elDistanceTogo) > config.endpointNearDistance:
             elSpeed = config.elEndpointNearSpeed * polarity
@@ -1004,14 +1021,14 @@ def watchEncoderMove(axis):
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
                 # Start slew at this speed
                 #setElSpeed(elSpeed)
-                runSpeed(1, elSpeed, 10)                        
+                runSpeed(1, elSpeed, 2)                        
             config.elInNearApproach = True
         elif abs(config.elDistanceTogo) > config.endpointVeryNearDistance:
             elSpeed = config.elEndpointVeryNearSpeed * polarity
             if config.elInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
                 #setElSpeed(elSpeed)
-                runSpeed(1, elSpeed, 10)                        
+                runSpeed(1, elSpeed, 2)                        
             config.elInVeryNearApproach = True
         elif abs(config.elDistanceTogo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
@@ -1062,6 +1079,7 @@ def stopAz():
     config.azStartupComplete = False
     config.isTracking = False
     #config.azSpeed = 0.0
+    azAccelRamp.disable()
 
 def stopEl():
     logging.debug("stopEl()")
@@ -1070,7 +1088,8 @@ def stopEl():
     config.elStartupComplete = False
     config.isTracking = False
     #config.elSpeed = 0.0
-
+    elAccelRamp.disable()
+    
 def quickStopAz():
     logging.debug("quickStopAz()")
     sendStepperCommand("6:0")
@@ -1079,6 +1098,7 @@ def quickStopAz():
     config.azStartupComplete = False
     config.isTracking = False
     #config.azSpeed = 0.0
+    azAccelRamp.disable()
 
 def quickStopEl():
     logging.debug("quickStopEl()")
@@ -1088,6 +1108,7 @@ def quickStopEl():
     config.elStartupComplete = False
     config.isTracking = False
     #config.elSpeed = 0.0
+    elAccelRamp.disable()
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
@@ -1151,7 +1172,7 @@ def homeAzimuth():
     # slew west a long friggin way
     #relMoveAz(-40000)
     #setAzSpeed(-config.azHomingSpeed)
-    runSpeed(0, -config.azHomingSpeed, 10)
+    runSpeed(0, -config.azHomingSpeed, 2)
 
 # Moves south in elvation until down limit switch made
 # This results in setting the elHoming flag which is watched in
@@ -1172,7 +1193,7 @@ def homeElevation():
     # slew south a long friggin way
     #relMoveEl(-40000)
     #setElSpeed(-config.elHomingSpeed)
-    runSpeed(1, -config.elHomingSpeed, 10)
+    runSpeed(1, -config.elHomingSpeed, 2)
 
 # Sets both encoder axes to zero
 # Use when both encoders are in home position and stopped
@@ -1312,8 +1333,8 @@ def startTracking():
     #setElSpeed(elSpeed)
     
     # Start the motors
-    runSpeed(0, azSpeed, 5)
-    runSpeed(1, elSpeed, 5)
+    runSpeed(0, azSpeed, 2)
+    runSpeed(1, elSpeed, 2)
     
 
 if __name__ == "__main__":
@@ -1377,7 +1398,7 @@ if __name__ == "__main__":
                         [sg.Text('Az Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'azGeoPosn')],
                         [sg.Text('El Geo', size=(10,1)), sg.Text('', size=(7,1), background_color = 'lightblue',key = 'elGeoPosn')],
                         [sg.Button('ZERO_AZ_ENC', size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_ENC',size=(13,1), pad=config.padSize)],
-                        [sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize),sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize)],
+                        [sg.Button('ZERO_AZ_STEP',size=(13,1), pad=config.padSize),sg.Button('ZERO_EL_STEP',size=(13,1), pad=config.padSize)],
                         ]    
 
 
