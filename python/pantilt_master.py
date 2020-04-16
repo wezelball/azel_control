@@ -55,6 +55,10 @@ class AccelRamp():
         self.finalSpeed = speed
         logging.debug("AccelRamp() setFinalSpeed(): %f", self.finalSpeed)
     
+    # What was the final speed we were running at?
+    def getFinalSpeed(self):
+        return self.finalSpeed
+    
     # We must know the current speed
     def setCurrentSpeed(self, speed):
         self.currentSpeed = speed
@@ -98,12 +102,16 @@ class AccelRamp():
         if self.enabled == True:
             # Get the calculated speed increment
             self.deltaV = self.getDeltaV()
+            logging.debug("AccelRamp.update() deltaV : %f", self.deltaV)
             # Update the speed
             self.newSpeed += self.deltaV
             logging.debug("AccelRamp.update() newSpeed : %f", self.newSpeed)
             
             # Make sure we don't exceed the speed limit
-            if abs(self.newSpeed) >= abs(self.finalSpeed):
+            # This code needs to be tested well
+            # How close can the spped increment come to the final speed?
+            if  abs(self.finalSpeed - self.newSpeed) < 5:
+                logging.debug("AccelRamp() speed=final speed")
                 self.newSpeed = self.finalSpeed
                 self.isRampComplete = True
             else:
@@ -452,11 +460,14 @@ class periodicThread (threading.Thread):
                 azAccelRamp.update()
             if azAccelRamp.isComplete():
                 azAccelRamp.disable()
+                config.azCurrentSpeed = azAccelRamp.getFinalSpeed()
+                
 
             if elAccelRamp.isEnabled():
                 elAccelRamp.update()
             if elAccelRamp.isComplete():
                 elAccelRamp.disable()
+                config.elCurrentSpeed = elAccelRamp.getFinalSpeed()
                 
             
     def print_time(self,threadName):
@@ -956,7 +967,8 @@ def startEncoderMove(axis, distance):
 # every speed change
 def watchEncoderMove(axis):
     if axis == 0:
-        config.azDistanceTogo = config.azDistance - config.azMountPosn
+        config.azDistanceToGo = config.azDistance - config.azMountPosn
+        logging.debug("watchEncoderMove(%f) az distance to go", config.azDistanceToGo)
         
         # Need to determine direction based on sign
         if config.azDistance - config.azMountPosn > 0:
@@ -964,7 +976,7 @@ def watchEncoderMove(axis):
         else:
             polarity = -1
     
-        if abs(config.azDistanceTogo) > config.endpointFarDistance:
+        if abs(config.azDistanceToGo) > config.endpointFarDistance:
             azSpeed = config.azEndpointFarSpeed * polarity
             # Starts the motion at this speed
             if config.azInFarApproach == False:
@@ -973,7 +985,7 @@ def watchEncoderMove(axis):
                 #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)
             config.azInFarApproach = True
-        elif abs(config.azDistanceTogo) > config.endpointNearDistance:
+        elif abs(config.azDistanceToGo) > config.endpointNearDistance:
             azSpeed = config.azEndpointNearSpeed * polarity
             if config.azInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
@@ -981,14 +993,14 @@ def watchEncoderMove(axis):
                 #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)                        
             config.azInNearApproach = True
-        elif abs(config.azDistanceTogo) > config.endpointVeryNearDistance:
+        elif abs(config.azDistanceToGo) > config.endpointVeryNearDistance:
             azSpeed = config.azEndpointVeryNearSpeed * polarity
             if config.azInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
                 #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)                        
             config.azInVeryNearApproach = True
-        elif abs(config.azDistanceTogo) < config.endpointDeadband:
+        elif abs(config.azDistanceToGo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
             stopAz()
             # Reset the flags
@@ -998,7 +1010,8 @@ def watchEncoderMove(axis):
             config.azMovingClosedLoop = False    
 
     if axis == 1:
-        config.elDistanceTogo = config.elDistance - config.elMountPosn
+        config.elDistanceToGo = config.elDistance - config.elMountPosn
+        logging.debug("watchEncoderMove(%d) el distance to go", config.elDistanceToGo)
         
         # Need to determine direction based on sign
         if config.elDistance - config.elMountPosn > 0:
@@ -1006,7 +1019,7 @@ def watchEncoderMove(axis):
         else:
             polarity = -1
     
-        if abs(config.elDistanceTogo) > config.endpointFarDistance:
+        if abs(config.elDistanceToGo) > config.endpointFarDistance:
             elSpeed = config.elEndpointFarSpeed * polarity
             # Starts the motion at this speed
             if config.elInFarApproach == False:
@@ -1015,7 +1028,7 @@ def watchEncoderMove(axis):
                 #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)
             config.elInFarApproach = True
-        elif abs(config.elDistanceTogo) > config.endpointNearDistance:
+        elif abs(config.elDistanceToGo) > config.endpointNearDistance:
             elSpeed = config.elEndpointNearSpeed * polarity
             if config.elInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
@@ -1023,14 +1036,14 @@ def watchEncoderMove(axis):
                 #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)                        
             config.elInNearApproach = True
-        elif abs(config.elDistanceTogo) > config.endpointVeryNearDistance:
+        elif abs(config.elDistanceToGo) > config.endpointVeryNearDistance:
             elSpeed = config.elEndpointVeryNearSpeed * polarity
             if config.elInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
                 #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)                        
             config.elInVeryNearApproach = True
-        elif abs(config.elDistanceTogo) < config.endpointDeadband:
+        elif abs(config.elDistanceToGo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
             stopEl()
             # Reset the flags
@@ -1067,7 +1080,7 @@ def runSpeed(axis, speed, acceltime):
         config.elStartupComplete = False
         #config.isElRamping = True
        # Startup the ramp generator
-        elAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
+        elAccelRamp.setCurrentSpeed(config.elCurrentSpeed)
         elAccelRamp.setFinalSpeed(speed)
         elAccelRamp.setRampTime(acceltime)
         elAccelRamp.enable()
