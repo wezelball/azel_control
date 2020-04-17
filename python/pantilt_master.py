@@ -91,6 +91,8 @@ class AccelRamp():
     def enable(self):
         logging.debug("AccelRamp() enabled")
         self.enabled = True
+        # Start with speed equal to currentSpeed
+        self.newSpeed = self.currentSpeed
         
     def disable(self):
         self.enabled = False
@@ -114,7 +116,7 @@ class AccelRamp():
             # Make sure we don't exceed the speed limit
             # This code needs to be improved
             # Need at better test for completion of the accel ramp
-            if  abs(self.finalSpeed - self.newSpeed) < 50:
+            if  abs(self.finalSpeed - self.newSpeed) < 10:
                 logging.debug("AccelRamp() speed=final speed")
                 self.newSpeed = self.finalSpeed
                 self.isRampComplete = True
@@ -1200,7 +1202,7 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
-    setAzMaxSpeed(config.azHomingSpeed)
+    #setAzMaxSpeed(config.azHomingSpeed)
     # slew west a long friggin way
     #relMoveAz(-40000)
     #setAzSpeed(-config.azHomingSpeed)
@@ -1221,7 +1223,7 @@ def homeAzimuth():
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
-    setElMaxSpeed(config.elHomingSpeed)
+    #setElMaxSpeed(config.elHomingSpeed)
     # slew south a long friggin way
     #relMoveEl(-40000)
     #setElSpeed(-config.elHomingSpeed)
@@ -1519,15 +1521,15 @@ if __name__ == "__main__":
             moveElStepperDegrees(values['relElDeg'])
 
         if event == 'ABS_AZ_ENC':               # TODO - breaks if a floating-point entered
-            setAzMaxSpeed(config.azMaxSpeed)
+            #setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, values['absAzEnc'])
 
         if event == 'ABS_EL_ENC':               # TODO - breaks if a floating-point entered
-            setElMaxSpeed(config.elMaxSpeed)   
+            #setElMaxSpeed(config.elMaxSpeed)   
             startEncoderMove(1, values['absElEnc'])
 
         if event == 'DEG_AZ_ENC':
-            setAzMaxSpeed(config.azMaxSpeed)
+            #setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, encoderDegreesToCounts(0,values['degAzEnc']))
 
         if event == 'DEG_EL_ENC':
