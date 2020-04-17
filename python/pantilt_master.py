@@ -64,6 +64,10 @@ class AccelRamp():
         self.currentSpeed = speed
         logging.debug("AccelRamp() setCurrentSpeed(): %f", self.currentSpeed)
         
+    # Someone else wants to know the current speed
+    def getCurrentSpeed(self):
+        return self.currentSpeed
+
     # Is the ramp generator enabled?
     def isEnabled(self):
         # TODO - there's a cooler way to do this
@@ -108,9 +112,9 @@ class AccelRamp():
             logging.debug("AccelRamp.update() newSpeed : %f", self.newSpeed)
             
             # Make sure we don't exceed the speed limit
-            # This code needs to be tested well
-            # How close can the spped increment come to the final speed?
-            if  abs(self.finalSpeed - self.newSpeed) < 5:
+            # This code needs to be improved
+            # Need at better test for completion of the accel ramp
+            if  abs(self.finalSpeed - self.newSpeed) < 50:
                 logging.debug("AccelRamp() speed=final speed")
                 self.newSpeed = self.finalSpeed
                 self.isRampComplete = True
@@ -118,8 +122,10 @@ class AccelRamp():
                 # Update the stepper speed
                 if self.axis == 0:
                     setAzSpeed(self.newSpeed)
+                    self.CurrentSpeed = self.newSpeed
                 elif self.axis == 1:
                     setElSpeed(self.newSpeed)
+                    self.CurrentSpeed = self.newSpeed
                     
                 # Tell the stepper to run at speed here
                 sendStepperCommand(self.cmd)
@@ -968,7 +974,7 @@ def startEncoderMove(axis, distance):
 def watchEncoderMove(axis):
     if axis == 0:
         config.azDistanceToGo = config.azDistance - config.azMountPosn
-        logging.debug("watchEncoderMove(%f) az distance to go", config.azDistanceToGo)
+        logging.debug("watchEncoderMove() az distance to go: %f", config.azDistanceToGo)
         
         # Need to determine direction based on sign
         if config.azDistance - config.azMountPosn > 0:
@@ -1011,7 +1017,7 @@ def watchEncoderMove(axis):
 
     if axis == 1:
         config.elDistanceToGo = config.elDistance - config.elMountPosn
-        logging.debug("watchEncoderMove(%d) el distance to go", config.elDistanceToGo)
+        logging.debug("watchEncoderMove() el distance to go: %f", config.elDistanceToGo)
         
         # Need to determine direction based on sign
         if config.elDistance - config.elMountPosn > 0:
@@ -1069,17 +1075,30 @@ def runSpeed(axis, speed, acceltime):
     if axis == 0:
         config.isAzRunning = True
         config.azStartupComplete = False
-        #config.isAzRamping = True
-        # Startup the ramp generator
+        
+        # If ramp generator already running, disable and
+        # store speed to current speed
+        if azAccelRamp.isComplete == False:
+            config.azCurrentSpeed = azAccelRamp.getCurrentSpeed()
+            azAccelRamp.disable()
+        
+        # Start the ramp generator    
         azAccelRamp.setCurrentSpeed(config.azCurrentSpeed)
         azAccelRamp.setFinalSpeed(speed)
         azAccelRamp.setRampTime(acceltime)
         azAccelRamp.enable()
+
     elif axis == 1:
         config.isElRunning = True
         config.elStartupComplete = False
-        #config.isElRamping = True
-       # Startup the ramp generator
+        
+        # If ramp generator already running, disable and
+        # store speed to current speed        
+        if elAccelRamp.isComplete == False:
+            config.elCurrentSpeed = elAccelRamp.getCurrentSpeed()
+            elAccelRamp.disable()        
+        
+        # Startup the ramp generator
         elAccelRamp.setCurrentSpeed(config.elCurrentSpeed)
         elAccelRamp.setFinalSpeed(speed)
         elAccelRamp.setRampTime(acceltime)

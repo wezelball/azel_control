@@ -29,19 +29,19 @@ elMovingClosedLoop = False
 azDistance = 0
 elDistance = 0
 
-endpointFarDistance = 100
+endpointFarDistance = 200
 endpointNearDistance = 50
 endpointVeryNearDistance = 10
 endpointDeadband = 2
-azDistanceTogo = 0
-elDistanceTogo = 0
+azDistanceToGo = 0
+elDistanceToGo = 0
 
-azEndpointFarSpeed = 1000     # replace with axis max speed when available
-elEndpointFarSpeed = 1000     # replace with axis max speed when available
-azEndpointNearSpeed = 250
-elEndpointNearSpeed = 250
-azEndpointVeryNearSpeed = 100
-elEndpointVeryNearSpeed = 100
+azEndpointFarSpeed = 500     # replace with axis max speed when available
+elEndpointFarSpeed = 500     # replace with axis max speed when available
+azEndpointNearSpeed = 200
+elEndpointNearSpeed = 200
+azEndpointVeryNearSpeed = 50
+elEndpointVeryNearSpeed = 50
 
 # We need to know what region the axis is in
 azInFarApproach = False
