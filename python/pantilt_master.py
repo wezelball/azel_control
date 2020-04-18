@@ -438,8 +438,6 @@ class periodicThread (threading.Thread):
             config.azAvgVelocity = azMovingAverage.computeAverage()
             config.elAvgVelocity = elMovingAverage.computeAverage()
             
-            # Update the last encoders positions
-            #self.lastAz,self.lastEl = config.azMountPosn, config.elMountPosn
 
             # Update geographical positions
             # Do I need to maintain these variables?
@@ -448,7 +446,6 @@ class periodicThread (threading.Thread):
             
             # Update RA, dec
             config.rightAscension, config.declination = observer.radec_of(math.radians(config.azGeoPosn), math.radians(config.elGeoPosn))
-            #logging.debug("periodicThread() config.rightAscension %s", config.rightAscension)
             
             # Update the process logfile
             log.write(time.strftime('%H:%M:%S') + ',' +  str(config.azMountPosn) + ',' + str(config.elMountPosn) + ','  \
@@ -552,7 +549,6 @@ def sendMessage(priority, message, i2c_address):
                 config.encoderi2CErrorCount += 1
                 reply = ""
                 logging.warn("sendMessage() - encoderI2CError %d", config.encoderi2CErrorCount)
-                #logging.debug("setAzSpeed() %s", speed)
                 
             elif i2c_address == config.STEPPERS_I2C_ADDR:
                 config.stepperIOError = True
@@ -598,14 +594,11 @@ def getEncoders():
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             encPosList = config.azMountPosn, config.elMountPosn
-            #logging.debug("getEncoders() Value error")
         except AttributeError:
             # Bus error, assign last known values of encoder
             # positions - this is ugly and might cause issues
             encPosList = config.azMountPosn, config.elMountPosn
-            #logging.debug("getEncoders() Attribute error")
             
-    #logging.debug("getEncoders() returned %s", encPosList)
    
     return tuple(encPosList)
 
@@ -637,9 +630,6 @@ def getStepperPosn(axis):
         if ord(i) >= 48 and ord(i) <= 57:
             result += i
     
-    # for debugging
-    #logging.debug("getStepperPosn() returned %s", result)
-    
     if config.stepperIOError == False:
         try:
             return int(result)
@@ -661,25 +651,21 @@ def sendStepperCommand(cmd):
 def setAzSpeed(speed):
     cmd = "12" + ':' + str(speed)
     sendStepperCommand(cmd)
-    #config.azSpeed = speed
     logging.debug("setAzSpeed() %s", speed)
 
 def setAzMaxSpeed(speed):
     cmd = "16" + ':' + str(speed)
     sendStepperCommand(cmd)
-    #config.azMaxSpeed = speed
     logging.debug("setAzMaxSpeed() %s", speed)
 
 def setElSpeed(speed):
     cmd = "13" + ':' + str(speed)
     sendStepperCommand(cmd)
-    #config.elSpeed = speed
     logging.debug("setElSpeed() %s", speed)
 
 def setElMaxSpeed(speed):
     cmd = "17" + ':' + str(speed)
     sendStepperCommand(cmd)
-    #config.elMaxSpeed = speed
     logging.debug("setElMaxSpeed() %s", speed)
 
 def setAzAccel(accel):
@@ -904,9 +890,7 @@ def getTrackVelocity(axis, az, el, latitude):
     
     # convert to degrees/sec
     azV = AZD * ((2*math.pi)/86400) * (360/(2*math.pi))
-    elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))
-    
-    # convert to seconds of arc per second, so 
+    elV = ELD * ((2*math.pi)/86400) * (360/(2*math.pi))  
     
     # Convert to pulses per second, then return
     if axis == 0:
@@ -994,23 +978,18 @@ def watchEncoderMove(axis):
             # Starts the motion at this speed
             if config.azInFarApproach == False:
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
-                # Start slew at this speed
-                #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)
             config.azInFarApproach = True
         elif abs(config.azDistanceToGo) > config.endpointNearDistance:
             azSpeed = config.azEndpointNearSpeed * polarity
             if config.azInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
-                # Start slew at this speed
-                #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)                        
             config.azInNearApproach = True
         elif abs(config.azDistanceToGo) > config.endpointVeryNearDistance:
             azSpeed = config.azEndpointVeryNearSpeed * polarity
             if config.azInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
-                #setAzSpeed(azSpeed)
                 runSpeed(0, azSpeed, 2)                        
             config.azInVeryNearApproach = True
         elif abs(config.azDistanceToGo) < config.endpointDeadband:
@@ -1032,23 +1011,18 @@ def watchEncoderMove(axis):
             # Starts the motion at this speed
             if config.elInFarApproach == False:
                 logging.debug("watchEncoderMove(%s) set far approach run", axis)
-                # Start slew at this speed
-                #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)
             config.elInFarApproach = True
         elif abs(config.elDistanceToGo) > config.endpointNearDistance:
             elSpeed = config.elEndpointNearSpeed * polarity
             if config.elInNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set near approach run", axis)
-                # Start slew at this speed
-                #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)                        
             config.elInNearApproach = True
         elif abs(config.elDistanceToGo) > config.endpointVeryNearDistance:
             elSpeed = config.elEndpointVeryNearSpeed * polarity
             if config.elInVeryNearApproach == False:
                 logging.debug("watchEncoderMove(%s) set very near approach run", axis)
-                #setElSpeed(elSpeed)
                 runSpeed(1, elSpeed, 2)                        
             config.elInVeryNearApproach = True
         elif abs(config.elDistanceToGo) < config.endpointDeadband:
@@ -1063,10 +1037,8 @@ def watchEncoderMove(axis):
 # runSpeed will be changed to implement an 
 # accel ramp based on passed arguments
 def runSpeed(axis, speed, acceltime):
-    #cmd = '20:' + str(axis)
     logging.debug("runSpeed() axis: %s", axis)
-    #sendStepperCommand(cmd)
-    #time.sleep(0.5)
+
     if axis == 0:
         config.isAzRunning = True
         config.azStartupComplete = False
@@ -1215,10 +1187,6 @@ def isElDownLimit():
 def homeAzimuth():
     config.azHoming = True
     logging.debug("homeAzimuth() executed")
-    #setAzMaxSpeed(config.azHomingSpeed)
-    # slew west a long friggin way
-    #relMoveAz(-40000)
-    #setAzSpeed(-config.azHomingSpeed)
     runSpeed(0, -config.azHomingSpeed, 2)
 
 # Moves south in elvation until down limit switch made
@@ -1236,10 +1204,6 @@ def homeAzimuth():
 def homeElevation():
     config.elHoming = True
     logging.debug("homeElevation() executed")
-    #setElMaxSpeed(config.elHomingSpeed)
-    # slew south a long friggin way
-    #relMoveEl(-40000)
-    #setElSpeed(-config.elHomingSpeed)
     runSpeed(1, -config.elHomingSpeed, 2)
 
 # Sets both encoder axes to zero
@@ -1321,10 +1285,8 @@ def isRunning(axis):
     logging.debug("isRunning() axis %s result %s", axis, result)    
 
     if result == "1":
-        #print("True")
         return True
     else:
-        #print("False")
         return False
     
 def azJam():
@@ -1349,7 +1311,6 @@ def elJam():
 
 # Called if no case passed to switch function
 def case_default():
-    #print("No case")
     logging.debug("case_default() entered")
 
 def shutdown():
@@ -1361,7 +1322,6 @@ def shutdown():
     
     # Close the damn window
     window.Close()
-    #del window
     sys.exit()
 
 # Star sidereal rate tracking
@@ -1374,11 +1334,7 @@ def startTracking():
 
     logging.debug("startTracking() azSpeed: %f", azSpeed)
     logging.debug("startTracking() elSpeed: %f", elSpeed)
-
-    # Set the stepper speeds
-    #setAzSpeed(azSpeed)
-    #setElSpeed(elSpeed)
-    
+  
     # Start the motors
     runSpeed(0, azSpeed, 1)
     runSpeed(1, elSpeed, 1)
@@ -1499,7 +1455,7 @@ if __name__ == "__main__":
     setInitialValues()    
 
     while True:
-        event, values = window.Read(500) # Please try and use as high of a timeout value as you can
+        event, values = window.Read(500)        # Please try and use as high of a timeout value as you can
     
         # EVENTS
         if event is None or event == 'Quit':    # if user closed the window using X or clicked Quit button
@@ -1534,15 +1490,12 @@ if __name__ == "__main__":
             moveElStepperDegrees(values['relElDeg'])
 
         if event == 'ABS_AZ_ENC':               # TODO - breaks if a floating-point entered
-            #setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, values['absAzEnc'])
 
         if event == 'ABS_EL_ENC':               # TODO - breaks if a floating-point entered
-            #setElMaxSpeed(config.elMaxSpeed)   
             startEncoderMove(1, values['absElEnc'])
 
         if event == 'DEG_AZ_ENC':
-            #setAzMaxSpeed(config.azMaxSpeed)
             startEncoderMove(0, encoderDegreesToCounts(0,values['degAzEnc']))
 
         if event == 'DEG_EL_ENC':
