@@ -201,7 +201,8 @@ class motionThread(threading.Thread):
     def run(self):
         while self.running:
             time.sleep(self.delay)
-            
+                      
+            # TODO - this code may be removed, it is part of jam detection and is not being used
             # Update the state of the startup flags
             # If an axis has been told to run, we will give it several
             # iterations of the motion thread before setting the
@@ -337,8 +338,8 @@ class motionThread(threading.Thread):
                 config.trackingAge += self.delay
                 
                 # Now check to see if an update is required, the tracking velocity
-                # is too old - 90 sec for now
-                if config.trackingAge >= 90:
+                # is too old - 10 sec for now
+                if config.trackingAge >= 10:
                     config.trackingAge = 0
                     setAzSpeed(getTrackVelocity(0, config.azGeoPosn, config.elGeoPosn, 37.79))
                     setElSpeed(getTrackVelocity(1, config.azGeoPosn, config.elGeoPosn, 37.79))
@@ -1015,11 +1016,6 @@ def watchEncoderMove(axis):
         elif abs(config.azDistanceToGo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
             stopAz()
-            # Reset the flags
-            config.azInFarApproach = False
-            config.azInNearApproach = False
-            config.azInVeryNearApproach = False
-            config.azMovingClosedLoop = False    
 
     if axis == 1:
         config.elDistanceToGo = config.elDistance - config.elMountPosn
@@ -1058,13 +1054,6 @@ def watchEncoderMove(axis):
         elif abs(config.elDistanceToGo) < config.endpointDeadband:
             logging.debug("watchEncoderMove(%s) stopped in deadband", axis)
             stopEl()
-            # Reset the flags
-            config.elInFarApproach = False
-            config.elInNearApproach = False
-            config.elInVeryNearApproach = False
-            config.elMovingClosedLoop = False
-
-
 
 
 # Run at constant speed, based on last setSpeed()
@@ -1118,6 +1107,11 @@ def stopAz():
     config.isTracking = False
     config.azCurrentSpeed = 0.0
     azAccelRamp.disable()
+    # Reset watchEncoderMove() flags
+    config.azInFarApproach = False
+    config.azInNearApproach = False
+    config.azInVeryNearApproach = False
+    config.azMovingClosedLoop = False    
 
 def stopEl():
     logging.debug("stopEl()")
@@ -1127,6 +1121,11 @@ def stopEl():
     config.isTracking = False
     config.elCurrentSpeed = 0.0
     elAccelRamp.disable()
+    # Reset watchEncoderMove() flags
+    config.elInFarApproach = False
+    config.elInNearApproach = False
+    config.elInVeryNearApproach = False
+    config.elMovingClosedLoop = False    
     
 def quickStopAz():
     logging.debug("quickStopAz()")
@@ -1137,6 +1136,11 @@ def quickStopAz():
     config.isTracking = False
     config.azCurrentSpeed = 0.0
     azAccelRamp.disable()
+    # Reset watchEncoderMove() flags
+    config.azInFarApproach = False
+    config.azInNearApproach = False
+    config.azInVeryNearApproach = False
+    config.azMovingClosedLoop = False    
 
 def quickStopEl():
     logging.debug("quickStopEl()")
@@ -1147,6 +1151,11 @@ def quickStopEl():
     config.isTracking = False
     config.elCurrentSpeed = 0.0
     elAccelRamp.disable()
+    # Reset watchEncoderMove() flags
+    config.elInFarApproach = False
+    config.elInNearApproach = False
+    config.elInVeryNearApproach = False
+    config.elMovingClosedLoop = False    
 
 # Move the axis the number of degrees specified
 def moveAzStepperDegrees(degrees):
