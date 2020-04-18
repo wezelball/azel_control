@@ -114,9 +114,11 @@ class AccelRamp():
             logging.debug("AccelRamp.update() newSpeed : %f", self.newSpeed)
             
             # Make sure we don't exceed the speed limit
-            # This code needs to be improved
-            # Need at better test for completion of the accel ramp
-            if  abs(self.finalSpeed - self.newSpeed) < 10:
+            # I think the following ian elegant solution to the problem
+            # Let's call it finished if we are within a percentage 
+            # window, let's say 2% for now. This should work for both large 
+            # and small velocities
+            if  abs(self.finalSpeed - self.newSpeed) < abs(self.finalSpeed * 0.02):
                 logging.debug("AccelRamp() speed=final speed")
                 self.newSpeed = self.finalSpeed
                 self.isRampComplete = True
@@ -125,9 +127,11 @@ class AccelRamp():
                 if self.axis == 0:
                     setAzSpeed(self.newSpeed)
                     self.CurrentSpeed = self.newSpeed
+                    logging.debug("AccelRamp.update() sent new speed to az servo : %f", self.newSpeed)
                 elif self.axis == 1:
                     setElSpeed(self.newSpeed)
                     self.CurrentSpeed = self.newSpeed
+                    logging.debug("AccelRamp.update() sent new speed to el servo : %f", self.newSpeed)
                     
                 # Tell the stepper to run at speed here
                 sendStepperCommand(self.cmd)
@@ -242,11 +246,11 @@ class motionThread(threading.Thread):
             if config.isAzRunning == True and config.azStartupComplete == True:
                 if self.azLastPosn == config.azMountPosn:  
                     self.azPulseAge += self.delay   # this is the interval of this thread
-                    logging.debug("motionThread() azPulseAge extended: %d", self.azPulseAge)
+                    #logging.debug("motionThread() azPulseAge extended: %d", self.azPulseAge)
                 else:
                     self.azLastPosn = config.azMountPosn
                     self.azPulseAge = 0.0
-                    logging.debug("motionThread() azPulseAge reset")
+                    #logging.debug("motionThread() azPulseAge reset")
                     
             # TODO - This code is not stable, working to replace.  Jam detection is now disabled
             
@@ -1112,7 +1116,7 @@ def stopAz():
     config.isAzRunning = False
     config.azStartupComplete = False
     config.isTracking = False
-    #config.azSpeed = 0.0
+    config.azCurrentSpeed = 0.0
     azAccelRamp.disable()
 
 def stopEl():
@@ -1121,7 +1125,7 @@ def stopEl():
     config.isElRunning = False
     config.elStartupComplete = False
     config.isTracking = False
-    #config.elSpeed = 0.0
+    config.elCurrentSpeed = 0.0
     elAccelRamp.disable()
     
 def quickStopAz():
@@ -1131,7 +1135,7 @@ def quickStopAz():
     config.azHoming = False
     config.azStartupComplete = False
     config.isTracking = False
-    #config.azSpeed = 0.0
+    config.azCurrentSpeed = 0.0
     azAccelRamp.disable()
 
 def quickStopEl():
@@ -1141,7 +1145,7 @@ def quickStopEl():
     config.elHoming = False
     config.elStartupComplete = False
     config.isTracking = False
-    #config.elSpeed = 0.0
+    config.elCurrentSpeed = 0.0
     elAccelRamp.disable()
 
 # Move the axis the number of degrees specified
@@ -1367,8 +1371,8 @@ def startTracking():
     #setElSpeed(elSpeed)
     
     # Start the motors
-    runSpeed(0, azSpeed, 2)
-    runSpeed(1, elSpeed, 2)
+    runSpeed(0, azSpeed, 1)
+    runSpeed(1, elSpeed, 1)
     
 
 if __name__ == "__main__":
