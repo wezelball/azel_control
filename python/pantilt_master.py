@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
-
+#!/usr/bin/en
 # pantilt_master.py
 # Dave Cohen
+
+# This is the accutrack between
 
 import sys
 import smbus
