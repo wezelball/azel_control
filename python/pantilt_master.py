@@ -1,8 +1,8 @@
-#!/usr/bin/en
+#!/usr/bin/env python3
 # pantilt_master.py
 # Dave Cohen
 
-# This is the accutrack between
+# This is the accutrack branch
 
 import sys
 import smbus
@@ -1428,12 +1428,15 @@ if __name__ == "__main__":
                         ]
 
     other_layout =      [
-                        [sg.Button('EXIT', size=(13,1))],
+                        [sg.Button('FUTURE', size=(13,1))],
                         ]
 
 
     # I've got tab groups now!
-    layout =            [[sg.TabGroup([[sg.Tab('Position', position_layout,font='Courier 24'), sg.Tab('Motion', motion_layout,font='Courier 24'), sg.Tab('State', state_layout,font='Courier 24'), sg.Tab('Celestial', celestial_layout,font='Courier 24'), sg.Tab('Other', other_layout,font='Courier 24'),]])]]    
+    layout =            [
+                        [sg.TabGroup([[sg.Tab('Position', position_layout,font='Courier 28'), sg.Tab('Motion', motion_layout,font='Courier 28'), sg.Tab('State', state_layout,font='Courier 28'), sg.Tab('Celestial', celestial_layout,font='Courier 28'), sg.Tab('Other', other_layout,font='Courier 28'),]])],
+                        [sg.Button('EXIT', size=(7,1))],
+                        ]    
                          
     
     
@@ -1523,6 +1526,7 @@ if __name__ == "__main__":
 
         if event == 'EXIT':
             shutdown()
+            
 
         # Speeds and accelerations
         # TODO - handle case where button is pressed but there 
